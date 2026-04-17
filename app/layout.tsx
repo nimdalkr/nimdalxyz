@@ -13,8 +13,8 @@ const themeScript = `
 `;
 
 export const metadata: Metadata = {
-  title: "Jinsoo Heo",
-  description: "Terminal-inspired personal homepage for Jinsoo Heo."
+  title: "Nimdal | 탁찬우",
+  description: "Terminal-inspired personal homepage for Nimdal, a growth marketer, GTM operator, and community builder."
 };
 
 export default function RootLayout({

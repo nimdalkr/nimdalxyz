@@ -22,63 +22,42 @@ export type ProfileContent = {
 };
 
 export const profileContent: ProfileContent = {
-  nameEn: "Jinsoo Heo",
-  nameKo: "허진수",
-  role: "DevOps Engineer",
+  nameEn: "Nimdal",
+  nameKo: "탁찬우",
+  role: "Growth Marketer / GTM / Community Builder",
   location: "Seoul, Korea",
-  terminalTitle: "jinsoo@koriel: ~",
-  statusFile: "/etc/notd",
-  introCommand: "cat /etc/notd",
+  terminalTitle: "nimdal@portfolio: ~",
+  statusFile: "/etc/nimdal",
+  introCommand: "cat /etc/nimdal",
   linksCommand: "ls ~/links",
-  avatarFallback: "JH",
+  avatarFallback: "NM",
   links: [
     {
-      id: "blog",
-      label: "blog",
-      href: "https://blog.koriel.kr",
-      displayText: "blog.koriel.kr",
+      id: "portfolio",
+      label: "portfolio",
+      href: "https://portfolio.nimdal.xyz/",
+      displayText: "portfolio.nimdal.xyz",
+      external: true
+    },
+    {
+      id: "works",
+      label: "works",
+      href: "https://portfolio.nimdal.xyz/works.html",
+      displayText: "works.html",
       external: true
     },
     {
       id: "github",
       label: "github",
-      href: "https://github.com/devkoriel",
-      displayText: "devkoriel",
-      external: true
-    },
-    {
-      id: "linkedin",
-      label: "linkedin",
-      href: "https://www.linkedin.com/in/devkoriel/",
-      displayText: "in/devkoriel",
-      external: true
-    },
-    {
-      id: "x",
-      label: "x",
-      href: "https://x.com/devkoriel",
-      displayText: "@devkoriel",
-      external: true
-    },
-    {
-      id: "telegram",
-      label: "telegram",
-      href: "https://t.me/devkoriel",
-      displayText: "@devkoriel",
-      external: true
-    },
-    {
-      id: "channel",
-      label: "channel",
-      href: "https://t.me/whoskoriel",
-      displayText: "@whoskoriel",
+      href: "https://github.com/nimdalkr",
+      displayText: "nimdalkr",
       external: true
     },
     {
       id: "email",
       label: "email",
-      href: "mailto:dev.koriel@gmail.com",
-      displayText: "dev.koriel@gmail.com",
+      href: "mailto:0xnimdal@gmail.com",
+      displayText: "0xnimdal@gmail.com",
       external: false
     }
   ]
