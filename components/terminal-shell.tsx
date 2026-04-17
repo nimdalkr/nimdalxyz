@@ -9,9 +9,9 @@ type TerminalShellProps = {
 
 const moduleLinks = [
   { id: "home", label: "01._HOME" },
-  { id: "status", label: "02._STATUS" },
-  { id: "links", label: "03._LINKS" },
-  { id: "contact", label: "04._CONTACT" }
+  { id: "work", label: "02._WORK" },
+  { id: "about", label: "03._ABOUT" },
+  { id: "resume", label: "04._RESUME" }
 ];
 
 const runtimeInfo = [
@@ -21,21 +21,21 @@ const runtimeInfo = [
 ];
 
 const runtimeMeta = [
-  { label: "UPTIME", value: "2163d 17:15" },
+  { label: "UPTIME", value: "2163d 17:22" },
   { label: "TERMINAL", value: "TTY0" },
   { label: "STATUS", value: "200", accent: true }
-];
-
-const focusRows = [
-  { key: "LOCATION", value: "SEOUL -- KOREA" },
-  { key: "FOCUS", value: "Growth / GTM / Community / AI Workflow Build" },
-  { key: "CONTACT", value: "0xnimdal@gmail.com" }
 ];
 
 const summaryLines = [
   "Growth marketer, GTM operator, and community builder working from Seoul.",
   "10+ years spanning startup building, marketing operations, localization, KOL, and Web3 onboarding.",
   "Currently building AI-assisted workflows and product-shaped growth systems."
+];
+
+const focusRows = [
+  { key: "LOCATION", value: "SEOUL -- KOREA" },
+  { key: "FOCUS", value: "Growth / GTM / Community / AI Workflow Build" },
+  { key: "CONTACT", value: "0xnimdal@gmail.com" }
 ];
 
 export function TerminalShell({ intro }: TerminalShellProps) {
@@ -99,9 +99,7 @@ export function TerminalShell({ intro }: TerminalShellProps) {
               ))}
             </div>
           </div>
-        </section>
 
-        <section id="status" className="terminal-block">
           <p className="prompt-line">$ cat status.txt</p>
           <div className="status-table" role="table" aria-label="Profile status table">
             {focusRows.map((row) => (
@@ -115,9 +113,7 @@ export function TerminalShell({ intro }: TerminalShellProps) {
               </div>
             ))}
           </div>
-        </section>
 
-        <section id="links" className="terminal-block">
           <a
             className="signal-badge"
             href="https://blog.nimdal.xyz"
@@ -127,12 +123,82 @@ export function TerminalShell({ intro }: TerminalShellProps) {
             <span className="signal-dot" aria-hidden="true" />
             BLOG IS LIVE -- OPEN LOG
           </a>
+        </section>
 
-          <div className="tip-row">
-            <span>TIP:</span>
-            <span>Use the modules below or open one of the public endpoints.</span>
+        <section id="work" className="terminal-block">
+          <p className="prompt-line">$ ls -la /projects/</p>
+          <p className="helper-copy">
+            {profileContent.projects.length} entries -- click filename to open the related public endpoint when available
+          </p>
+
+          <div className="project-table" role="table" aria-label="Project list">
+            <div className="project-head" role="row">
+              <span role="columnheader">NAME</span>
+              <span role="columnheader">SIZE</span>
+              <span role="columnheader">MODIFIED</span>
+              <span role="columnheader">DESCRIPTION</span>
+            </div>
+            {profileContent.projects.map((project) => {
+              const mappedLink = profileContent.links.find((link) => link.label === project.name.toLowerCase());
+
+              return (
+                <div key={project.name} className="project-row" role="row">
+                  {mappedLink ? (
+                    <a
+                      href={mappedLink.href}
+                      className="project-name project-name-link"
+                      target={mappedLink.external ? "_blank" : undefined}
+                      rel={mappedLink.external ? "noreferrer" : undefined}
+                      role="cell"
+                    >
+                      {project.name}
+                    </a>
+                  ) : (
+                    <span className="project-name" role="cell">
+                      {project.name}
+                    </span>
+                  )}
+                  <span role="cell">{project.size}</span>
+                  <span role="cell">{project.modified}</span>
+                  <span className="project-description" role="cell">
+                    {project.description}
+                  </span>
+                </div>
+              );
+            })}
           </div>
+        </section>
 
+        <section id="about" className="terminal-block">
+          <p className="prompt-line">$ cat about.md</p>
+          <div className="terminal-copy rich-copy">
+            {profileContent.aboutParagraphs.map((paragraph) => (
+              <p key={paragraph}>{paragraph}</p>
+            ))}
+            <p className="about-signoff">0xnimdal@gmail.com</p>
+          </div>
+        </section>
+
+        <section id="resume" className="terminal-block">
+          <p className="prompt-line">$ cat resume.txt</p>
+          <div className="resume-shell">
+            {profileContent.resumeSections.map((section) => (
+              <div key={section.title} className="resume-section">
+                <p className="resume-title">// {section.title}</p>
+                <div className="resume-lines">
+                  {section.lines.map((line) => (
+                    <p key={line} className="resume-line">
+                      {line}
+                    </p>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="terminal-block">
+          <p className="prompt-line">$ ls ~/links</p>
           <div className="link-cloud">
             {profileContent.links.map((link) => (
               <a
@@ -149,8 +215,8 @@ export function TerminalShell({ intro }: TerminalShellProps) {
           </div>
         </section>
 
-        <section id="contact" className="terminal-block terminal-copy-block">
-          <p className="prompt-line">$ cat /etc/nimdal</p>
+        <section className="terminal-block terminal-copy-block">
+          <p className="prompt-line">$ {profileContent.introCommand}</p>
           <div className="terminal-copy rich-copy">{intro}</div>
         </section>
       </div>
@@ -170,11 +236,11 @@ export function TerminalShell({ intro }: TerminalShellProps) {
         <div className="module-row">
           <span className="module-prefix">root@zui/nav &gt; SELECT MODULE [up/down + enter or click]</span>
           <nav className="module-nav" aria-label="Bottom module navigation">
-            {moduleLinks.map((item, index) => (
+            {moduleLinks.map((item) => (
               <a
                 key={item.id}
                 href={`#${item.id}`}
-                className={`module-link${index === 0 ? " is-active" : ""}`}
+                className="module-link"
               >
                 {item.label}
               </a>

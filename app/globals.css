@@ -5,17 +5,7 @@
   --font-size-xs: 13px;
   --font-size-sm: 14px;
   --line-height-base: 22.4px;
-  --space-1: 3px;
-  --space-2: 8px;
-  --space-3: 10px;
-  --space-4: 12px;
-  --space-5: 14px;
-  --space-6: 16px;
-  --space-7: 24px;
-  --space-8: 32px;
-  --space-9: 44px;
   --surface-page: #000000;
-  --surface-muted: #0f1210;
   --surface-panel: #0b0e0c;
   --surface-input: #090b09;
   --text-primary: #d4d8d0;
@@ -25,11 +15,7 @@
   --border-muted: #2a5c38;
   --border-strong: #5a6058;
   --focus-ring: rgba(61, 212, 108, 0.45);
-  --motion-instant: 100ms;
   --motion-fast: 150ms;
-  --motion-normal: 1350ms;
-  --motion-slow: 1800ms;
-  --motion-ease: cubic-bezier(0.36, 0.05, 0.26, 1);
 }
 
 * {
@@ -65,7 +51,7 @@ a {
   color: inherit;
   text-decoration: none;
   transition:
-    color var(--motion-instant) ease-in-out,
+    color var(--motion-fast) ease-in-out,
     border-color var(--motion-fast) ease-in-out,
     background var(--motion-fast) ease-in-out;
 }
@@ -95,9 +81,7 @@ input:focus-visible {
   display: grid;
   min-height: calc(100vh - 40px);
   border: 1px solid rgba(42, 92, 56, 0.28);
-  background:
-    linear-gradient(180deg, rgba(15, 18, 16, 0.22) 0%, rgba(15, 18, 16, 0.08) 100%);
-  animation: fi var(--motion-fast) ease-in-out both;
+  background: linear-gradient(180deg, rgba(15, 18, 16, 0.22) 0%, rgba(15, 18, 16, 0.08) 100%);
 }
 
 .runtime-strip {
@@ -130,9 +114,12 @@ input:focus-visible {
 
 .runtime-label,
 .status-key,
+.helper-copy,
 .module-prefix,
-.tip-row,
-.endpoint-name {
+.endpoint-name,
+.project-head,
+.resume-title,
+.about-signoff {
   color: var(--text-muted);
 }
 
@@ -149,17 +136,17 @@ input:focus-visible {
 .prompt-line,
 .signal-dot,
 .command-prompt,
-.module-link.is-active,
-.endpoint-link:hover .endpoint-value,
-.endpoint-link:focus-visible .endpoint-value {
+.project-name-link,
+.module-link:hover,
+.module-link:focus-visible {
   color: var(--text-accent);
 }
 
 .terminal-body {
   display: grid;
   align-content: start;
-  gap: 26px;
-  padding: 18px 22px 26px;
+  gap: 34px;
+  padding: 18px 22px 32px;
 }
 
 .terminal-block {
@@ -177,8 +164,7 @@ input:focus-visible {
 }
 
 .prompt-line,
-.identity-name,
-.hero-command {
+.identity-name {
   margin: 0;
 }
 
@@ -226,7 +212,7 @@ input:focus-visible {
   color: var(--text-primary);
 }
 
-.terminal-copy p {
+.rich-copy p {
   margin: 0;
 }
 
@@ -234,7 +220,8 @@ input:focus-visible {
   margin-top: 10px;
 }
 
-.status-table {
+.status-table,
+.resume-shell {
   display: grid;
   gap: 8px;
 }
@@ -243,11 +230,6 @@ input:focus-visible {
   display: grid;
   grid-template-columns: 96px minmax(0, 1fr);
   gap: 16px;
-}
-
-.status-value,
-.endpoint-value {
-  color: var(--text-primary);
 }
 
 .signal-badge {
@@ -275,10 +257,48 @@ input:focus-visible {
   box-shadow: 0 0 10px currentColor;
 }
 
-.tip-row {
-  display: flex;
-  gap: 10px;
-  font-size: 13px;
+.project-table {
+  display: grid;
+  border-top: 1px solid rgba(42, 92, 56, 0.28);
+}
+
+.project-head,
+.project-row {
+  display: grid;
+  grid-template-columns: 180px 80px 96px minmax(0, 1fr);
+  gap: 16px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(42, 92, 56, 0.22);
+}
+
+.project-name {
+  color: var(--text-primary);
+}
+
+.project-description {
+  color: var(--text-secondary);
+}
+
+.resume-section {
+  display: grid;
+  gap: 8px;
+}
+
+.resume-title {
+  margin: 0;
+  padding-top: 8px;
+  border-top: 1px solid rgba(42, 92, 56, 0.22);
+}
+
+.resume-lines {
+  display: grid;
+  gap: 6px;
+}
+
+.resume-line,
+.helper-copy,
+.about-signoff {
+  margin: 0;
 }
 
 .link-cloud {
@@ -300,6 +320,10 @@ input:focus-visible {
 .endpoint-link:focus-visible {
   border-color: var(--border-muted);
   background: rgba(15, 18, 16, 0.52);
+}
+
+.endpoint-value {
+  color: var(--text-primary);
 }
 
 .terminal-footer {
@@ -344,25 +368,18 @@ input:focus-visible {
 .module-nav {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 18px;
 }
 
 .module-link {
-  padding: 2px 0;
   color: var(--text-muted);
 }
 
-.module-link:hover,
-.module-link:focus-visible {
-  color: var(--text-primary);
-}
-
-@keyframes fi {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
+@media (max-width: 900px) {
+  .project-head,
+  .project-row {
+    grid-template-columns: 1fr;
+    gap: 6px;
   }
 }
 
@@ -399,16 +416,10 @@ input:focus-visible {
     font-size: 8.6px;
   }
 
-  .identity-shell {
-    grid-template-columns: 1fr;
-  }
-
-  .link-cloud {
-    grid-template-columns: 1fr;
-  }
-
+  .identity-shell,
   .status-row,
-  .command-row {
+  .command-row,
+  .link-cloud {
     grid-template-columns: 1fr;
   }
 }
