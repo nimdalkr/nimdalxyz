@@ -71,6 +71,10 @@ const helpGroups = {
     { key: "blog", description: "// open blog" },
     { key: "portfolio", description: "// open portfolio" },
     { key: "github", description: "// open github" },
+    { key: "linkedin", description: "// open linkedin" },
+    { key: "x", description: "// open x" },
+    { key: "telegram", description: "// open telegram" },
+    { key: "channel", description: "// open channel" },
     { key: "email", description: "// copy email" }
   ],
   projects: [
@@ -138,7 +142,7 @@ export function TerminalShell({ intro }: TerminalShellProps) {
         heading: "available commands:",
         lines: [
           "help core      // home work about resume",
-          "help links     // blog portfolio github email",
+          "help links     // blog portfolio github linkedin x telegram channel email",
           "help projects  // nimdalcraft mylol daltacks ethosalpha nomorenaver",
           "clear          // clear response"
         ]
