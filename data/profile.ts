@@ -18,12 +18,13 @@ export type ProfileContent = {
   introCommand: string;
   linksCommand: string;
   avatarFallback: string;
+  avatarSrc?: string;
   links: ProfileLink[];
 };
 
 export const profileContent: ProfileContent = {
   nameEn: "Nimdal",
-  nameKo: "탁찬우",
+  nameKo: "\uD0C1\uCC2C\uC6B0",
   role: "Growth Marketer / GTM / Community Builder",
   location: "Seoul, Korea",
   terminalTitle: "nimdal@portfolio: ~",
@@ -31,6 +32,7 @@ export const profileContent: ProfileContent = {
   introCommand: "cat /etc/nimdal",
   linksCommand: "ls ~/links",
   avatarFallback: "NM",
+  avatarSrc: "/profile.jpg",
   links: [
     {
       id: "portfolio",
@@ -50,7 +52,7 @@ export const profileContent: ProfileContent = {
       id: "linkedin",
       label: "linkedin",
       href: "https://www.linkedin.com/in/chanwoo-tak-132b281a4/",
-      displayText: "chanwoo-tak-132b281a4",
+      displayText: "chanwoo-tak",
       external: true
     },
     {

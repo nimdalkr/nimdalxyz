@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { ReactNode } from "react";
 
 import { profileContent } from "@/data/profile";
@@ -25,8 +26,19 @@ export function TerminalShell({ intro }: TerminalShellProps) {
         <div className="command-block section-delay-1">
           <p className="prompt-line">$ whoami</p>
           <div className="identity-row">
-            <div className="avatar-shell" aria-hidden="true">
-              <span>{profileContent.avatarFallback}</span>
+            <div className="avatar-shell">
+              {profileContent.avatarSrc ? (
+                <Image
+                  src={profileContent.avatarSrc}
+                  alt={`${profileContent.nameEn} profile photo`}
+                  className="avatar-image"
+                  width={58}
+                  height={58}
+                  priority
+                />
+              ) : (
+                <span aria-hidden="true">{profileContent.avatarFallback}</span>
+              )}
             </div>
             <div className="identity-copy">
               <div className="identity-name-row">
@@ -36,7 +48,7 @@ export function TerminalShell({ intro }: TerminalShellProps) {
               <p className="identity-meta">
                 <span>{profileContent.role}</span>
                 <span className="meta-dot" aria-hidden="true">
-                  ·
+                  &middot;
                 </span>
                 <span>{profileContent.location}</span>
               </p>
