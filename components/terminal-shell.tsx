@@ -806,14 +806,16 @@ export function TerminalShell({ intro, bootedAt }: TerminalShellProps) {
         {bootComplete && activeModule === "about" ? (
           <section id="about" className="terminal-block">
             <p className="prompt-line">$ cat about.md</p>
-            <pre className="terminal-manifest">{profileContent.aboutParagraphs.join("\n")}</pre>
+            <div className="scroll-panel">
+              <pre className="terminal-manifest">{profileContent.aboutParagraphs.join("\n")}</pre>
+            </div>
           </section>
         ) : null}
 
         {bootComplete && activeModule === "resume" ? (
           <section id="resume" className="terminal-block">
             <p className="prompt-line">$ cat resume.txt</p>
-            <div className="resume-shell">
+            <div className="resume-shell scroll-panel">
               {profileContent.resumeSections.map((section) => (
                 <div key={section.title} className="resume-section">
                   <p className="resume-title">// {section.title.toLowerCase()}</p>

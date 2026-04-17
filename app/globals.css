@@ -302,6 +302,25 @@ input:focus-visible {
   gap: 8px;
 }
 
+.scroll-panel {
+  min-height: 0;
+  max-height: min(100%, 360px);
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.scroll-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scroll-panel::-webkit-scrollbar-thumb {
+  background: var(--border);
+}
+
+.scroll-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 .status-row {
   display: grid;
   grid-template-columns: 96px minmax(0, 1fr);
@@ -586,6 +605,10 @@ input:focus-visible {
   .command-output {
     min-height: 132px;
     max-height: 132px;
+  }
+
+  .scroll-panel {
+    max-height: min(100%, 420px);
   }
 
   .command-list {
