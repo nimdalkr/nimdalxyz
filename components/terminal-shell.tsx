@@ -7,218 +7,181 @@ type TerminalShellProps = {
   intro: ReactNode;
 };
 
-const systemNav = [
-  { id: "identity", label: "identity", code: "01" },
-  { id: "briefing", label: "briefing", code: "02" },
-  { id: "network", label: "network", code: "03" },
-  { id: "console", label: "console", code: "04" }
+const moduleLinks = [
+  { id: "home", label: "01._HOME" },
+  { id: "status", label: "02._STATUS" },
+  { id: "links", label: "03._LINKS" },
+  { id: "contact", label: "04._CONTACT" }
 ];
 
-const focusItems = [
-  "Growth strategy and GTM execution",
-  "Web2 / Web3 localization and onboarding",
-  "Community operations and KOL coordination",
-  "AI-assisted MVP and workflow build"
+const runtimeInfo = [
+  { label: "SYS.NAME", value: "NMDL_OS v1.0.0" },
+  { label: "SYS.AUTH", value: "GUEST_ACCESS_GRANTED", accent: true },
+  { label: "SYS.NODE", value: "nimdal.ooo" }
 ];
 
-const systemSignals = [
-  { label: "base", value: "Seoul, Korea" },
-  { label: "mode", value: "Operator / Builder" },
-  { label: "reach", value: "10+ years" }
+const runtimeMeta = [
+  { label: "UPTIME", value: "2163d 17:15" },
+  { label: "TERMINAL", value: "TTY0" },
+  { label: "STATUS", value: "200", accent: true }
 ];
 
-const commandHistory = [
-  "$ boot --profile nimdal",
-  "$ sync --channels portfolio blog github x telegram",
-  "$ deploy --focus growth community ai-workflows"
+const focusRows = [
+  { key: "LOCATION", value: "SEOUL -- KOREA" },
+  { key: "FOCUS", value: "Growth / GTM / Community / AI Workflow Build" },
+  { key: "CONTACT", value: "0xnimdal@gmail.com" }
+];
+
+const summaryLines = [
+  "Growth marketer, GTM operator, and community builder working from Seoul.",
+  "10+ years spanning startup building, marketing operations, localization, KOL, and Web3 onboarding.",
+  "Currently building AI-assisted workflows and product-shaped growth systems."
 ];
 
 export function TerminalShell({ intro }: TerminalShellProps) {
   return (
-    <section className="system-shell">
-      <header className="system-header">
-        <div className="system-branding">
-          <p className="system-kicker">ZUI.C // SYS.PORTFOLIO</p>
-          <h1 className="system-heading">NIMDAL PORTFOLIO SYSTEM</h1>
+    <section className="terminal-screen">
+      <header className="runtime-strip" aria-label="System runtime information">
+        <div className="runtime-grid">
+          {runtimeInfo.map((item) => (
+            <div key={item.label} className="runtime-row">
+              <span className="runtime-label">{item.label}</span>
+              <span className={`runtime-value${item.accent ? " is-accent" : ""}`}>{item.value}</span>
+            </div>
+          ))}
         </div>
-        <div className="system-statusbar" aria-label="System status">
-          <span className="status-chip">active</span>
-          <span className="status-chip">public routes 08</span>
-          <span className="status-chip">tz asia/seoul</span>
+        <div className="runtime-grid runtime-grid-right">
+          {runtimeMeta.map((item) => (
+            <div key={item.label} className="runtime-row runtime-row-right">
+              <span className="runtime-label">{item.label}</span>
+              <span className={`runtime-value${item.accent ? " is-accent" : ""}`}>{item.value}</span>
+            </div>
+          ))}
         </div>
       </header>
 
-      <div className="system-layout">
-        <aside className="system-sidebar">
-          <div className="sidebar-block">
-            <p className="sidebar-label">nav.index</p>
-            <nav className="system-nav" aria-label="Section navigation">
-              {systemNav.map((item) => (
-                <a key={item.id} className="nav-link" href={`#${item.id}`}>
-                  <span className="nav-code">{item.code}</span>
-                  <span className="nav-text">{item.label}</span>
-                </a>
-              ))}
-            </nav>
-          </div>
+      <div className="terminal-body">
+        <section id="home" className="terminal-block">
+          <pre className="ascii-name" aria-label="ASCII logo">
+{` _   _ ___ __  __ ____    _    _
+| \\ | |_ _|  \\/  |  _ \\  / \\  | |
+|  \\| || || |\\/| | | | |/ _ \\ | |
+| |\\  || || |  | | |_| / ___ \\| |___
+|_| \\_|___|_|  |_|____/_/   \\_\\_____|`}
+          </pre>
 
-          <div className="sidebar-block sidebar-terminal">
-            <p className="sidebar-label">session.signal</p>
-            <div className="signal-list">
-              {systemSignals.map((signal) => (
-                <div key={signal.label} className="signal-row">
-                  <span className="signal-key">{signal.label}</span>
-                  <span className="signal-value">{signal.value}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </aside>
+          <p className="prompt-line">$ whoami</p>
 
-        <div className="system-main">
-          <section id="identity" className="panel panel-hero">
-            <div className="panel-toolbar">
-              <span className="toolbar-dot" />
-              <span className="toolbar-dot" />
-              <span className="toolbar-dot" />
-              <p className="panel-path">/sys/identity</p>
+          <div className="identity-shell">
+            <div className="identity-photo">
+              {profileContent.avatarSrc ? (
+                <Image
+                  src={profileContent.avatarSrc}
+                  alt={`${profileContent.nameEn} profile photo`}
+                  className="avatar-image"
+                  width={70}
+                  height={70}
+                  priority
+                />
+              ) : (
+                <span aria-hidden="true">{profileContent.avatarFallback}</span>
+              )}
             </div>
 
-            <div className="hero-grid">
-              <div className="hero-avatar">
-                {profileContent.avatarSrc ? (
-                  <Image
-                    src={profileContent.avatarSrc}
-                    alt={`${profileContent.nameEn} profile photo`}
-                    className="avatar-image"
-                    width={132}
-                    height={132}
-                    priority
-                  />
-                ) : (
-                  <span aria-hidden="true">{profileContent.avatarFallback}</span>
-                )}
-              </div>
-
-              <div className="hero-copy">
-                <p className="hero-command">$ whoami --full</p>
-                <p className="ascii-name">[{profileContent.nameEn}] // {profileContent.nameKo}</p>
-                <p className="hero-role">{profileContent.role}</p>
-                <p className="hero-location">{profileContent.location}</p>
-              </div>
-
-              <div className="hero-metrics">
-                <div className="metric-card">
-                  <span className="metric-label">status</span>
-                  <strong className="metric-value">online</strong>
-                </div>
-                <div className="metric-card">
-                  <span className="metric-label">focus</span>
-                  <strong className="metric-value">GTM</strong>
-                </div>
-                <div className="metric-card">
-                  <span className="metric-label">surface</span>
-                  <strong className="metric-value">portfolio</strong>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <section id="briefing" className="panel panel-briefing">
-            <div className="panel-heading-row">
-              <div>
-                <p className="panel-label">{profileContent.introCommand}</p>
-                <h2 className="panel-title">Operator briefing</h2>
-              </div>
-              <span className="panel-badge">read-only</span>
-            </div>
-
-            <div className="briefing-grid">
-              <div className="briefing-copy">{intro}</div>
-              <div className="briefing-stack">
-                <p className="stack-label">active.modules</p>
-                <ul className="focus-list">
-                  {focusItems.map((item) => (
-                    <li key={item} className="focus-item">
-                      <span className="focus-bullet" aria-hidden="true">
-                        +
-                      </span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </section>
-
-          <section id="network" className="panel panel-network">
-            <div className="panel-heading-row">
-              <div>
-                <p className="panel-label">{profileContent.linksCommand}</p>
-                <h2 className="panel-title">Network registry</h2>
-              </div>
-              <span className="panel-badge">8 endpoints</span>
-            </div>
-
-            <div className="link-registry" role="table" aria-label="Profile links">
-              <div className="registry-head" role="row">
-                <span role="columnheader">node</span>
-                <span role="columnheader">address</span>
-                <span role="columnheader">access</span>
-              </div>
-              {profileContent.links.map((link) => (
-                <div key={link.id} className="registry-row" role="row">
-                  <span className="registry-key" role="cell">
-                    {link.label}
-                  </span>
-                  <a
-                    href={link.href}
-                    className="registry-link"
-                    role="cell"
-                    target={link.external ? "_blank" : undefined}
-                    rel={link.external ? "noreferrer" : undefined}
-                  >
-                    {link.displayText}
-                  </a>
-                  <span className="registry-state" role="cell">
-                    open
-                  </span>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <section id="console" className="panel panel-console">
-            <div className="panel-heading-row">
-              <div>
-                <p className="panel-label">cmd://dispatch</p>
-                <h2 className="panel-title">Execution console</h2>
-              </div>
-              <span className="panel-badge">simulated</span>
-            </div>
-
-            <div className="console-shell" aria-label="Command history">
-              {commandHistory.map((line) => (
-                <p key={line} className="console-line">
+            <div className="identity-copy">
+              <p className="identity-name">
+                {profileContent.nameEn} <span className="identity-name-ko">({profileContent.nameKo})</span>
+              </p>
+              {summaryLines.map((line) => (
+                <p key={line} className="terminal-copy">
                   {line}
                 </p>
               ))}
-              <label className="console-input-row">
-                <span className="console-prompt" aria-hidden="true">
-                  &gt;
-                </span>
-                <input
-                  id="cmd-input"
-                  className="console-input"
-                  defaultValue="open profile --target public"
-                  aria-label="Command input preview"
-                  readOnly
-                />
-              </label>
             </div>
-          </section>
-        </div>
+          </div>
+        </section>
+
+        <section id="status" className="terminal-block">
+          <p className="prompt-line">$ cat status.txt</p>
+          <div className="status-table" role="table" aria-label="Profile status table">
+            {focusRows.map((row) => (
+              <div key={row.key} className="status-row" role="row">
+                <span className="status-key" role="cell">
+                  {row.key}
+                </span>
+                <span className="status-value" role="cell">
+                  {row.value}
+                </span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section id="links" className="terminal-block">
+          <a
+            className="signal-badge"
+            href="https://blog.nimdal.xyz"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <span className="signal-dot" aria-hidden="true" />
+            BLOG IS LIVE -- OPEN LOG
+          </a>
+
+          <div className="tip-row">
+            <span>TIP:</span>
+            <span>Use the modules below or open one of the public endpoints.</span>
+          </div>
+
+          <div className="link-cloud">
+            {profileContent.links.map((link) => (
+              <a
+                key={link.id}
+                href={link.href}
+                className="endpoint-link"
+                target={link.external ? "_blank" : undefined}
+                rel={link.external ? "noreferrer" : undefined}
+              >
+                <span className="endpoint-name">{link.label}</span>
+                <span className="endpoint-value">{link.displayText}</span>
+              </a>
+            ))}
+          </div>
+        </section>
+
+        <section id="contact" className="terminal-block terminal-copy-block">
+          <p className="prompt-line">$ cat /etc/nimdal</p>
+          <div className="terminal-copy rich-copy">{intro}</div>
+        </section>
       </div>
+
+      <footer className="terminal-footer">
+        <label className="command-row">
+          <span className="command-prompt">zui@portfolio:~$</span>
+          <input
+            id="cmd-input"
+            className="command-input"
+            defaultValue="type a command (try: help)"
+            aria-label="Command input preview"
+            readOnly
+          />
+        </label>
+
+        <div className="module-row">
+          <span className="module-prefix">root@zui/nav &gt; SELECT MODULE [up/down + enter or click]</span>
+          <nav className="module-nav" aria-label="Bottom module navigation">
+            {moduleLinks.map((item, index) => (
+              <a
+                key={item.id}
+                href={`#${item.id}`}
+                className={`module-link${index === 0 ? " is-active" : ""}`}
+              >
+                {item.label}
+              </a>
+            ))}
+          </nav>
+        </div>
+      </footer>
     </section>
   );
 }
