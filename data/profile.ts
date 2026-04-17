@@ -40,10 +40,38 @@ export const profileContent: ProfileContent = {
       external: true
     },
     {
-      id: "works",
-      label: "works",
-      href: "https://portfolio.nimdal.xyz/works.html",
-      displayText: "works.html",
+      id: "blog",
+      label: "blog",
+      href: "https://blog.nimdal.xyz",
+      displayText: "blog.nimdal.xyz",
+      external: true
+    },
+    {
+      id: "linkedin",
+      label: "linkedin",
+      href: "https://www.linkedin.com/in/chanwoo-tak-132b281a4/",
+      displayText: "chanwoo-tak-132b281a4",
+      external: true
+    },
+    {
+      id: "x",
+      label: "x",
+      href: "https://x.com/0xnimdal",
+      displayText: "@0xnimdal",
+      external: true
+    },
+    {
+      id: "telegram",
+      label: "telegram",
+      href: "https://t.me/nimdal",
+      displayText: "@nimdal",
+      external: true
+    },
+    {
+      id: "channel",
+      label: "channel",
+      href: "https://t.me/alpha_duo",
+      displayText: "@alpha_duo",
       external: true
     },
     {
