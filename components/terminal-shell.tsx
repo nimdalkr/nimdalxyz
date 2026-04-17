@@ -7,6 +7,7 @@ import { profileContent } from "@/data/profile";
 
 type TerminalShellProps = {
   intro: ReactNode;
+  bootedAt: number;
 };
 
 const moduleLinks = [
@@ -55,22 +56,15 @@ const runtimeInfoRight = [
 ];
 
 const whoamiLines = [
-  "nimdal (chanwoo tak)",
-  "",
+  "nimdal (chanwoo tak | 1992.11.20)",
   "> role: growth_marketer",
   "> stack: web2_marketing -> web3 marketer / ai / automation / fake_dev",
   "> mode: building_in_public",
   "",
-  "> summary:",
-  "designing growth systems that convert attention -> users -> revenue",
-  "",
   "> current_focus:",
   "- GTM for early-stage products",
   "- AI workflow automation",
-  "- crypto-native growth loops",
-  "",
-  "> signal:",
-  "high noise tolerance / execution > theory"
+  "- crypto-native growth loops"
 ].join("\n");
 
 const bootLines: BootLine[] = [
@@ -118,13 +112,12 @@ const helpGroups = {
   ]
 } as const;
 
-export function TerminalShell({ intro }: TerminalShellProps) {
-  const [bootedAt] = useState(() => Date.now());
+export function TerminalShell({ intro, bootedAt }: TerminalShellProps) {
   const [activeModule, setActiveModule] = useState<ModuleId>("home");
   const [expandedProject, setExpandedProject] = useState<string | null>(null);
   const [commandValue, setCommandValue] = useState("");
   const [commandOutput, setCommandOutput] = useState<CommandOutput | null>(null);
-  const [uptime, setUptime] = useState(() => formatUptime(0));
+  const [uptime, setUptime] = useState(() => formatUptime(Date.now() - bootedAt));
   const [bootLineCount, setBootLineCount] = useState(0);
   const [bootComplete, setBootComplete] = useState(false);
 
