@@ -81,6 +81,12 @@ const bootLines: BootLine[] = [
   { prefix: "READY." }
 ];
 
+const asciiLogo = ` _   _ ___ __  __ ____    _    _     
+| \\ | |_ _|  \\/  |  _ \\  / \\  | |    
+|  \\| || || |\\/| | | | |/ _ \\ | |    
+| |\\  || || |  | | |_| / ___ \\| |___ 
+|_| \\_|___|_|  |_|____/_/   \\_\\_____|`;
+
 const helpGroups = {
   core: [
     { key: "home", description: "// go home" },
@@ -322,12 +328,12 @@ export function TerminalShell({ intro }: TerminalShellProps) {
 
         {bootComplete && activeModule === "home" && (
           <section id="home" className="terminal-block">
-            <pre className="ascii-name" aria-label="ASCII logo">
-{`| \\ | |_ _|  \\/  |  _ \\  / \\  | |    
-|  \\| || || |\\/| | | | |/ _ \\ | |    
-| |\\  || || |  | | |_| / ___ \\| |___ 
-|_| \\_|___|_|  |_|____/_/   \\_\\_____|`}
-            </pre>
+            <div className="ascii-logo" aria-label="ASCII logo">
+              <pre className="ascii-name ascii-name-shadow" aria-hidden="true">
+                {asciiLogo}
+              </pre>
+              <pre className="ascii-name ascii-name-face">{asciiLogo}</pre>
+            </div>
 
             <p className="prompt-line">$ whoami</p>
             <div className="terminal-copy">

@@ -245,6 +245,29 @@ input:focus-visible {
   white-space: pre;
 }
 
+.ascii-logo {
+  position: relative;
+  width: fit-content;
+}
+
+.ascii-name-shadow,
+.ascii-name-face {
+  margin: 0;
+}
+
+.ascii-name-shadow {
+  position: absolute;
+  top: 8px;
+  left: 10px;
+  color: var(--dim);
+  opacity: 0.7;
+}
+
+.ascii-name-face {
+  position: relative;
+  z-index: 1;
+}
+
 .prompt-line,
 .resume-title,
 .command-output-heading,
