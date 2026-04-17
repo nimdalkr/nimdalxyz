@@ -60,24 +60,27 @@ const focusRows = [
   { key: "CONTACT", value: "0xnimdal@gmail.com" }
 ];
 
-const availableCommands = [
-  { key: "help", description: "// show available commands" },
-  { key: "home", description: "// go home" },
-  { key: "work", description: "// project list" },
-  { key: "about", description: "// about page" },
-  { key: "resume", description: "// resume page" },
-  { key: "blog", description: "// open blog" },
-  { key: "portfolio", description: "// open portfolio" },
-  { key: "github", description: "// open github" },
-  { key: "email", description: "// copy email" },
-  { key: "clear", description: "// clear response" },
-  { key: "?", description: "// alias for help" },
-  { key: "nimdalcraft", description: "// project file 01" },
-  { key: "mylol", description: "// project file 02" },
-  { key: "daltacks", description: "// project file 03" },
-  { key: "ethosalpha", description: "// project file 04" },
-  { key: "nomorenaver", description: "// project file 05" }
-];
+const helpGroups = {
+  core: [
+    { key: "home", description: "// go home" },
+    { key: "work", description: "// project list" },
+    { key: "about", description: "// about page" },
+    { key: "resume", description: "// resume page" }
+  ],
+  links: [
+    { key: "blog", description: "// open blog" },
+    { key: "portfolio", description: "// open portfolio" },
+    { key: "github", description: "// open github" },
+    { key: "email", description: "// copy email" }
+  ],
+  projects: [
+    { key: "nimdalcraft", description: "// web2 ai product system" },
+    { key: "mylol", description: "// web2 lck sim game" },
+    { key: "daltacks", description: "// web3 stacks monorepo" },
+    { key: "ethosalpha", description: "// web3 analytics dashboard" },
+    { key: "nomorenaver", description: "// web2 naver keyword tool" }
+  ]
+} as const;
 
 export function TerminalShell({ intro }: TerminalShellProps) {
   const [activeModule, setActiveModule] = useState<ModuleId>("home");
@@ -133,7 +136,36 @@ export function TerminalShell({ intro }: TerminalShellProps) {
     if (normalized === "help" || normalized === "?") {
       setOutput({
         heading: "available commands:",
-        rows: availableCommands
+        lines: [
+          "help core      // home work about resume",
+          "help links     // blog portfolio github email",
+          "help projects  // nimdalcraft mylol daltacks ethosalpha nomorenaver",
+          "clear          // clear response"
+        ]
+      });
+      return;
+    }
+
+    if (normalized === "help core") {
+      setOutput({
+        heading: "core commands:",
+        rows: [...helpGroups.core]
+      });
+      return;
+    }
+
+    if (normalized === "help links") {
+      setOutput({
+        heading: "link commands:",
+        rows: [...helpGroups.links]
+      });
+      return;
+    }
+
+    if (normalized === "help projects") {
+      setOutput({
+        heading: "project commands:",
+        rows: [...helpGroups.projects]
       });
       return;
     }
