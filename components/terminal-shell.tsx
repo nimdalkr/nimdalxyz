@@ -74,7 +74,7 @@ const availableCommands = [
 
 export function TerminalShell({ intro }: TerminalShellProps) {
   const [activeModule, setActiveModule] = useState<ModuleId>("home");
-  const [commandValue, setCommandValue] = useState("type a command (try: help)");
+  const [commandValue, setCommandValue] = useState("");
   const [commandOutput, setCommandOutput] = useState<CommandOutput | null>(null);
 
   const activeIndex = moduleLinks.findIndex((moduleLink) => moduleLink.id === activeModule);

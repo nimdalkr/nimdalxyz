@@ -87,9 +87,11 @@ input:focus-visible {
 
 .terminal-screen {
   display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
   min-height: calc(100vh - 40px);
   border: 1px solid rgba(42, 92, 56, 0.28);
   background: linear-gradient(180deg, rgba(15, 18, 16, 0.22) 0%, rgba(15, 18, 16, 0.08) 100%);
+  overflow: hidden;
 }
 
 .runtime-strip {
@@ -158,10 +160,11 @@ input:focus-visible {
 .terminal-body {
   display: grid;
   align-content: start;
-  min-height: 540px;
+  min-height: 0;
   width: min(100%, var(--content-width));
   margin: 0 auto;
   padding: 18px 22px 12px;
+  overflow: auto;
 }
 
 .terminal-block {
@@ -338,14 +341,19 @@ input:focus-visible {
   outline: 0;
 }
 
-.command-input[readonly] {
-  cursor: text;
+.command-input::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
 }
 
 .command-output {
   display: grid;
   gap: 8px;
+  max-height: 180px;
+  overflow: auto;
   padding: 4px 0 8px;
+  border-top: 1px solid rgba(42, 92, 56, 0.18);
+  border-bottom: 1px solid rgba(42, 92, 56, 0.18);
 }
 
 .command-output-heading,
