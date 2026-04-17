@@ -54,17 +54,24 @@ const runtimeInfoRight = [
   { label: "STATUS", value: "200", tone: "orange" as const }
 ];
 
-const summaryLines = [
-  "Growth marketer and GTM operator working from Seoul.",
-  "10+ years spanning startup building, marketing operations, localization, KOL, and Web3 onboarding.",
-  "Currently building AI-assisted workflows and product-shaped growth systems."
-];
-
-const focusRows = [
-  { key: "LOCATION", value: "SEOUL -- KOREA" },
-  { key: "FOCUS", value: "Growth / GTM / AI Workflow Build" },
-  { key: "CONTACT", value: "0xnimdal@gmail.com" }
-];
+const whoamiLines = [
+  "nimdal (chanwoo tak)",
+  "",
+  "> role: growth_marketer",
+  "> stack: web2_marketing -> web3 marketer / ai / automation / fake_dev",
+  "> mode: building_in_public",
+  "",
+  "> summary:",
+  "designing growth systems that convert attention -> users -> revenue",
+  "",
+  "> current_focus:",
+  "- GTM for early-stage products",
+  "- AI workflow automation",
+  "- crypto-native growth loops",
+  "",
+  "> signal:",
+  "high noise tolerance / execution > theory"
+].join("\n");
 
 const bootLines: BootLine[] = [
   { prefix: "NIMDAL_OS v1.0.0", suffix: " -- booting" },
@@ -335,25 +342,7 @@ export function TerminalShell({ intro }: TerminalShellProps) {
             </div>
 
             <p className="prompt-line">$ whoami</p>
-            <div className="terminal-copy">
-              {summaryLines.map((line) => (
-                <p key={line}>{line}</p>
-              ))}
-            </div>
-
-            <p className="prompt-line">$ cat status.txt</p>
-            <div className="status-table" role="table" aria-label="Profile status table">
-              {focusRows.map((row) => (
-                <div key={row.key} className="status-row" role="row">
-                  <span className="status-key" role="cell">
-                    {row.key}
-                  </span>
-                  <span className="status-value" role="cell">
-                    {row.value}
-                  </span>
-                </div>
-              ))}
-            </div>
+            <pre className="terminal-manifest">{whoamiLines}</pre>
 
             <a
               className="signal-badge"
@@ -435,12 +424,7 @@ export function TerminalShell({ intro }: TerminalShellProps) {
         {bootComplete && activeModule === "about" && (
           <section id="about" className="terminal-block">
             <p className="prompt-line">$ cat about.md</p>
-            <div className="terminal-copy rich-copy">
-              {profileContent.aboutParagraphs.map((paragraph) => (
-                <p key={paragraph}>{paragraph}</p>
-              ))}
-              <p className="about-signoff">0xnimdal@gmail.com</p>
-            </div>
+            <pre className="terminal-manifest">{profileContent.aboutParagraphs.join("\n")}</pre>
           </section>
         )}
 

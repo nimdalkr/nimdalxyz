@@ -41,7 +41,7 @@ export type ProfileContent = {
 export const profileContent: ProfileContent = {
   nameEn: "Nimdal",
   nameKo: "\uD0C1\uCC2C\uC6B0",
-  role: "Growth Marketer / GTM Operator",
+  role: "growth_marketer",
   location: "Seoul, Korea",
   terminalTitle: "nimdal@portfolio: ~",
   statusFile: "/etc/nimdal",
@@ -145,10 +145,35 @@ export const profileContent: ProfileContent = {
     }
   ],
   aboutParagraphs: [
-    "I entered Web2 marketing through community building, not the other way around. What kept the work alive was trust, sincerity, and the ability to keep relationships healthy over time.",
-    "Before spending budget on ads or content, I look at where people stop. Sometimes the message is wrong. Sometimes the structure underneath is weak. I prefer fixing that first.",
-    "Korean localization is never just translation. Expectations, tone, rhythm, and community distance all need to be tuned together for the market response to feel natural.",
-    "I do not like stopping at problem definition. That is why I often move one step deeper into MVP structure, workflow design, and implementation support when it helps execution."
+    "# about",
+    "",
+    "i started in web2 marketing.",
+    "not ads — systems.",
+    "",
+    "campaigns, influencer networks, distribution loops.",
+    "learned one thing early:",
+    "",
+    "attention without structure = waste",
+    "",
+    "now i'm operating in web3.",
+    "",
+    "same fundamentals, different rails:",
+    "- tokens instead of points",
+    "- communities instead of audiences",
+    "- liquidity instead of impressions",
+    "",
+    "currently focused on:",
+    "- GTM strategy for early-stage products",
+    "- AI-driven workflow automation",
+    "- building tools that reduce manual ops to zero",
+    "",
+    "i care about:",
+    "execution speed",
+    "clear signal over noise",
+    "systems that scale without people",
+    "",
+    "if you're building something real,",
+    "we'll probably get along."
   ],
   resumeSections: [
     {
