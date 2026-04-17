@@ -1,4 +1,7 @@
+"use client";
+
 import Image from "next/image";
+import { useState } from "react";
 import type { ReactNode } from "react";
 
 import { profileContent } from "@/data/profile";
@@ -12,7 +15,9 @@ const moduleLinks = [
   { id: "work", label: "02._WORK" },
   { id: "about", label: "03._ABOUT" },
   { id: "resume", label: "04._RESUME" }
-];
+] as const;
+
+type ModuleId = (typeof moduleLinks)[number]["id"];
 
 const runtimeInfo = [
   { label: "SYS.NAME", value: "NMDL_OS v1.0.0" },
@@ -39,6 +44,15 @@ const focusRows = [
 ];
 
 export function TerminalShell({ intro }: TerminalShellProps) {
+  const [activeModule, setActiveModule] = useState<ModuleId>("home");
+
+  const activeIndex = moduleLinks.findIndex((moduleLink) => moduleLink.id === activeModule);
+
+  const moveModule = (direction: -1 | 1) => {
+    const nextIndex = (activeIndex + direction + moduleLinks.length) % moduleLinks.length;
+    setActiveModule(moduleLinks[nextIndex].id);
+  };
+
   return (
     <section className="terminal-screen">
       <header className="runtime-strip" aria-label="System runtime information">
@@ -61,94 +75,96 @@ export function TerminalShell({ intro }: TerminalShellProps) {
       </header>
 
       <div className="terminal-body">
-        <section id="home" className="terminal-block">
-          <pre className="ascii-name" aria-label="ASCII logo">
+        {activeModule === "home" && (
+          <section id="home" className="terminal-block">
+            <pre className="ascii-name" aria-label="ASCII logo">
 {` _   _ ___ __  __ ____    _    _
 | \\ | |_ _|  \\/  |  _ \\  / \\  | |
 |  \\| || || |\\/| | | | |/ _ \\ | |
 | |\\  || || |  | | |_| / ___ \\| |___
 |_| \\_|___|_|  |_|____/_/   \\_\\_____|`}
-          </pre>
+            </pre>
 
-          <p className="prompt-line">$ whoami</p>
+            <p className="prompt-line">$ whoami</p>
 
-          <div className="identity-shell">
-            <div className="identity-photo">
-              {profileContent.avatarSrc ? (
-                <Image
-                  src={profileContent.avatarSrc}
-                  alt={`${profileContent.nameEn} profile photo`}
-                  className="avatar-image"
-                  width={70}
-                  height={70}
-                  priority
-                />
-              ) : (
-                <span aria-hidden="true">{profileContent.avatarFallback}</span>
-              )}
+            <div className="identity-shell">
+              <div className="identity-photo">
+                {profileContent.avatarSrc ? (
+                  <Image
+                    src={profileContent.avatarSrc}
+                    alt={`${profileContent.nameEn} profile photo`}
+                    className="avatar-image"
+                    width={54}
+                    height={54}
+                    priority
+                  />
+                ) : (
+                  <span aria-hidden="true">{profileContent.avatarFallback}</span>
+                )}
+              </div>
+
+              <div className="identity-copy">
+                {summaryLines.map((line) => (
+                  <p key={line} className="terminal-copy">
+                    {line}
+                  </p>
+                ))}
+              </div>
             </div>
 
-            <div className="identity-copy">
-              <p className="identity-name">
-                {profileContent.nameEn} <span className="identity-name-ko">({profileContent.nameKo})</span>
-              </p>
-              {summaryLines.map((line) => (
-                <p key={line} className="terminal-copy">
-                  {line}
-                </p>
+            <p className="prompt-line">$ cat status.txt</p>
+            <div className="status-table" role="table" aria-label="Profile status table">
+              {focusRows.map((row) => (
+                <div key={row.key} className="status-row" role="row">
+                  <span className="status-key" role="cell">
+                    {row.key}
+                  </span>
+                  <span className="status-value" role="cell">
+                    {row.value}
+                  </span>
+                </div>
               ))}
             </div>
-          </div>
 
-          <p className="prompt-line">$ cat status.txt</p>
-          <div className="status-table" role="table" aria-label="Profile status table">
-            {focusRows.map((row) => (
-              <div key={row.key} className="status-row" role="row">
-                <span className="status-key" role="cell">
-                  {row.key}
-                </span>
-                <span className="status-value" role="cell">
-                  {row.value}
-                </span>
-              </div>
-            ))}
-          </div>
+            <a
+              className="signal-badge"
+              href="https://blog.nimdal.xyz"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <span className="signal-dot" aria-hidden="true" />
+              BLOG IS LIVE -- OPEN LOG
+            </a>
 
-          <a
-            className="signal-badge"
-            href="https://blog.nimdal.xyz"
-            target="_blank"
-            rel="noreferrer"
-          >
-            <span className="signal-dot" aria-hidden="true" />
-            BLOG IS LIVE -- OPEN LOG
-          </a>
-        </section>
-
-        <section id="work" className="terminal-block">
-          <p className="prompt-line">$ ls -la /projects/</p>
-          <p className="helper-copy">
-            {profileContent.projects.length} entries -- click filename to open the related public endpoint when available
-          </p>
-
-          <div className="project-table" role="table" aria-label="Project list">
-            <div className="project-head" role="row">
-              <span role="columnheader">NAME</span>
-              <span role="columnheader">SIZE</span>
-              <span role="columnheader">MODIFIED</span>
-              <span role="columnheader">DESCRIPTION</span>
+            <div className="tip-row">
+              <span>TIP:</span>
+              <span>Use the module bar below to inspect work, about, and resume output.</span>
             </div>
-            {profileContent.projects.map((project) => {
-              const mappedLink = profileContent.links.find((link) => link.label === project.name.toLowerCase());
+          </section>
+        )}
 
-              return (
+        {activeModule === "work" && (
+          <section id="work" className="terminal-block">
+            <p className="prompt-line">$ ls -la /projects/</p>
+            <p className="helper-copy">
+              {profileContent.projects.length} entries -- click filename to open the related public endpoint
+            </p>
+
+            <div className="project-table" role="table" aria-label="Project list">
+              <div className="project-head" role="row">
+                <span role="columnheader">NAME</span>
+                <span role="columnheader">SIZE</span>
+                <span role="columnheader">MODIFIED</span>
+                <span role="columnheader">DESCRIPTION</span>
+              </div>
+              {profileContent.projects.map((project) => (
                 <div key={project.name} className="project-row" role="row">
-                  {mappedLink ? (
+                  {project.href ? (
                     <a
-                      href={mappedLink.href}
+                      href={project.href}
                       className="project-name project-name-link"
-                      target={mappedLink.external ? "_blank" : undefined}
-                      rel={mappedLink.external ? "noreferrer" : undefined}
+                      target="_blank"
+                      rel="noreferrer"
                       role="cell"
                     >
                       {project.name}
@@ -164,61 +180,42 @@ export function TerminalShell({ intro }: TerminalShellProps) {
                     {project.description}
                   </span>
                 </div>
-              );
-            })}
-          </div>
-        </section>
+              ))}
+            </div>
+          </section>
+        )}
 
-        <section id="about" className="terminal-block">
-          <p className="prompt-line">$ cat about.md</p>
-          <div className="terminal-copy rich-copy">
-            {profileContent.aboutParagraphs.map((paragraph) => (
-              <p key={paragraph}>{paragraph}</p>
-            ))}
-            <p className="about-signoff">0xnimdal@gmail.com</p>
-          </div>
-        </section>
+        {activeModule === "about" && (
+          <section id="about" className="terminal-block">
+            <p className="prompt-line">$ cat about.md</p>
+            <div className="terminal-copy rich-copy">
+              {profileContent.aboutParagraphs.map((paragraph) => (
+                <p key={paragraph}>{paragraph}</p>
+              ))}
+              <p className="about-signoff">0xnimdal@gmail.com</p>
+            </div>
+          </section>
+        )}
 
-        <section id="resume" className="terminal-block">
-          <p className="prompt-line">$ cat resume.txt</p>
-          <div className="resume-shell">
-            {profileContent.resumeSections.map((section) => (
-              <div key={section.title} className="resume-section">
-                <p className="resume-title">// {section.title}</p>
-                <div className="resume-lines">
-                  {section.lines.map((line) => (
-                    <p key={line} className="resume-line">
-                      {line}
-                    </p>
-                  ))}
+        {activeModule === "resume" && (
+          <section id="resume" className="terminal-block">
+            <p className="prompt-line">$ cat resume.txt</p>
+            <div className="resume-shell">
+              {profileContent.resumeSections.map((section) => (
+                <div key={section.title} className="resume-section">
+                  <p className="resume-title">// {section.title}</p>
+                  <div className="resume-lines">
+                    {section.lines.map((line) => (
+                      <p key={line} className="resume-line">
+                        {line}
+                      </p>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="terminal-block">
-          <p className="prompt-line">$ ls ~/links</p>
-          <div className="link-cloud">
-            {profileContent.links.map((link) => (
-              <a
-                key={link.id}
-                href={link.href}
-                className="endpoint-link"
-                target={link.external ? "_blank" : undefined}
-                rel={link.external ? "noreferrer" : undefined}
-              >
-                <span className="endpoint-name">{link.label}</span>
-                <span className="endpoint-value">{link.displayText}</span>
-              </a>
-            ))}
-          </div>
-        </section>
-
-        <section className="terminal-block terminal-copy-block">
-          <p className="prompt-line">$ {profileContent.introCommand}</p>
-          <div className="terminal-copy rich-copy">{intro}</div>
-        </section>
+              ))}
+            </div>
+          </section>
+        )}
       </div>
 
       <footer className="terminal-footer">
@@ -237,15 +234,25 @@ export function TerminalShell({ intro }: TerminalShellProps) {
           <span className="module-prefix">root@zui/nav &gt; SELECT MODULE [up/down + enter or click]</span>
           <nav className="module-nav" aria-label="Bottom module navigation">
             {moduleLinks.map((item) => (
-              <a
+              <button
                 key={item.id}
-                href={`#${item.id}`}
-                className="module-link"
+                type="button"
+                className={`module-link${activeModule === item.id ? " is-active" : ""}`}
+                onClick={() => setActiveModule(item.id)}
               >
-                {item.label}
-              </a>
+                {activeModule === item.id ? `> ${item.label}` : item.label}
+              </button>
             ))}
           </nav>
+        </div>
+
+        <div className="module-controls">
+          <button type="button" className="control-link" onClick={() => moveModule(-1)}>
+            prev
+          </button>
+          <button type="button" className="control-link" onClick={() => moveModule(1)}>
+            next
+          </button>
         </div>
       </footer>
     </section>

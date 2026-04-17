@@ -13,6 +13,7 @@ export type ProjectEntry = {
   size: string;
   modified: string;
   description: string;
+  href?: string;
 };
 
 export type ResumeSection = {
@@ -111,31 +112,36 @@ export const profileContent: ProfileContent = {
       name: "nimdalcraft",
       size: "12.4kb",
       modified: "2026-03",
-      description: "AI product system for turning vague ideas into buildable SaaS starter packages."
+      description: "AI product system for turning vague ideas into buildable SaaS starter packages.",
+      href: "https://github.com/nimdalkr/nimdalcraft"
     },
     {
       name: "octascout",
       size: "38.1kb",
       modified: "2026-01",
-      description: "Research workflow for rapid market validation from a single website URL."
+      description: "Research workflow for rapid market validation from a single website URL.",
+      href: "https://github.com/nimdalkr"
     },
     {
       name: "myLoL",
       size: "94.7kb",
       modified: "2026-03",
-      description: "LCK simulation game and AI-assisted solo build workflow pushed to a public release."
+      description: "LCK simulation game and AI-assisted solo build workflow pushed to a public release.",
+      href: "https://play.google.com/store/apps/details?id=com.nimdal.mylol"
     },
     {
       name: "daltacks",
       size: "6.5kb",
       modified: "2026-02",
-      description: "Stacks monorepo connecting contracts, frontend, API, and deployment in one flow."
+      description: "Stacks monorepo connecting contracts, frontend, API, and deployment in one flow.",
+      href: "https://daltacks.vercel.app/"
     },
     {
       name: "ethosalpha",
       size: "9.2kb",
       modified: "2026-02",
-      description: "Tier-aware analytics dashboard combining Ethos data, social signals, and validation metrics."
+      description: "Tier-aware analytics dashboard combining Ethos data, social signals, and validation metrics.",
+      href: "https://github.com/nimdalkr/ethoskaito"
     }
   ],
   aboutParagraphs: [
