@@ -5,6 +5,7 @@
   --font-size-xs: 13px;
   --font-size-sm: 14px;
   --line-height-base: 22.4px;
+  --content-width: 940px;
   --surface-page: #000000;
   --surface-panel: #0b0e0c;
   --surface-input: #090b09;
@@ -95,6 +96,8 @@ input:focus-visible {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 24px;
+  width: min(100%, var(--content-width));
+  margin: 0 auto;
   padding: 18px 22px 12px;
   border-bottom: 1px solid rgba(42, 92, 56, 0.28);
 }
@@ -156,6 +159,8 @@ input:focus-visible {
   display: grid;
   align-content: start;
   min-height: 540px;
+  width: min(100%, var(--content-width));
+  margin: 0 auto;
   padding: 18px 22px 12px;
 }
 
@@ -305,6 +310,9 @@ input:focus-visible {
   align-content: end;
   gap: 12px;
   margin-top: auto;
+  width: min(100%, var(--content-width));
+  margin-left: auto;
+  margin-right: auto;
   padding: 14px 22px 18px;
 }
 
