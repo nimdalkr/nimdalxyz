@@ -36,6 +36,14 @@ type CommandOutput = {
   lines?: string[];
 };
 
+type BootLine = {
+  prefix?: string;
+  target?: string;
+  status?: string;
+  tone?: "accent" | "orange" | "dim";
+  suffix?: string;
+};
+
 const runtimeInfo = [
   { label: "SYS.NAME", value: "NIMDAL_OS v1.0.0" },
   { label: "SYS.AUTH", value: "GUEST_ACCESS_GRANTED", tone: "accent" as const },
@@ -49,15 +57,28 @@ const runtimeInfoRight = [
 ];
 
 const summaryLines = [
-  "Growth marketer, GTM operator, and community builder working from Seoul.",
+  "Growth marketer and GTM operator working from Seoul.",
   "10+ years spanning startup building, marketing operations, localization, KOL, and Web3 onboarding.",
   "Currently building AI-assisted workflows and product-shaped growth systems."
 ];
 
 const focusRows = [
   { key: "LOCATION", value: "SEOUL -- KOREA" },
-  { key: "FOCUS", value: "Growth / GTM / Community / AI Workflow Build" },
+  { key: "FOCUS", value: "Growth / GTM / AI Workflow Build" },
   { key: "CONTACT", value: "0xnimdal@gmail.com" }
+];
+
+const bootLines: BootLine[] = [
+  { prefix: "NIMDAL_OS v1.0.0", suffix: " -- booting" },
+  { prefix: "Loading", target: " growth.systems.pkg", status: "[OK]", tone: "accent" },
+  { prefix: "Loading", target: " localization.ops.pkg", status: "[OK]", tone: "accent" },
+  { prefix: "Loading", target: " web3.channels.pkg", status: "[OK]", tone: "accent" },
+  { prefix: "Loading", target: " ai.workflow.pkg", status: "[OK]", tone: "accent" },
+  { prefix: "Mounting", target: " /projects/nomorenaver", status: "[LIVE]", tone: "accent" },
+  { prefix: "Mounting", target: " /projects/daltacks", status: "[LIVE]", tone: "accent" },
+  { prefix: "Mounting", target: " /projects/ethosalpha", status: "[WIP]", tone: "orange" },
+  { prefix: "Checking", target: " market.signal.status", status: "[TRUE]", tone: "accent" },
+  { prefix: "READY." }
 ];
 
 const helpGroups = {
@@ -92,6 +113,8 @@ export function TerminalShell({ intro }: TerminalShellProps) {
   const [commandValue, setCommandValue] = useState("");
   const [commandOutput, setCommandOutput] = useState<CommandOutput | null>(null);
   const [uptime, setUptime] = useState(() => formatUptime(Date.now()));
+  const [bootLineCount, setBootLineCount] = useState(0);
+  const [bootComplete, setBootComplete] = useState(false);
 
   const activeIndex = moduleLinks.findIndex((moduleLink) => moduleLink.id === activeModule);
 
@@ -101,6 +124,31 @@ export function TerminalShell({ intro }: TerminalShellProps) {
     }, 1000);
 
     return () => window.clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReducedMotion) {
+      setBootLineCount(bootLines.length);
+      setBootComplete(true);
+      return;
+    }
+
+    const lineTimer = window.setInterval(() => {
+      setBootLineCount((current) => {
+        if (current >= bootLines.length) {
+          window.clearInterval(lineTimer);
+          window.setTimeout(() => {
+            setBootComplete(true);
+          }, 220);
+          return current;
+        }
+
+        return current + 1;
+      });
+    }, 120);
+
+    return () => window.clearInterval(lineTimer);
   }, []);
 
   const moveModule = (direction: -1 | 1) => {
@@ -129,6 +177,10 @@ export function TerminalShell({ intro }: TerminalShellProps) {
   };
 
   const executeCommand = async (rawValue: string) => {
+    if (!bootComplete) {
+      return;
+    }
+
     const normalized = rawValue.trim().toLowerCase();
     if (!normalized) {
       return;
@@ -253,11 +305,25 @@ export function TerminalShell({ intro }: TerminalShellProps) {
       </header>
 
       <div className="terminal-body">
-        {activeModule === "home" && (
+        {!bootComplete ? (
+          <section className="terminal-block boot-sequence" aria-label="System boot sequence">
+            {bootLines.slice(0, bootLineCount).map((line, index) => (
+              <p key={`${line.prefix}-${index}`} className="boot-line">
+                {line.prefix ? <span className="boot-prefix">{line.prefix}</span> : null}
+                {line.target ? <span className="boot-target">{line.target}</span> : null}
+                {line.status ? (
+                  <span className={`boot-status${line.tone ? ` is-${line.tone}` : ""}`}>{line.status}</span>
+                ) : null}
+                {line.suffix ? <span className="boot-suffix">{line.suffix}</span> : null}
+              </p>
+            ))}
+          </section>
+        ) : null}
+
+        {bootComplete && activeModule === "home" && (
           <section id="home" className="terminal-block">
             <pre className="ascii-name" aria-label="ASCII logo">
-{` _   _ ___ __  __ ____    _    _     
-| \\ | |_ _|  \\/  |  _ \\  / \\  | |    
+{`| \\ | |_ _|  \\/  |  _ \\  / \\  | |    
 |  \\| || || |\\/| | | | |/ _ \\ | |    
 | |\\  || || |  | | |_| / ___ \\| |___ 
 |_| \\_|___|_|  |_|____/_/   \\_\\_____|`}
@@ -303,7 +369,7 @@ export function TerminalShell({ intro }: TerminalShellProps) {
           </section>
         )}
 
-        {activeModule === "work" && (
+        {bootComplete && activeModule === "work" && (
           <section id="work" className="terminal-block">
             <p className="prompt-line">$ ls -la /projects/</p>
             <p className="helper-copy">
@@ -361,7 +427,7 @@ export function TerminalShell({ intro }: TerminalShellProps) {
           </section>
         )}
 
-        {activeModule === "about" && (
+        {bootComplete && activeModule === "about" && (
           <section id="about" className="terminal-block">
             <p className="prompt-line">$ cat about.md</p>
             <div className="terminal-copy rich-copy">
@@ -373,7 +439,7 @@ export function TerminalShell({ intro }: TerminalShellProps) {
           </section>
         )}
 
-        {activeModule === "resume" && (
+        {bootComplete && activeModule === "resume" && (
           <section id="resume" className="terminal-block">
             <p className="prompt-line">$ cat resume.txt</p>
             <div className="resume-shell">
@@ -406,6 +472,7 @@ export function TerminalShell({ intro }: TerminalShellProps) {
             aria-label="Command input"
             autoComplete="off"
             spellCheck={false}
+            disabled={!bootComplete}
           />
         </form>
 
@@ -435,7 +502,7 @@ export function TerminalShell({ intro }: TerminalShellProps) {
         ) : null}
 
         <div className="module-row">
-          <span className="module-prefix">root@zui/nav &gt; SELECT MODULE [up/down + enter or click]</span>
+          <span className="module-prefix">root@nimdal/nav &gt; SELECT MODULE [up/down + enter or click]</span>
           <nav className="module-nav" aria-label="Bottom module navigation">
             {moduleLinks.map((item) => (
               <button
@@ -443,6 +510,7 @@ export function TerminalShell({ intro }: TerminalShellProps) {
                 type="button"
                 className={`module-link${activeModule === item.id ? " is-active" : ""}`}
                 onClick={() => handleModuleSelect(item.id)}
+                disabled={!bootComplete}
               >
                 {activeModule === item.id ? `> ${item.label}` : item.label}
               </button>
@@ -451,10 +519,10 @@ export function TerminalShell({ intro }: TerminalShellProps) {
         </div>
 
         <div className="module-controls">
-          <button type="button" className="control-link" onClick={() => moveModule(-1)}>
+          <button type="button" className="control-link" onClick={() => moveModule(-1)} disabled={!bootComplete}>
             prev
           </button>
-          <button type="button" className="control-link" onClick={() => moveModule(1)}>
+          <button type="button" className="control-link" onClick={() => moveModule(1)} disabled={!bootComplete}>
             next
           </button>
         </div>

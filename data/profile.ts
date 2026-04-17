@@ -41,7 +41,7 @@ export type ProfileContent = {
 export const profileContent: ProfileContent = {
   nameEn: "Nimdal",
   nameKo: "\uD0C1\uCC2C\uC6B0",
-  role: "Growth Marketer / GTM / Community Builder",
+  role: "Growth Marketer / GTM Operator",
   location: "Seoul, Korea",
   terminalTitle: "nimdal@portfolio: ~",
   statusFile: "/etc/nimdal",

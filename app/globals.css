@@ -204,6 +204,39 @@ input:focus-visible {
   gap: 14px;
 }
 
+.boot-sequence {
+  gap: 2px;
+  align-self: start;
+  width: min(100%, 420px);
+  color: var(--dim);
+}
+
+.boot-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  color: var(--dim);
+}
+
+.boot-prefix,
+.boot-target,
+.boot-suffix {
+  color: var(--dim);
+}
+
+.boot-status.is-accent {
+  color: var(--accent);
+}
+
+.boot-status.is-orange {
+  color: var(--orange);
+}
+
+.boot-status.is-dim {
+  color: var(--dim);
+}
+
 .ascii-name {
   margin: 2px 0 6px;
   color: var(--fg);
@@ -393,6 +426,13 @@ input:focus-visible {
 
 .command-input::placeholder {
   color: var(--dim);
+  opacity: 1;
+}
+
+.command-input:disabled,
+.module-link:disabled,
+.control-link:disabled {
+  cursor: default;
   opacity: 1;
 }
 
