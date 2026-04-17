@@ -10,7 +10,7 @@ export type ProfileLink = {
 
 export type ProjectEntry = {
   name: string;
-  size: string;
+  type: string;
   modified: string;
   description: string;
   href?: string;
@@ -110,38 +110,38 @@ export const profileContent: ProfileContent = {
   projects: [
     {
       name: "nimdalcraft",
-      size: "12.4kb",
+      type: "web2",
       modified: "2026-03",
       description: "AI product system for turning vague ideas into buildable SaaS starter packages.",
       href: "https://github.com/nimdalkr/nimdalcraft"
     },
     {
-      name: "octascout",
-      size: "38.1kb",
-      modified: "2026-01",
-      description: "Research workflow for rapid market validation from a single website URL.",
-      href: "https://github.com/nimdalkr"
-    },
-    {
       name: "myLoL",
-      size: "94.7kb",
+      type: "web2",
       modified: "2026-03",
       description: "LCK simulation game and AI-assisted solo build workflow pushed to a public release.",
       href: "https://play.google.com/store/apps/details?id=com.nimdal.mylol"
     },
     {
       name: "daltacks",
-      size: "6.5kb",
+      type: "web3",
       modified: "2026-02",
       description: "Stacks monorepo connecting contracts, frontend, API, and deployment in one flow.",
       href: "https://daltacks.vercel.app/"
     },
     {
       name: "ethosalpha",
-      size: "9.2kb",
+      type: "web3",
       modified: "2026-02",
       description: "Tier-aware analytics dashboard combining Ethos data, social signals, and validation metrics.",
       href: "https://github.com/nimdalkr/ethoskaito"
+    },
+    {
+      name: "nomorenaver",
+      type: "web2",
+      modified: "2026-04",
+      description: "A keyword analysis platform for Naver targeting marketers focused on the Korean market.",
+      href: "https://nomorenaver.vercel.app/"
     }
   ],
   aboutParagraphs: [

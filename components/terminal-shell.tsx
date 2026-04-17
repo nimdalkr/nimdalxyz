@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
 
@@ -39,8 +38,14 @@ type CommandOutput = {
 
 const runtimeInfo = [
   { label: "SYS.NAME", value: "NIMDAL_OS v1.0.0" },
-  { label: "SYS.AUTH", value: "GUEST_ACCESS_GRANTED", accent: true },
+  { label: "SYS.AUTH", value: "GUEST_ACCESS_GRANTED", tone: "accent" as const },
   { label: "SYS.NODE", value: "nimdal.xyz" }
+];
+
+const runtimeInfoRight = [
+  { label: "UPTIME", value: "dynamic" },
+  { label: "TERMINAL", value: "TTY0" },
+  { label: "STATUS", value: "200", tone: "orange" as const }
 ];
 
 const summaryLines = [
@@ -61,25 +66,22 @@ const availableCommands = [
   { key: "work", description: "// project list" },
   { key: "about", description: "// about page" },
   { key: "resume", description: "// resume page" },
-  { key: "portfolio", description: "// open portfolio" },
   { key: "blog", description: "// open blog" },
+  { key: "portfolio", description: "// open portfolio" },
   { key: "github", description: "// open github" },
-  { key: "linkedin", description: "// open linkedin" },
-  { key: "x", description: "// open x" },
-  { key: "telegram", description: "// open telegram" },
-  { key: "channel", description: "// open channel" },
   { key: "email", description: "// copy email" },
-  { key: "nimdalcraft", description: "// project file 01" },
-  { key: "octascout", description: "// project file 02" },
-  { key: "mylol", description: "// project file 03" },
-  { key: "daltacks", description: "// project file 04" },
-  { key: "ethosalpha", description: "// project file 05" },
   { key: "clear", description: "// clear response" },
-  { key: "?", description: "// alias for help" }
+  { key: "?", description: "// alias for help" },
+  { key: "nimdalcraft", description: "// project file 01" },
+  { key: "mylol", description: "// project file 02" },
+  { key: "daltacks", description: "// project file 03" },
+  { key: "ethosalpha", description: "// project file 04" },
+  { key: "nomorenaver", description: "// project file 05" }
 ];
 
 export function TerminalShell({ intro }: TerminalShellProps) {
   const [activeModule, setActiveModule] = useState<ModuleId>("home");
+  const [expandedProject, setExpandedProject] = useState<string | null>(null);
   const [commandValue, setCommandValue] = useState("");
   const [commandOutput, setCommandOutput] = useState<CommandOutput | null>(null);
   const [uptime, setUptime] = useState(() => formatUptime(Date.now()));
@@ -97,6 +99,7 @@ export function TerminalShell({ intro }: TerminalShellProps) {
   const moveModule = (direction: -1 | 1) => {
     const nextIndex = (activeIndex + direction + moduleLinks.length) % moduleLinks.length;
     setActiveModule(moduleLinks[nextIndex].id);
+    setExpandedProject(null);
   };
 
   const setOutput = (output: CommandOutput | null) => {
@@ -105,6 +108,17 @@ export function TerminalShell({ intro }: TerminalShellProps) {
 
   const openHref = (href: string) => {
     window.open(href, "_blank", "noopener,noreferrer");
+  };
+
+  const handleModuleSelect = (moduleId: ModuleId) => {
+    setActiveModule(moduleId);
+    if (moduleId !== "work") {
+      setExpandedProject(null);
+    }
+  };
+
+  const handleProjectToggle = (projectName: string) => {
+    setExpandedProject((current) => (current === projectName ? null : projectName));
   };
 
   const executeCommand = async (rawValue: string) => {
@@ -130,7 +144,7 @@ export function TerminalShell({ intro }: TerminalShellProps) {
     }
 
     if (normalized === "home" || normalized === "work" || normalized === "about" || normalized === "resume") {
-      setActiveModule(normalized);
+      handleModuleSelect(normalized);
       setOutput({
         lines: [`switching module -> ${normalized}`]
       });
@@ -159,11 +173,11 @@ export function TerminalShell({ intro }: TerminalShellProps) {
       return;
     }
 
-    if (projectMatch?.href) {
+    if (projectMatch) {
       setActiveModule("work");
-      openHref(projectMatch.href);
+      setExpandedProject(projectMatch.name);
       setOutput({
-        lines: [`opening project -> ${projectMatch.name}`]
+        lines: [`expanded file -> ${projectMatch.name}`, "use [OPEN] to launch the public endpoint"]
       });
       return;
     }
@@ -186,19 +200,17 @@ export function TerminalShell({ intro }: TerminalShellProps) {
           {runtimeInfo.map((item) => (
             <div key={item.label} className="runtime-row">
               <span className="runtime-label">{item.label}</span>
-              <span className={`runtime-value${item.accent ? " is-accent" : ""}`}>{item.value}</span>
+              <span className={`runtime-value${item.tone ? ` is-${item.tone}` : ""}`}>{item.value}</span>
             </div>
           ))}
         </div>
         <div className="runtime-grid runtime-grid-right">
-          {[
-            { label: "UPTIME", value: uptime },
-            { label: "TERMINAL", value: "TTY0" },
-            { label: "STATUS", value: "200", accent: true }
-          ].map((item) => (
+          {runtimeInfoRight.map((item) => (
             <div key={item.label} className="runtime-row runtime-row-right">
               <span className="runtime-label">{item.label}</span>
-              <span className={`runtime-value${item.accent ? " is-accent" : ""}`}>{item.value}</span>
+              <span className={`runtime-value${item.tone ? ` is-${item.tone}` : ""}`}>
+                {item.label === "UPTIME" ? uptime : item.value}
+              </span>
             </div>
           ))}
         </div>
@@ -208,38 +220,18 @@ export function TerminalShell({ intro }: TerminalShellProps) {
         {activeModule === "home" && (
           <section id="home" className="terminal-block">
             <pre className="ascii-name" aria-label="ASCII logo">
-{` _   _ ___ __  __ ____    _    _
-| \\ | |_ _|  \\/  |  _ \\  / \\  | |
-|  \\| || || |\\/| | | | |/ _ \\ | |
-| |\\  || || |  | | |_| / ___ \\| |___
+{` _   _ ___ __  __ ____    _    _     
+| \\ | |_ _|  \\/  |  _ \\  / \\  | |    
+|  \\| || || |\\/| | | | |/ _ \\ | |    
+| |\\  || || |  | | |_| / ___ \\| |___ 
 |_| \\_|___|_|  |_|____/_/   \\_\\_____|`}
             </pre>
 
             <p className="prompt-line">$ whoami</p>
-
-            <div className="identity-shell">
-              <div className="identity-photo">
-                {profileContent.avatarSrc ? (
-                  <Image
-                    src={profileContent.avatarSrc}
-                    alt={`${profileContent.nameEn} profile photo`}
-                    className="avatar-image"
-                    width={54}
-                    height={54}
-                    priority
-                  />
-                ) : (
-                  <span aria-hidden="true">{profileContent.avatarFallback}</span>
-                )}
-              </div>
-
-              <div className="identity-copy">
-                {summaryLines.map((line) => (
-                  <p key={line} className="terminal-copy">
-                    {line}
-                  </p>
-                ))}
-              </div>
+            <div className="terminal-copy">
+              {summaryLines.map((line) => (
+                <p key={line}>{line}</p>
+              ))}
             </div>
 
             <p className="prompt-line">$ cat status.txt</p>
@@ -262,13 +254,15 @@ export function TerminalShell({ intro }: TerminalShellProps) {
               target="_blank"
               rel="noreferrer"
             >
-              <span className="signal-dot" aria-hidden="true" />
+              <span className="signal-dot" aria-hidden="true">
+                ●
+              </span>
               BLOG IS LIVE -- OPEN LOG
             </a>
 
             <div className="tip-row">
               <span>TIP:</span>
-              <span>Use the command line or the module bar below to inspect work, about, and resume output.</span>
+              <span>Type `work`, `about`, `resume`, or `help`.</span>
             </div>
           </section>
         )}
@@ -277,40 +271,56 @@ export function TerminalShell({ intro }: TerminalShellProps) {
           <section id="work" className="terminal-block">
             <p className="prompt-line">$ ls -la /projects/</p>
             <p className="helper-copy">
-              {profileContent.projects.length} entries -- click filename to open the related public endpoint
+              {profileContent.projects.length} entries -- click filename to expand -- click [OPEN] to read the public endpoint
             </p>
 
             <div className="project-table" role="table" aria-label="Project list">
               <div className="project-head" role="row">
                 <span role="columnheader">NAME</span>
-                <span role="columnheader">SIZE</span>
+                <span role="columnheader">TYPE</span>
                 <span role="columnheader">MODIFIED</span>
                 <span role="columnheader">DESCRIPTION</span>
               </div>
-              {profileContent.projects.map((project) => (
-                <div key={project.name} className="project-row" role="row">
-                  {project.href ? (
-                    <a
-                      href={project.href}
-                      className="project-name project-name-link"
-                      target="_blank"
-                      rel="noreferrer"
-                      role="cell"
-                    >
-                      {project.name}
-                    </a>
-                  ) : (
-                    <span className="project-name" role="cell">
-                      {project.name}
-                    </span>
-                  )}
-                  <span role="cell">{project.size}</span>
-                  <span role="cell">{project.modified}</span>
-                  <span className="project-description" role="cell">
-                    {project.description}
-                  </span>
-                </div>
-              ))}
+
+              {profileContent.projects.map((project) => {
+                const isExpanded = expandedProject === project.name;
+
+                return (
+                  <div key={project.name} className="project-entry">
+                    <div className="project-row" role="row">
+                      <button
+                        type="button"
+                        className="project-name-trigger"
+                        onClick={() => handleProjectToggle(project.name)}
+                        aria-expanded={isExpanded}
+                      >
+                        {project.name}
+                      </button>
+                      <span role="cell">{project.type}</span>
+                      <span role="cell">{project.modified}</span>
+                      <span className="project-description" role="cell">
+                        {project.description}
+                      </span>
+                    </div>
+
+                    {isExpanded ? (
+                      <div className="project-meta" role="row">
+                        <p className="project-meta-copy">{project.description}</p>
+                        {project.href ? (
+                          <a
+                            href={project.href}
+                            className="open-button"
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            OPEN
+                          </a>
+                        ) : null}
+                      </div>
+                    ) : null}
+                  </div>
+                );
+              })}
             </div>
           </section>
         )}
@@ -333,7 +343,7 @@ export function TerminalShell({ intro }: TerminalShellProps) {
             <div className="resume-shell">
               {profileContent.resumeSections.map((section) => (
                 <div key={section.title} className="resume-section">
-                  <p className="resume-title">// {section.title}</p>
+                  <p className="resume-title">// {section.title.toLowerCase()}</p>
                   <div className="resume-lines">
                     {section.lines.map((line) => (
                       <p key={line} className="resume-line">
@@ -363,7 +373,7 @@ export function TerminalShell({ intro }: TerminalShellProps) {
           />
         </form>
 
-        {commandOutput && (
+        {commandOutput ? (
           <div className="command-output" aria-live="polite">
             {commandOutput.heading ? <p className="command-output-heading">{commandOutput.heading}</p> : null}
             {commandOutput.rows ? (
@@ -386,7 +396,7 @@ export function TerminalShell({ intro }: TerminalShellProps) {
               </div>
             ) : null}
           </div>
-        )}
+        ) : null}
 
         <div className="module-row">
           <span className="module-prefix">root@zui/nav &gt; SELECT MODULE [up/down + enter or click]</span>
@@ -396,7 +406,7 @@ export function TerminalShell({ intro }: TerminalShellProps) {
                 key={item.id}
                 type="button"
                 className={`module-link${activeModule === item.id ? " is-active" : ""}`}
-                onClick={() => setActiveModule(item.id)}
+                onClick={() => handleModuleSelect(item.id)}
               >
                 {activeModule === item.id ? `> ${item.label}` : item.label}
               </button>
