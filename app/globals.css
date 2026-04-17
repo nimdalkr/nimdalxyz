@@ -31,7 +31,8 @@ html {
 
 body {
   margin: 0;
-  min-height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
   background:
     linear-gradient(rgba(255, 255, 255, 0.015), rgba(255, 255, 255, 0.015)),
     repeating-linear-gradient(
@@ -77,8 +78,8 @@ input:focus-visible {
 }
 
 .page-shell {
-  min-height: 100vh;
-  padding: 20px 18px;
+  height: 100dvh;
+  padding: 14px 18px;
 }
 
 .page-glow {
@@ -88,7 +89,7 @@ input:focus-visible {
 .terminal-screen {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
-  min-height: calc(100vh - 40px);
+  height: 100%;
   border: 1px solid rgba(42, 92, 56, 0.28);
   background: linear-gradient(180deg, rgba(15, 18, 16, 0.22) 0%, rgba(15, 18, 16, 0.08) 100%);
   overflow: hidden;
@@ -163,8 +164,8 @@ input:focus-visible {
   min-height: 0;
   width: min(100%, var(--content-width));
   margin: 0 auto;
-  padding: 18px 22px 12px;
-  overflow: auto;
+  padding: 16px 22px 10px;
+  overflow: hidden;
 }
 
 .terminal-block {
@@ -311,12 +312,12 @@ input:focus-visible {
 .terminal-footer {
   display: grid;
   align-content: end;
-  gap: 12px;
+  gap: 10px;
   margin-top: auto;
   width: min(100%, var(--content-width));
   margin-left: auto;
   margin-right: auto;
-  padding: 14px 22px 18px;
+  padding: 10px 22px 14px;
 }
 
 .command-row,
@@ -348,10 +349,11 @@ input:focus-visible {
 
 .command-output {
   display: grid;
-  gap: 8px;
-  max-height: 180px;
-  overflow: auto;
-  padding: 4px 0 8px;
+  gap: 6px;
+  min-height: 112px;
+  max-height: 112px;
+  overflow: hidden;
+  padding: 4px 0 6px;
   border-top: 1px solid rgba(42, 92, 56, 0.18);
   border-bottom: 1px solid rgba(42, 92, 56, 0.18);
 }
@@ -367,10 +369,15 @@ input:focus-visible {
   gap: 4px;
 }
 
+.command-list {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 22px;
+}
+
 .command-list-row {
   display: grid;
-  grid-template-columns: 76px minmax(0, 1fr);
-  gap: 12px;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 10px;
 }
 
 .command-list-key {
@@ -424,7 +431,7 @@ input:focus-visible {
   }
 
   .page-shell {
-    padding: 10px;
+    padding: 8px;
   }
 
   .runtime-strip {
@@ -444,6 +451,15 @@ input:focus-visible {
   .terminal-footer {
     padding-left: 14px;
     padding-right: 14px;
+  }
+
+  .command-output {
+    min-height: 132px;
+    max-height: 132px;
+  }
+
+  .command-list {
+    grid-template-columns: 1fr;
   }
 
   .ascii-name {
