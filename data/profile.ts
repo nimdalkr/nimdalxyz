@@ -179,25 +179,73 @@ export const profileContent: ProfileContent = {
     {
       title: "EXPERIENCE",
       lines: [
-        "2025 -- PRESENT // GTM and community execution around on-chain data, product signals, and participation growth.",
-        "2024 -- PRESENT // Personal branding on X and Telegram while operating Web3 communities in parallel.",
-        "2018 -- 2024 // Ran a company closer to growth-structure design than ad agency work."
+        "2025 -- PRESENT",
+        "// Leading GTM and growth execution for on-chain products",
+        "// Focus: user acquisition, activation, and participation growth",
+        "// Managing distribution across X, Telegram, and community channels",
+        "",
+        "2024 -- PRESENT",
+        "// Building personal distribution on X & Telegram",
+        "// Operating content-driven acquisition funnels within Web3 ecosystems",
+        "// Managing communities as retention and engagement drivers",
+        "",
+        "2018 -- 2024",
+        "// Founder, MKR",
+        "// Executed 200+ campaigns across SEO, influencer, and performance channels",
+        "// Built and operated influencer network (3,000+)",
+        "// Focused on scalable traffic acquisition and conversion"
       ]
     },
     {
       title: "WORK STYLE",
       lines: [
-        "Read friction before scaling spend.",
-        "Treat community as both distribution and early-warning system.",
-        "Move from strategy into MVP structure when execution needs it."
+        "Start from distribution, not assumptions.",
+        "",
+        "Test -> iterate -> scale.",
+        "",
+        "Community is retention + feedback loop.",
+        "",
+        "Optimize for conversion, not impressions.",
+        "",
+        "Execution speed is the edge.",
+        "",
+        "If it doesn't bring users, it's irrelevant."
       ]
     },
     {
-      title: "STACK",
+      title: "MARKETING",
       lines: [
-        "Growth / GTM / Localization / KOL / Community Ops",
-        "Next.js / TypeScript / Node.js / PostgreSQL",
-        "Codex / Claude Code / Cursor / Gemini / GA4 / Notion"
+        "[CHANNEL]",
+        "X / Telegram / NAVER / YouTube / Influencer Networks",
+        "",
+        "[ACQUISITION]",
+        "SEO / GEO / AEO / Content Marketing / KOL",
+        "",
+        "[CONVERSION]",
+        "Funnel Design / Retention Loop / Community Ops"
+      ]
+    },
+    {
+      title: "CONTENT / CREATIVE",
+      lines: [
+        "Premiere Pro / After Effects / Photoshop",
+        "",
+        "Short-form / Long-form / Educational / Thread-based content"
+      ]
+    },
+    {
+      title: "TOOLS",
+      lines: [
+        "GA4 / Notion / Discord / Telegram"
+      ]
+    },
+    {
+      title: "CURRENT FOCUS",
+      lines: [
+        "Growth for Web3 products:",
+        "- content -> acquisition funnels",
+        "- community -> retention & activation",
+        "- distribution -> scalable user inflow"
       ]
     }
   ]
