@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
 
 import { profileContent } from "@/data/profile";
@@ -19,6 +19,18 @@ const moduleLinks = [
 
 type ModuleId = (typeof moduleLinks)[number]["id"];
 
+const BOOTED_AT = new Date("2020-05-16T00:00:00+09:00").getTime();
+
+function formatUptime(now: number) {
+  const elapsedMs = Math.max(0, now - BOOTED_AT);
+  const totalMinutes = Math.floor(elapsedMs / 60000);
+  const days = Math.floor(totalMinutes / (60 * 24));
+  const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
+  const minutes = totalMinutes % 60;
+
+  return `${days}d ${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+}
+
 type CommandOutput = {
   heading?: string;
   rows?: Array<{ key: string; description: string }>;
@@ -26,15 +38,9 @@ type CommandOutput = {
 };
 
 const runtimeInfo = [
-  { label: "SYS.NAME", value: "NMDL_OS v1.0.0" },
+  { label: "SYS.NAME", value: "NIMDAL_OS v1.0.0" },
   { label: "SYS.AUTH", value: "GUEST_ACCESS_GRANTED", accent: true },
-  { label: "SYS.NODE", value: "nimdal.ooo" }
-];
-
-const runtimeMeta = [
-  { label: "UPTIME", value: "2163d 17:22" },
-  { label: "TERMINAL", value: "TTY0" },
-  { label: "STATUS", value: "200", accent: true }
+  { label: "SYS.NODE", value: "nimdal.xyz" }
 ];
 
 const summaryLines = [
@@ -76,8 +82,17 @@ export function TerminalShell({ intro }: TerminalShellProps) {
   const [activeModule, setActiveModule] = useState<ModuleId>("home");
   const [commandValue, setCommandValue] = useState("");
   const [commandOutput, setCommandOutput] = useState<CommandOutput | null>(null);
+  const [uptime, setUptime] = useState(() => formatUptime(Date.now()));
 
   const activeIndex = moduleLinks.findIndex((moduleLink) => moduleLink.id === activeModule);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setUptime(formatUptime(Date.now()));
+    }, 1000);
+
+    return () => window.clearInterval(timer);
+  }, []);
 
   const moveModule = (direction: -1 | 1) => {
     const nextIndex = (activeIndex + direction + moduleLinks.length) % moduleLinks.length;
@@ -176,7 +191,11 @@ export function TerminalShell({ intro }: TerminalShellProps) {
           ))}
         </div>
         <div className="runtime-grid runtime-grid-right">
-          {runtimeMeta.map((item) => (
+          {[
+            { label: "UPTIME", value: uptime },
+            { label: "TERMINAL", value: "TTY0" },
+            { label: "STATUS", value: "200", accent: true }
+          ].map((item) => (
             <div key={item.label} className="runtime-row runtime-row-right">
               <span className="runtime-label">{item.label}</span>
               <span className={`runtime-value${item.accent ? " is-accent" : ""}`}>{item.value}</span>
