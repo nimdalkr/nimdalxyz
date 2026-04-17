@@ -18,16 +18,14 @@ const moduleLinks = [
 
 type ModuleId = (typeof moduleLinks)[number]["id"];
 
-const BOOTED_AT = new Date("2020-05-16T00:00:00+09:00").getTime();
+function formatUptime(elapsedMs: number) {
+  const totalSeconds = Math.max(0, Math.floor(elapsedMs / 1000));
+  const days = Math.floor(totalSeconds / (60 * 60 * 24));
+  const hours = Math.floor((totalSeconds % (60 * 60 * 24)) / (60 * 60));
+  const minutes = Math.floor((totalSeconds % (60 * 60)) / 60);
+  const seconds = totalSeconds % 60;
 
-function formatUptime(now: number) {
-  const elapsedMs = Math.max(0, now - BOOTED_AT);
-  const totalMinutes = Math.floor(elapsedMs / 60000);
-  const days = Math.floor(totalMinutes / (60 * 24));
-  const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
-  const minutes = totalMinutes % 60;
-
-  return `${days}d ${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+  return `${days}d ${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }
 
 type CommandOutput = {
@@ -114,11 +112,12 @@ const helpGroups = {
 } as const;
 
 export function TerminalShell({ intro }: TerminalShellProps) {
+  const [bootedAt] = useState(() => Date.now());
   const [activeModule, setActiveModule] = useState<ModuleId>("home");
   const [expandedProject, setExpandedProject] = useState<string | null>(null);
   const [commandValue, setCommandValue] = useState("");
   const [commandOutput, setCommandOutput] = useState<CommandOutput | null>(null);
-  const [uptime, setUptime] = useState(() => formatUptime(Date.now()));
+  const [uptime, setUptime] = useState(() => formatUptime(0));
   const [bootLineCount, setBootLineCount] = useState(0);
   const [bootComplete, setBootComplete] = useState(false);
 
@@ -126,11 +125,11 @@ export function TerminalShell({ intro }: TerminalShellProps) {
 
   useEffect(() => {
     const timer = window.setInterval(() => {
-      setUptime(formatUptime(Date.now()));
+      setUptime(formatUptime(Date.now() - bootedAt));
     }, 1000);
 
     return () => window.clearInterval(timer);
-  }, []);
+  }, [bootedAt]);
 
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
