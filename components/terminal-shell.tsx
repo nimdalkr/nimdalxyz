@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import type { ReactNode } from "react";
+import type { FormEvent, ReactNode } from "react";
 
 import { profileContent } from "@/data/profile";
 
@@ -18,6 +18,12 @@ const moduleLinks = [
 ] as const;
 
 type ModuleId = (typeof moduleLinks)[number]["id"];
+
+type CommandOutput = {
+  heading?: string;
+  rows?: Array<{ key: string; description: string }>;
+  lines?: string[];
+};
 
 const runtimeInfo = [
   { label: "SYS.NAME", value: "NMDL_OS v1.0.0" },
@@ -43,14 +49,119 @@ const focusRows = [
   { key: "CONTACT", value: "0xnimdal@gmail.com" }
 ];
 
+const availableCommands = [
+  { key: "help", description: "// show available commands" },
+  { key: "home", description: "// go home" },
+  { key: "work", description: "// project list" },
+  { key: "about", description: "// about page" },
+  { key: "resume", description: "// resume page" },
+  { key: "portfolio", description: "// open portfolio" },
+  { key: "blog", description: "// open blog" },
+  { key: "github", description: "// open github" },
+  { key: "linkedin", description: "// open linkedin" },
+  { key: "x", description: "// open x" },
+  { key: "telegram", description: "// open telegram" },
+  { key: "channel", description: "// open channel" },
+  { key: "email", description: "// copy email" },
+  { key: "nimdalcraft", description: "// project file 01" },
+  { key: "octascout", description: "// project file 02" },
+  { key: "mylol", description: "// project file 03" },
+  { key: "daltacks", description: "// project file 04" },
+  { key: "ethosalpha", description: "// project file 05" },
+  { key: "clear", description: "// clear response" },
+  { key: "?", description: "// alias for help" }
+];
+
 export function TerminalShell({ intro }: TerminalShellProps) {
   const [activeModule, setActiveModule] = useState<ModuleId>("home");
+  const [commandValue, setCommandValue] = useState("type a command (try: help)");
+  const [commandOutput, setCommandOutput] = useState<CommandOutput | null>(null);
 
   const activeIndex = moduleLinks.findIndex((moduleLink) => moduleLink.id === activeModule);
 
   const moveModule = (direction: -1 | 1) => {
     const nextIndex = (activeIndex + direction + moduleLinks.length) % moduleLinks.length;
     setActiveModule(moduleLinks[nextIndex].id);
+  };
+
+  const setOutput = (output: CommandOutput | null) => {
+    setCommandOutput(output);
+  };
+
+  const openHref = (href: string) => {
+    window.open(href, "_blank", "noopener,noreferrer");
+  };
+
+  const executeCommand = async (rawValue: string) => {
+    const normalized = rawValue.trim().toLowerCase();
+    if (!normalized) {
+      return;
+    }
+
+    const linkMatch = profileContent.links.find((link) => link.label === normalized);
+    const projectMatch = profileContent.projects.find((project) => project.name.toLowerCase() === normalized);
+
+    if (normalized === "help" || normalized === "?") {
+      setOutput({
+        heading: "available commands:",
+        rows: availableCommands
+      });
+      return;
+    }
+
+    if (normalized === "clear") {
+      setOutput(null);
+      return;
+    }
+
+    if (normalized === "home" || normalized === "work" || normalized === "about" || normalized === "resume") {
+      setActiveModule(normalized);
+      setOutput({
+        lines: [`switching module -> ${normalized}`]
+      });
+      return;
+    }
+
+    if (normalized === "email") {
+      try {
+        await navigator.clipboard.writeText("0xnimdal@gmail.com");
+        setOutput({
+          lines: ["email copied -> 0xnimdal@gmail.com"]
+        });
+      } catch {
+        setOutput({
+          lines: ["copy failed -> 0xnimdal@gmail.com"]
+        });
+      }
+      return;
+    }
+
+    if (linkMatch) {
+      openHref(linkMatch.href);
+      setOutput({
+        lines: [`opening endpoint -> ${linkMatch.displayText}`]
+      });
+      return;
+    }
+
+    if (projectMatch?.href) {
+      setActiveModule("work");
+      openHref(projectMatch.href);
+      setOutput({
+        lines: [`opening project -> ${projectMatch.name}`]
+      });
+      return;
+    }
+
+    setOutput({
+      lines: [`command not found -> ${normalized}`, "type 'help' to inspect available commands"]
+    });
+  };
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    await executeCommand(commandValue);
+    setCommandValue("");
   };
 
   return (
@@ -138,7 +249,7 @@ export function TerminalShell({ intro }: TerminalShellProps) {
 
             <div className="tip-row">
               <span>TIP:</span>
-              <span>Use the module bar below to inspect work, about, and resume output.</span>
+              <span>Use the command line or the module bar below to inspect work, about, and resume output.</span>
             </div>
           </section>
         )}
@@ -219,16 +330,44 @@ export function TerminalShell({ intro }: TerminalShellProps) {
       </div>
 
       <footer className="terminal-footer">
-        <label className="command-row">
-          <span className="command-prompt">zui@portfolio:~$</span>
+        <form className="command-row" onSubmit={handleSubmit}>
+          <span className="command-prompt">nimdal.xyz:~$</span>
           <input
             id="cmd-input"
             className="command-input"
-            defaultValue="type a command (try: help)"
-            aria-label="Command input preview"
-            readOnly
+            value={commandValue}
+            onChange={(event) => setCommandValue(event.target.value)}
+            placeholder="type a command (try: help)"
+            aria-label="Command input"
+            autoComplete="off"
+            spellCheck={false}
           />
-        </label>
+        </form>
+
+        {commandOutput && (
+          <div className="command-output" aria-live="polite">
+            {commandOutput.heading ? <p className="command-output-heading">{commandOutput.heading}</p> : null}
+            {commandOutput.rows ? (
+              <div className="command-list">
+                {commandOutput.rows.map((row) => (
+                  <div key={row.key} className="command-list-row">
+                    <span className="command-list-key">{row.key}</span>
+                    <span className="command-list-desc">{row.description}</span>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+            {commandOutput.lines ? (
+              <div className="command-lines">
+                {commandOutput.lines.map((line) => (
+                  <p key={line} className="command-line">
+                    {line}
+                  </p>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        )}
 
         <div className="module-row">
           <span className="module-prefix">root@zui/nav &gt; SELECT MODULE [up/down + enter or click]</span>

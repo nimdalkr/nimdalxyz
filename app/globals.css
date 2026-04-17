@@ -334,6 +334,38 @@ input:focus-visible {
   cursor: text;
 }
 
+.command-output {
+  display: grid;
+  gap: 8px;
+  padding: 4px 0 8px;
+}
+
+.command-output-heading,
+.command-line {
+  margin: 0;
+}
+
+.command-list,
+.command-lines {
+  display: grid;
+  gap: 4px;
+}
+
+.command-list-row {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  gap: 12px;
+}
+
+.command-list-key {
+  color: var(--text-muted);
+}
+
+.command-list-desc,
+.command-line {
+  color: var(--text-secondary);
+}
+
 .module-row {
   padding-top: 10px;
   border-top: 1px solid rgba(42, 92, 56, 0.28);
