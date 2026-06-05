@@ -2,19 +2,10 @@ import type { Metadata } from "next";
 
 import "./globals.css";
 
-const themeScript = `
-(() => {
-  const storageKey = "koriel-theme";
-  const stored = window.localStorage.getItem(storageKey);
-  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-  const resolved = stored === "light" || stored === "dark" ? stored : (prefersDark ? "dark" : "light");
-  document.documentElement.dataset.theme = resolved;
-})();
-`;
-
 export const metadata: Metadata = {
   title: "Nimdal | 탁찬우",
-  description: "Terminal-inspired personal homepage for Nimdal, a growth marketer, GTM operator, and community builder."
+  description:
+    "Web3, AI 자동화, 커뮤니티, 초기 제품 GTM을 다루는 그로스 마케터 탁찬우의 홈페이지."
 };
 
 export default function RootLayout({
@@ -23,10 +14,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-      </head>
+    <html lang="en">
       <body>{children}</body>
     </html>
   );
