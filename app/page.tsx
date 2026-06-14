@@ -1,7 +1,3 @@
-import { EditorialHome } from "@/components/editorial-home";
-
 export default function Home() {
-  return (
-    <EditorialHome />
-  );
+  return <main aria-hidden="true" style={{ minHeight: "100svh", background: "#fff" }} />;
 }
