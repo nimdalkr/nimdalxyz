@@ -51,7 +51,7 @@ export function MagneticButton({
       className={cn(
         "group inline-flex min-h-12 items-center justify-center gap-2 rounded-md border px-5 py-3 text-sm font-black uppercase tracking-[0.12em] transition-colors duration-300",
         variant === "solid"
-          ? "border-[var(--acid)] bg-[var(--acid)] text-black shadow-[0_0_32px_rgba(199,241,91,0.22)] hover:bg-[var(--fg)]"
+          ? "solid-action border-[var(--acid)] bg-[var(--acid)] shadow-[0_0_32px_rgba(199,241,91,0.22)] hover:bg-[var(--fg)]"
           : "border-white/16 bg-white/[0.035] text-white hover:border-white/42 hover:bg-white/[0.07]",
         className
       )}
