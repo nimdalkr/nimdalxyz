@@ -3,9 +3,15 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Nimdal | 탁찬우",
+  title: "Nimdal | Signal Engine",
   description:
-    "Web3, AI 자동화, 커뮤니티, 초기 제품 GTM을 다루는 그로스 마케터 탁찬우의 홈페이지."
+    "A cinematic, strategy-first marketing portfolio for Web3 launches, Web2 growth systems, positioning, funnels, community, and performance creative.",
+  openGraph: {
+    title: "Nimdal | Signal Engine",
+    description:
+      "Growth marketer for launches, communities, funnels, and demand systems that need proof instead of noise.",
+    type: "website"
+  }
 };
 
 export default function RootLayout({

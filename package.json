@@ -1,26 +1,34 @@
 {
-  "name": "jinsoo-portfolio",
+  "name": "nimdal-signal-engine",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@mdx-js/loader": "^3.0.0",
     "@mdx-js/react": "^3.0.0",
     "@next/mdx": "^15.0.0",
+    "@react-three/fiber": "^9.0.0",
+    "clsx": "^2.1.1",
+    "gsap": "^3.12.5",
+    "lucide-react": "^0.468.0",
     "motion": "^12.40.0",
     "next": "^15.0.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "tailwind-merge": "^2.5.5",
+    "three": "^0.170.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.0.0",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "@types/three": "^0.170.0",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.0.0"
   }
