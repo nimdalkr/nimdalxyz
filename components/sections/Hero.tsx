@@ -3,7 +3,6 @@
 import { Activity, ArrowDown, Radar, Sparkles } from "lucide-react";
 import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
 import { usePortfolioData } from "@/components/LocaleProvider";
-import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import { MagneticButton } from "@/components/ui/MagneticButton";
 import { Reveal } from "@/components/ui/Reveal";
 import { easing } from "@/lib/motion";
@@ -43,7 +42,6 @@ export function Hero() {
                 </a>
               ))}
             </div>
-            <LanguageSwitcher />
           </div>
         </nav>
       </header>
@@ -150,9 +148,11 @@ export function Hero() {
                   background:
                     index % 11 === 0 || index % 17 === 0
                       ? "var(--acid)"
-                      : index % 7 === 0
-                        ? "rgba(141, 248, 255, 0.5)"
-                        : "rgba(255,255,255,0.05)"
+                      : index % 13 === 0
+                        ? "var(--coral)"
+                        : index % 7 === 0
+                          ? "rgba(85, 214, 194, 0.55)"
+                          : "rgba(255,255,255,0.05)"
                 }}
               />
             ))}

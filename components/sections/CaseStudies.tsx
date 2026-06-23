@@ -90,7 +90,7 @@ function CaseStudyCard({
   return (
     <article
       id={item.slug}
-      className="case-card glass-panel group overflow-hidden p-5 transition duration-300 hover:border-[var(--acid)]/50 hover:shadow-[0_0_46px_rgba(223,255,79,0.09)] md:p-7"
+      className="case-card glass-panel group overflow-hidden p-5 transition duration-300 hover:border-[var(--cyan)]/50 hover:shadow-[0_0_46px_rgba(85,214,194,0.12)] md:p-7"
     >
       <div className="flex h-full min-h-[620px] flex-col justify-between gap-10">
         <div>

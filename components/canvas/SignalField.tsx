@@ -41,9 +41,9 @@ function SignalParticles() {
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
       </bufferGeometry>
       <pointsMaterial
-        color="#dfff4f"
+        color="#55d6c2"
         depthWrite={false}
-        opacity={0.56}
+        opacity={0.5}
         size={0.012}
         sizeAttenuation
         transparent
