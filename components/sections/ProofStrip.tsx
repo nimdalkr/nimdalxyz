@@ -8,7 +8,11 @@ export function ProofStrip() {
   const { proofMetrics, sections } = usePortfolioData();
 
   return (
-    <section id="proof" className="border-b border-white/10 py-20 md:py-28" aria-labelledby="proof-title">
+    <section
+      id="proof"
+      className="deep-section relative border-b border-white/10 py-20 md:py-28"
+      aria-labelledby="proof-title"
+    >
       <div className="section-shell">
         <Reveal>
           <div className="grid gap-6 lg:grid-cols-[0.82fr_1fr] lg:items-end">
@@ -27,7 +31,7 @@ export function ProofStrip() {
         <div className="mt-12 grid border-l border-t border-white/12 sm:grid-cols-2 lg:grid-cols-4">
           {proofMetrics.map((metric) => (
             <Reveal key={metric.label}>
-              <article className="min-h-[230px] border-b border-r border-white/12 bg-white/[0.025] p-5 transition-colors duration-300 hover:bg-white/[0.045]">
+              <article className="proof-cell min-h-[230px] border-b border-r border-white/12 bg-white/[0.025] p-5 transition duration-300 hover:bg-white/[0.045]">
                 <MetricTicker metric={metric} />
               </article>
             </Reveal>

@@ -19,7 +19,7 @@ export function OperatingSystem() {
     <section
       id="system"
       ref={sectionRef}
-      className="relative overflow-hidden border-b border-white/10 py-20 md:py-28"
+      className="deep-section relative overflow-hidden border-b border-white/10 py-20 md:py-28"
       aria-labelledby="system-title"
     >
       <motion.div
@@ -41,7 +41,7 @@ export function OperatingSystem() {
         <div className="mt-12 grid gap-4 md:grid-cols-2">
           {operatingSystem.map((step, index) => (
             <Reveal key={step.step} delay={index * 0.05}>
-              <article className="glass-panel min-h-[270px] p-6 md:p-7">
+              <article className="system-node glass-panel min-h-[270px] p-6 md:p-7">
                 <div className="flex items-start justify-between gap-4">
                   <span className="font-[var(--font-mono)] text-sm font-black text-[var(--acid)]">
                     {step.step}

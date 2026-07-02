@@ -14,6 +14,11 @@ export type CaseStudy = {
   client: string;
   category: string;
   href?: string;
+  media: {
+    src: string;
+    alt: string;
+    cue: string;
+  };
   title: string;
   oneLiner: string;
   context: string;
@@ -121,7 +126,7 @@ export const languageOptions: readonly {
 ];
 
 const sharedContact = {
-  email: "hello@nimdal.xyz",
+  email: "0xnimdal@gmail.com",
   scheduleUrl: "https://cal.com/replace-with-real-booking-link/audit"
 };
 
@@ -131,9 +136,14 @@ const workCaseStudies: readonly CaseStudy[] = [
     client: "ethosalpha",
     category: "Web3 analytics",
     href: "https://github.com/nimdalkr/ethoskaito",
+    media: {
+      src: "/media/projects/ethosalpha.png",
+      alt: "ethosalpha project visual.",
+      cue: "Web3 analytics"
+    },
     title: "Ethos social signal dashboard.",
     oneLiner: "An analytics dashboard for reading Web3 trust, reputation, and social response signals in one place.",
-    context: "Kept from the previous Work tab and reframed as a focused research surface for Web3 social and reputation data.",
+    context: "Kept from the previous personal projects area and reframed as a focused research surface for Web3 social and reputation data.",
     strategy: [
       "Combine Ethos data with social metrics for faster Web3 project analysis.",
       "Make project trust and community response easier to compare at a glance.",
@@ -146,6 +156,11 @@ const workCaseStudies: readonly CaseStudy[] = [
     client: "HyperAlphaDuo",
     category: "Trading research",
     href: "https://hyperalphaduo.vercel.app/",
+    media: {
+      src: "/media/projects/hyperalphaduo.png",
+      alt: "HyperAlphaDuo project visual.",
+      cue: "Trading research"
+    },
     title: "Hyperliquid market position search.",
     oneLiner: "A research tool for Hyperliquid positions, tokenized equities, and arbitrage signals across Korean exchanges.",
     context: "Built to compare fragmented price, listing, deposit, and withdrawal data across on-chain and exchange markets.",
@@ -161,6 +176,11 @@ const workCaseStudies: readonly CaseStudy[] = [
     client: "KOL Listing",
     category: "Crypto research",
     href: "https://kollisting.vercel.app/",
+    media: {
+      src: "/media/projects/kol-listing.png",
+      alt: "KOL Listing project visual.",
+      cue: "Crypto research"
+    },
     title: "KOL activity to KRW listing research.",
     oneLiner: "A crypto research tool that studies how KOL ads and AMA activity may affect KRW exchange listings.",
     context: "Built to connect public KOL campaigns with listing expectations, market attention, and project selection patterns.",
@@ -174,6 +194,11 @@ const workCaseStudies: readonly CaseStudy[] = [
     slug: "tg-finance-search-portal",
     client: "TG Finance Search Portal",
     category: "In progress",
+    media: {
+      src: "/media/projects/tg-finance-search-portal.png",
+      alt: "TG Finance Search Portal project visual.",
+      cue: "Search portal"
+    },
     title: "Telegram finance content portal.",
     oneLiner: "A portal for searching, organizing, and revisiting finance-sector content from Telegram.",
     context: "Currently in progress, with the goal of turning scattered Telegram finance posts into a searchable research surface.",
@@ -184,6 +209,11 @@ const workCaseStudies: readonly CaseStudy[] = [
     slug: "social-poster-one",
     client: "Social Poster-One",
     category: "Automation",
+    media: {
+      src: "/media/projects/social-poster-one.png",
+      alt: "Social Poster-One project visual.",
+      cue: "Automation"
+    },
     title: "SNS posting automation pipeline.",
     oneLiner: "An API-driven posting automation tool for distributing Telegram content to LinkedIn, Threads, and X.",
     context: "Built to reduce repetitive cross-channel posting and manage content distribution as an API-based workflow.",
@@ -195,6 +225,11 @@ const workCaseStudies: readonly CaseStudy[] = [
     client: "myLoL",
     category: "Game",
     href: "https://cafe.naver.com/xavishowtime",
+    media: {
+      src: "/media/projects/mylol.png",
+      alt: "myLoL project visual.",
+      cue: "Simulation game"
+    },
     title: "LCK team management simulation.",
     oneLiner: "A Football Manager-style LCK team management simulation game using real player data.",
     context: "Built for PC and Android as a sports management experience grounded in real LCK player data.",
@@ -205,6 +240,11 @@ const workCaseStudies: readonly CaseStudy[] = [
     slug: "maple-union",
     client: "maple uNion",
     category: "Game jam",
+    media: {
+      src: "/media/projects/maple-union.png",
+      alt: "maple uNion project visual.",
+      cue: "Game jam"
+    },
     title: "MapleStoryUniverse AFK game.",
     oneLiner: "An AFK game built with MapleStory resources and submitted to MapleStoryUniverse VibeCamp.",
     context: "Created a compact AFK game loop with MapleStoryUniverse resources inside a short production window.",
@@ -215,6 +255,11 @@ const workCaseStudies: readonly CaseStudy[] = [
     slug: "discord-bulk-leave",
     client: "Discord Bulk Leave Tool",
     category: "Utility",
+    media: {
+      src: "/media/projects/discord-bulk-leave.png",
+      alt: "Discord Bulk Leave Tool project visual.",
+      cue: "Utility"
+    },
     title: "Discord server bulk leave tool.",
     oneLiner: "A utility for selecting multiple Discord servers and leaving them in bulk through the official API.",
     context: "Built as a personal productivity tool to reduce the repetitive work of reviewing and leaving servers one by one.",
@@ -228,157 +273,142 @@ const workCaseStudies: readonly CaseStudy[] = [
 const en = {
   profile: {
     name: "Nimdal",
-    role: "Growth Marketer / Web3 & Web2 Strategist",
+    role: "Personal portfolio / Builder & strategist",
     location: "Seoul / Remote",
     email: sharedContact.email,
-    headline: "I turn scattered attention into compounding demand.",
-    headlineParts: ["I turn", "scattered attention", "into", "compounding demand."],
+    headline: "Nimdal portfolio and project archive.",
+    headlineParts: ["Nimdal", "portfolio and", "project archive."],
     subheadline:
-      "A cinematic marketing portfolio for launches, communities, funnels, and growth systems that need proof instead of noise.",
+      "A personal portfolio for Nimdal's identity, research tools, automation systems, and game-like experiments.",
     availability:
-      "Open for selective growth audits, launch strategy, and Web3 go-to-market systems.",
-    primaryCta: "View selected work",
-    secondaryCta: "Request sharp audit"
+      "Currently building research tools, automation systems, and playful product experiments from Seoul.",
+    primaryCta: "View work",
+    secondaryCta: "Contact"
   },
   ui: {
     languageLabel: "Language",
-    availabilityLabel: "Availability",
-    proofCue: "Proof-backed demand systems",
-    signalScanLabel: "Signal scan",
-    signalWords: ["Positioning", "Launch", "Community", "Funnel", "Creative"],
-    caseStudyCta: "Discuss this style of work",
-    offerScopeLabel: "Operating scope",
+    availabilityLabel: "Status",
+    proofCue: "Open work",
+    signalScanLabel: "Profile guide",
+    signalWords: ["Builder", "Research", "Automation", "Games", "Contact"],
+    caseStudyCta: "Open project",
+    offerScopeLabel: "Project areas",
     quoteOpen: "\"",
     quoteClose: "\"",
     emailAria: "Email Nimdal",
-    scheduleAria: "Book a growth audit",
-    footerProduct: "Signal Engine"
+    scheduleAria: "Book a conversation",
+    footerProduct: "Nimdal Portfolio"
   },
   nav: [
     { label: "Proof", href: "#proof" },
-    { label: "Work", href: "#work" },
+    { label: "Projects", href: "#work" },
     { label: "System", href: "#system" },
     { label: "Contact", href: "#contact" }
   ],
   sections: {
     proof: {
-      eyebrow: "Reasons to believe",
-      heading: "Animation is decoration. These are the reasons to believe.",
-      note: "Placeholder proof. Replace every metric with verified source data before publishing."
+      eyebrow: "Overview",
+      heading: "A portfolio for identity, projects, and contact.",
+      note: "Identity, projects, and contact points are arranged as a focused personal homepage."
     },
     work: {
-      eyebrow: "Selected projects",
-      heading: "Projects I built, tested, and operated."
+      eyebrow: "Projects",
+      heading: "Personal projects and experiments."
     },
     system: {
-      eyebrow: "Marketing operating system",
-      heading: "Pretty pages do not build demand. Systems do.",
-      marquee: "Market movement / Signal engine / Demand loops / Proof stack"
+      eyebrow: "Nimdal",
+      heading: "A personal homepage for work, identity, and context.",
+      marquee: "Profile / Projects / Identity / Contact"
     },
     offer: {
-      eyebrow: "Narrow offer",
-      heading: "Less campaign theater. More market movement.",
+      eyebrow: "What I build",
+      heading: "Small systems with sharp edges and real utility.",
       body:
-        "The offer is intentionally narrow: diagnose the market, sharpen the promise, build the acquisition system, and measure what should survive.",
-      cta: "Request sharp audit"
+        "Most of my work lives at the edge of research, automation, Web3 market structure, and playable interfaces. The common thread is simple: turn messy information into something usable.",
+      cta: "Start a project"
     },
     testimonials: {
-      eyebrow: "Placeholder testimonials",
-      heading: "Replace applause with real receipts."
+      eyebrow: "Field notes",
+      heading: "A few rules behind the interface."
     },
     contact: {
       eyebrow: "Contact",
-      heading: "Build the signal.",
+      heading: "Contact Nimdal.",
       body:
-        "Send a brief with the product, market, current traction, bottleneck, and what will count as a win. Vague make-it-viral requests deserve vague results.",
+        "Send the product, market, bottleneck, and what you want to build. I will reply when the context is clear.",
       primaryCta: "Email Nimdal",
-      secondaryCta: "Book audit"
+      secondaryCta: "Book call"
     }
   },
-  // IMPORTANT: These proof metrics are placeholders. Replace them with verified CRM,
-  // analytics, ad account, or community data before publishing. Fake metrics destroy trust.
   proofMetrics: [
     {
-      label: "Attributed pipeline",
-      prefix: "$",
-      value: 12.8,
-      suffix: "M",
-      detail: "Placeholder: replace with verified pipeline attribution.",
-      placeholder: true
+      label: "Identity sources",
+      value: 2,
+      detail: "Real operator portrait plus the pixel-octopus NFT identity."
     },
     {
-      label: "Launch ROAS",
-      value: 4.7,
-      suffix: "x",
-      detail: "Placeholder: replace with source-of-truth ad data.",
-      placeholder: true
+      label: "Project artifacts",
+      value: 8,
+      detail: "A curated work archive spanning research tools, automation, and games."
     },
     {
-      label: "Community growth",
-      value: 180,
-      suffix: "K",
-      detail: "Placeholder: replace with verified audience growth.",
-      placeholder: true
+      label: "Live links",
+      value: 3,
+      detail: "Public URLs and reference surfaces attached to selected projects."
     },
     {
-      label: "CAC reduction",
-      value: 31,
-      suffix: "%",
-      detail: "Placeholder: replace with confirmed acquisition data.",
-      placeholder: true
+      label: "Motion layers",
+      value: 5,
+      detail: "Scroll, cursor, sonar, media scan, and background current interactions."
     }
   ],
-  // IMPORTANT: Case-study metrics are demonstration placeholders. Replace each number
-  // and supporting detail with verified project data before using this portfolio publicly.
   caseStudies: workCaseStudies,
   operatingSystem: [
     {
       step: "01",
-      title: "Extract the unfair truth",
+      title: "Decode the surface",
       body:
-        "Interview users, read sales calls, mine objections, and find the one belief the market must adopt before it buys."
+        "Start with the visible operator: what I build, what I study, and what kind of problems keep pulling me back."
     },
     {
       step: "02",
-      title: "Shape the narrative",
+      title: "Wake the avatar",
       body:
-        "Turn raw product capability into a position, promise, proof stack, and repeatable campaign language."
+        "Bring the pixel-octopus identity into the interface as a guide, signal marker, and recurring visual language."
     },
     {
       step: "03",
-      title: "Build demand loops",
+      title: "Map the current",
       body:
-        "Connect paid, organic, community, lifecycle, and referral mechanics so each channel improves the next one."
+        "Treat every project as a current: a moving path through markets, communities, automation, and game systems."
     },
     {
       step: "04",
-      title: "Instrument the machine",
+      title: "Ship the artifact",
       body:
-        "Define leading indicators, attribution sanity checks, experiment cadence, and decision rules before scale."
+        "Give each project a clear signal: what it does, why it exists, and what kind of world it belongs to."
     }
   ],
   offers: [
-    "Launch narrative and GTM architecture",
-    "Landing page strategy and conversion critique",
-    "Web3 community growth and activation loops",
-    "Paid creative testing system",
-    "Lifecycle and retention messaging",
-    "Founder-led content engine"
+    "Web3 and crypto research tools",
+    "Market signal dashboards",
+    "Telegram and social automation pipelines",
+    "Interactive personal sites and portfolio systems",
+    "Game-like product experiments",
+    "Sharp product strategy for noisy markets"
   ],
-  // Replace these with real testimonials before launch. Names and titles are intentionally
-  // obvious placeholders so social proof is not mistaken for verified client evidence.
   testimonials: [
     {
       quote:
-        "The rare marketer who can make a launch feel inevitable while still caring about the spreadsheet.",
-      name: "Replace with real client",
-      title: "Founder, Web3 Infrastructure"
+        "An identity system is stronger when it becomes behavior, not decoration.",
+      name: "Rule 01",
+      title: "Motion should explain the world, not distract from it."
     },
     {
       quote:
-        "The positioning work cut through months of internal noise. We finally knew what to say and why it mattered.",
-      name: "Replace with real client",
-      title: "VP Growth, B2B SaaS"
+        "The best interface for complex work is one that makes the signal feel discoverable.",
+      name: "Rule 02",
+      title: "Interaction should make the archive feel alive."
     }
   ],
   contact: sharedContact

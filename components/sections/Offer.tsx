@@ -9,7 +9,7 @@ export function Offer() {
   const { offers, sections, ui } = usePortfolioData();
 
   return (
-    <section className="border-b border-white/10 py-20 md:py-28" aria-labelledby="offer-title">
+    <section className="deep-section relative border-b border-white/10 py-20 md:py-28" aria-labelledby="offer-title">
       <div className="section-shell grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
         <Reveal>
           <div className="eyebrow">{sections.offer.eyebrow}</div>

@@ -10,7 +10,7 @@ export function Contact() {
 
   return (
     <>
-      <section className="border-b border-white/10 py-20 md:py-28" aria-labelledby="testimonials-title">
+      <section className="deep-section relative border-b border-white/10 py-20 md:py-28" aria-labelledby="testimonials-title">
         <div className="section-shell">
           <Reveal>
             <div className="eyebrow">{sections.testimonials.eyebrow}</div>
@@ -40,7 +40,7 @@ export function Contact() {
         </div>
       </section>
 
-      <section id="contact" className="py-20 md:py-28" aria-labelledby="contact-title">
+      <section id="contact" className="deep-section relative py-20 md:py-28" aria-labelledby="contact-title">
         <div className="section-shell">
           <Reveal>
             <div className="grid gap-10 border-y border-white/12 py-12 lg:grid-cols-[0.95fr_1fr] lg:items-end">

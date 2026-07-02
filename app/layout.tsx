@@ -3,13 +3,13 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Nimdal | Signal Engine",
+  title: "Nimdal | Tak Chanwoo Portfolio",
   description:
-    "A cinematic, strategy-first marketing portfolio for Web3 launches, Web2 growth systems, positioning, funnels, community, and performance creative.",
+    "The personal portfolio of Tak Chanwoo, also known as Nimdal, covering Web3 research tools, automation systems, games, and growth work.",
   openGraph: {
-    title: "Nimdal | Signal Engine",
+    title: "Nimdal | Tak Chanwoo Portfolio",
     description:
-      "Growth marketer for launches, communities, funnels, and demand systems that need proof instead of noise.",
+      "An interactive personal portfolio for Web3 research tools, automation systems, games, and the Nimdal identity.",
     type: "website"
   }
 };
