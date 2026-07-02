@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://nimdal.xyz"),
   title: "Nimdal | Tak Chanwoo Portfolio",
   description:
     "The personal portfolio of Tak Chanwoo, also known as Nimdal, covering Web3 research tools, automation systems, games, and growth work.",

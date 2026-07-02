@@ -262,6 +262,7 @@ export default function CareerPortfolioPage() {
           <a href="#process">Process</a>
           <a href="#contact">Contact</a>
           <Link href="/">Interactive Home</Link>
+          <Link href="/blog">Logbook</Link>
           <SavePortfolioPdfButton />
         </nav>
       </header>
