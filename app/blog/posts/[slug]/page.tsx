@@ -103,7 +103,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         <article className="blog-article">
           <header className="blog-article-header">
             <Link href="/blog" className="blog-back-link">
-              Logbook
+              nimdalog
             </Link>
             <p className="blog-kicker">{post.category}</p>
             <h1>{post.title}</h1>

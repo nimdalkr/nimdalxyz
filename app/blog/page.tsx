@@ -21,7 +21,7 @@ export const metadata: Metadata = {
         url: absoluteBlogUrl("/media/identity-octopus.jpg"),
         width: 1200,
         height: 630,
-        alt: "Nimdal Logbook"
+        alt: "nimdalog"
       }
     ]
   },

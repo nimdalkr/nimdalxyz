@@ -29,13 +29,13 @@ export async function generateMetadata({ params }: BlogTagPageProps): Promise<Me
 
   return {
     title: `${label} Notes | ${siteConfig.blogName}`,
-    description: `Nimdal Logbook posts tagged ${label}.`,
+    description: `nimdalog posts tagged ${label}.`,
     alternates: {
       canonical: absoluteBlogUrl(`/tags/${tag}`)
     },
     openGraph: {
       title: `${label} Notes | ${siteConfig.blogName}`,
-      description: `Nimdal Logbook posts tagged ${label}.`,
+      description: `nimdalog posts tagged ${label}.`,
       url: absoluteBlogUrl(`/tags/${tag}`),
       siteName: siteConfig.blogName,
       type: "website"

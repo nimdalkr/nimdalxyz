@@ -474,7 +474,7 @@ export function NimdalPortfolioExperience() {
           >
             Projects
           </button>
-          <a href="/blog">Logbook</a>
+          <a href="/blog">nimdalog</a>
           <a href="/portfolio">Portfolio</a>
           <button className={scene === "identity" ? "is-active" : ""} onClick={() => showScene("identity")}>
             Identity

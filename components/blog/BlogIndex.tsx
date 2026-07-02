@@ -14,11 +14,10 @@ type BlogIndexProps = {
 export function BlogHeader() {
   return (
     <header className="blog-header">
-      <Link className="blog-brand" href="/blog" aria-label="Open Nimdal Logbook">
+      <Link className="blog-brand" href="/blog" aria-label="Open nimdalog">
         <Image src="/media/identity-octopus.jpg" alt="" width={42} height={42} className="blog-brand-mark" />
         <span>
-          <strong>Nimdal</strong>
-          <small>Logbook</small>
+          <strong>nimdalog</strong>
         </span>
       </Link>
       <nav className="blog-nav" aria-label="Blog navigation">
@@ -92,7 +91,7 @@ export function BlogIndex({ posts, tags, activeTag }: BlogIndexProps) {
         ) : (
           <section className="blog-empty" aria-label="No posts">
             <h2>No notes yet.</h2>
-            <p>The logbook is ready, but this tag does not have any published posts yet.</p>
+            <p>nimdalog is ready, but this tag does not have any published posts yet.</p>
           </section>
         )}
 
