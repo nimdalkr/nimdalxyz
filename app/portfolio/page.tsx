@@ -326,8 +326,8 @@ export default function CareerPortfolioPage() {
             <p className="career-kicker">Operating Range</p>
             <h2 id="capability-title">From brief to campaign system.</h2>
             <p>
-              Based on the PMG Korea AE portfolio deck, the work is organized around planning, execution, and reporting
-              around campaign goals, execution ownership, KPIs, and outcomes rather than company-by-company chronology.
+              Career work is organized around planning, execution, and reporting systems: campaign goals, execution
+              ownership, KPIs, outcomes, and the operating structure needed to move each project forward.
             </p>
           </div>
           <div className="career-capability-grid">
