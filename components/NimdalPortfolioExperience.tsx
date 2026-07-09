@@ -221,6 +221,7 @@ export function NimdalPortfolioExperience() {
   const [divingProject, setDivingProject] = useState<CaseStudy | null>(null);
   const diveTimerRef = useRef<number | null>(null);
   const pointerFrameRef = useRef<number | null>(null);
+  const hydratedProjectRef = useRef(false);
 
   const activeRoute = currentRoutes.find((route) => route.id === activeRouteId) ?? currentRoutes[0];
   const activeCases = useMemo(
@@ -254,6 +255,7 @@ export function NimdalPortfolioExperience() {
   const divingProjectVisual = divingProject
     ? projectVisuals[divingProject.slug] ?? divingProject.media.src
     : "/media/identity-octopus.jpg";
+  const particleCount = shouldReduceMotion ? 0 : 56;
   const roomPanels = useMemo<RoomPanel[]>(() => {
     if (!selectedProject) return [];
 
@@ -338,9 +340,32 @@ export function NimdalPortfolioExperience() {
     });
   }, [shouldReduceMotion]);
 
-  const showScene = useCallback((nextScene: Scene) => {
-    setScene(nextScene);
+  const clearProjectUrl = useCallback(() => {
+    if (typeof window === "undefined") return;
+
+    const url = new URL(window.location.href);
+    if (!url.searchParams.has("project")) return;
+
+    url.searchParams.delete("project");
+    window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
   }, []);
+
+  const syncProjectUrl = useCallback((project: CaseStudy) => {
+    if (typeof window === "undefined") return;
+
+    const url = new URL(window.location.href);
+    url.searchParams.set("project", project.slug);
+    url.hash = "";
+    window.history.replaceState(null, "", `${url.pathname}${url.search}`);
+  }, []);
+
+  const showScene = useCallback((nextScene: Scene) => {
+    if (nextScene !== "project") {
+      clearProjectUrl();
+    }
+
+    setScene(nextScene);
+  }, [clearProjectUrl]);
 
   const focusProject = useCallback(
     (project: CaseStudy) => {
@@ -362,6 +387,7 @@ export function NimdalPortfolioExperience() {
     (project = activeCase) => {
       if (!project) return;
       focusProject(project);
+      syncProjectUrl(project);
 
       if (shouldReduceMotion) {
         setDivingProject(null);
@@ -379,8 +405,25 @@ export function NimdalPortfolioExperience() {
         window.setTimeout(() => setDivingProject(null), 260);
       }, 360);
     },
-    [activeCase, focusProject, shouldReduceMotion]
+    [activeCase, focusProject, shouldReduceMotion, syncProjectUrl]
   );
+
+  useEffect(() => {
+    if (hydratedProjectRef.current || !allCases.length || typeof window === "undefined") return;
+
+    const params = new URLSearchParams(window.location.search);
+    const projectSlug = params.get("project") ?? window.location.hash.replace(/^#project-/, "");
+    hydratedProjectRef.current = true;
+
+    if (!projectSlug) return;
+
+    const project = allCases.find((item) => item.slug === projectSlug);
+    if (!project) return;
+
+    focusProject(project);
+    setDivingProject(null);
+    setScene("project");
+  }, [allCases, focusProject]);
 
   const moveCase = useCallback(
     (direction: 1 | -1) => {
@@ -403,9 +446,10 @@ export function NimdalPortfolioExperience() {
       const nextProject = allCases[(currentIndex + direction + allCases.length) % allCases.length];
 
       focusProject(nextProject);
+      syncProjectUrl(nextProject);
       setRoomPanelIndex(0);
     },
-    [allCases, focusProject, selectedProject?.slug]
+    [allCases, focusProject, selectedProject?.slug, syncProjectUrl]
   );
 
   const moveRoomPanel = useCallback(
@@ -486,7 +530,7 @@ export function NimdalPortfolioExperience() {
       </a>
       <div className="zero-depth-map" aria-hidden />
       <div className="zero-waterfield" aria-hidden>
-        {Array.from({ length: 120 }).map((_, index) => (
+        {Array.from({ length: particleCount }).map((_, index) => (
           <span
             key={index}
             className="zero-particle"
@@ -505,7 +549,7 @@ export function NimdalPortfolioExperience() {
 
       <header className="zero-header">
         <button className="zero-mark" onClick={() => showScene("gate")} aria-label="Return to entry">
-          <Image src="/media/identity-octopus.jpg" alt="" width={46} height={46} priority className="zero-pixel" />
+          <Image src="/media/identity-octopus.jpg" alt="" width={46} height={46} className="zero-pixel" />
           <span>
             <strong>NIMDAL</strong>
             <small>TAK CHANWOO</small>
@@ -531,7 +575,7 @@ export function NimdalPortfolioExperience() {
 
       <aside className="zero-hud zero-hud-left" aria-hidden>
         <div className="zero-radar">
-          <Image src="/media/identity-octopus.jpg" alt="" width={54} height={54} priority className="zero-pixel" />
+          <Image src="/media/identity-octopus.jpg" alt="" width={54} height={54} className="zero-pixel" />
         </div>
         <p>NIMDAL</p>
         <span>TAK CHANWOO</span>
@@ -612,7 +656,6 @@ export function NimdalPortfolioExperience() {
                     src="/media/identity-octopus.jpg"
                     alt="Nimdal pixel octopus NFT identity."
                     fill
-                    priority
                     sizes="170px"
                     className="zero-pixel"
                   />

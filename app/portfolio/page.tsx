@@ -331,18 +331,22 @@ export default function CareerPortfolioPage() {
           <article>
             <span>100+</span>
             <p>client operations handled through agency work</p>
+            <small>Portfolio dossier</small>
           </article>
           <article>
             <span>6+ yrs</span>
             <p>campaign operations across partners and deliverables</p>
+            <small>Career record</small>
           </article>
           <article>
             <span>2,000%</span>
             <p>ad-spend-to-sales level reached in the Swiss J case</p>
+            <small>Case metric</small>
           </article>
           <article>
             <span>KR GTM</span>
             <p>Korean execution structure for global/Web3 clients</p>
+            <small>Role evidence</small>
           </article>
         </section>
 

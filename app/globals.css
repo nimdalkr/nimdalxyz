@@ -2302,6 +2302,22 @@ a:focus-visible {
   line-height: 1.55;
 }
 
+.career-summary small {
+  display: inline-flex;
+  width: fit-content;
+  margin-top: 16px;
+  border: 1px solid rgba(169, 246, 109, 0.34);
+  background: rgba(169, 246, 109, 0.1);
+  padding: 7px 9px;
+  color: var(--acid);
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
 .career-section {
   padding: 106px 0 0;
   scroll-margin-top: 112px;
@@ -3286,19 +3302,43 @@ a:focus-visible {
 
   .zero-project-detail {
     align-self: start;
-    gap: 8px;
-    padding-top: 90px;
+    gap: 14px;
+    padding-top: 74px;
   }
 
   .zero-detail-visual {
-    display: none;
+    display: block;
+    margin-top: 18px;
+    min-height: 224px;
+    order: -1;
   }
 
   .zero-detail-frame {
     inset: 0;
+    clip-path: polygon(7% 0, 100% 0, 100% 84%, 88% 100%, 0 100%, 0 10%);
   }
 
   .zero-detail-caption {
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    padding: 9px 10px;
+    backdrop-filter: blur(10px);
+  }
+
+  .zero-detail-caption span {
+    display: none;
+  }
+
+  .zero-detail-caption strong {
+    font-size: 0.8rem;
+  }
+
+  .zero-detail-image {
+    object-position: center;
+  }
+
+  .zero-proof-lens {
     display: none;
   }
 
@@ -3328,7 +3368,16 @@ a:focus-visible {
   }
 
   .zero-detail-back {
-    display: none;
+    display: inline-flex;
+    position: fixed;
+    left: 18px;
+    top: 74px;
+    z-index: 55;
+    background: rgba(4, 24, 45, 0.78);
+    min-height: 42px;
+    padding: 0 14px;
+    font-size: 0.56rem;
+    backdrop-filter: blur(14px);
   }
 
   .zero-detail-heading h2 {
@@ -3363,7 +3412,16 @@ a:focus-visible {
   }
 
   .zero-project-detail .zero-detail-actions {
-    display: none;
+    position: static;
+    left: auto;
+    z-index: 40;
+    display: flex;
+    width: 100%;
+    margin-top: 10px;
+    border: 1px solid rgba(239, 250, 255, 0.16);
+    background: rgba(4, 24, 45, 0.74);
+    padding: 8px;
+    backdrop-filter: blur(18px);
   }
 
   .zero-detail-actions button,
@@ -3391,7 +3449,8 @@ a:focus-visible {
   }
 
   .zero-room-panel h3 {
-    font-size: 1.42rem;
+    font-size: 1.14rem;
+    line-height: 1.04;
   }
 
   .zero-room-panel p,
@@ -3416,11 +3475,15 @@ a:focus-visible {
   }
 
   .zero-room-dots button {
-    width: 20px;
+    width: 44px;
+    height: 44px;
+    border: 1px solid rgba(239, 250, 255, 0.18);
+    background: rgba(239, 250, 255, 0.1);
   }
 
   .zero-room-dots button.is-active {
-    width: 34px;
+    width: 44px;
+    background: var(--route-tone);
   }
 
   .zero-evidence-tray {
@@ -3568,6 +3631,23 @@ a:focus-visible {
 
   .zero-room-panel p {
     -webkit-line-clamp: 1;
+  }
+}
+
+@media (max-width: 620px), (pointer: coarse) {
+  .zero-waterfield {
+    display: none;
+  }
+
+  .zero-shell::before {
+    animation: none;
+  }
+
+  .zero-detail-caption,
+  .zero-proof-lens,
+  .zero-project-detail .zero-detail-actions,
+  .zero-detail-back {
+    backdrop-filter: none;
   }
 }
 
