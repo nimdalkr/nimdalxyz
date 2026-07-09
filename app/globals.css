@@ -74,7 +74,8 @@ a:focus-visible {
   --current-y: 50%;
   position: fixed;
   inset: 0;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   color: var(--fg);
   background:
     linear-gradient(180deg, rgba(126, 223, 255, 0.28) 0%, transparent 22%),
@@ -181,7 +182,7 @@ a:focus-visible {
 }
 
 .zero-header {
-  position: fixed;
+  position: absolute;
   left: 48px;
   right: 48px;
   top: 36px;
@@ -190,6 +191,7 @@ a:focus-visible {
   align-items: center;
   justify-content: space-between;
   gap: 18px;
+  transition: opacity 180ms var(--ease-out), transform 180ms var(--ease-out);
 }
 
 .zero-mark {
@@ -236,7 +238,7 @@ a:focus-visible {
 .zero-nav button,
 .zero-nav a {
   border: 0;
-  background: rgba(3, 16, 31, 0.1);
+  background: rgba(3, 16, 31, 0.28);
   color: rgba(239, 250, 255, 0.88);
   display: inline-flex;
   min-height: 44px;
@@ -248,6 +250,7 @@ a:focus-visible {
   letter-spacing: 0;
   padding: 0 8px;
   text-transform: uppercase;
+  backdrop-filter: blur(14px);
   transition: color 180ms var(--ease-out), background 180ms var(--ease-out), transform 180ms var(--ease-out);
 }
 
@@ -808,9 +811,10 @@ a:focus-visible {
 
 .zero-project-detail {
   display: grid;
-  grid-template-columns: minmax(360px, 0.86fr) minmax(420px, 1.14fr);
-  gap: clamp(28px, 5vw, 78px);
-  align-items: center;
+  grid-template-columns: minmax(420px, 5fr) minmax(520px, 7fr);
+  gap: clamp(26px, 3.8vw, 56px);
+  align-items: start;
+  padding-top: 18px;
 }
 
 .zero-detail-copy {
@@ -818,7 +822,7 @@ a:focus-visible {
   z-index: 2;
   display: grid;
   gap: 20px;
-  max-width: 670px;
+  max-width: none;
 }
 
 .zero-detail-back {
@@ -829,7 +833,7 @@ a:focus-visible {
 
 .zero-detail-heading h2 {
   max-width: 780px;
-  font-size: clamp(3.4rem, 4.8vw, 5.4rem);
+  font-size: clamp(3.2rem, 4.45vw, 5.25rem);
   line-height: 0.82;
 }
 
@@ -876,6 +880,16 @@ a:focus-visible {
     radial-gradient(circle at 12% 18%, color-mix(in srgb, var(--route-tone) 16%, transparent), transparent 46%),
     rgba(3, 16, 31, 0.24);
   padding: 14px;
+}
+
+.zero-case-room,
+.zero-scan-console,
+.zero-evidence-dock,
+.zero-room-interface,
+.zero-proof-reel,
+.zero-evidence-tray,
+.zero-proof-media {
+  scroll-margin-top: 128px;
 }
 
 .zero-case-room span,
@@ -1021,7 +1035,7 @@ a:focus-visible {
 .zero-scan-stage span,
 .zero-scan-stage strong {
   font-family: var(--font-mono);
-  font-size: 0.66rem;
+  font-size: 0.72rem;
   font-weight: 950;
   letter-spacing: 0;
   text-transform: uppercase;
@@ -1076,6 +1090,7 @@ a:focus-visible {
 .zero-scan-nodes button {
   display: grid;
   min-width: 0;
+  min-height: 58px;
   gap: 4px;
   border: 1px solid rgba(239, 250, 255, 0.22);
   background: rgba(239, 250, 255, 0.075);
@@ -1308,20 +1323,35 @@ a:focus-visible {
 }
 
 .zero-room-dots button {
-  width: 28px;
-  height: 5px;
+  position: relative;
+  width: 32px;
+  height: 24px;
   border: 0;
-  background: rgba(239, 250, 255, 0.28);
+  background: transparent;
   padding: 0;
   transition: width 180ms var(--ease-out), background 180ms var(--ease-out);
 }
 
+.zero-room-dots button::before {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 5px;
+  content: "";
+  background: rgba(239, 250, 255, 0.32);
+  transform: translateY(-50%);
+}
+
 .zero-room-dots button.is-active {
   width: 48px;
+}
+
+.zero-room-dots button.is-active::before {
   background: var(--route-tone);
 }
 
-.zero-room-dots button.is-scanned {
+.zero-room-dots button.is-scanned::before {
   background: color-mix(in srgb, var(--route-tone) 70%, rgba(239, 250, 255, 0.28));
 }
 
@@ -1469,17 +1499,29 @@ a:focus-visible {
 }
 
 .zero-proof-reel-controls div button {
-  width: 10px;
-  height: 10px;
+  position: relative;
+  width: 24px;
+  height: 24px;
   border: 1px solid rgba(239, 250, 255, 0.32);
-  background: rgba(239, 250, 255, 0.08);
+  background: rgba(239, 250, 255, 0.04);
   padding: 0;
+}
+
+.zero-proof-reel-controls div button::before {
+  position: absolute;
+  inset: 7px;
+  content: "";
+  background: rgba(239, 250, 255, 0.16);
 }
 
 .zero-proof-reel-controls div button.is-active {
   border-color: var(--acid);
-  background: var(--acid);
+  background: rgba(216, 255, 86, 0.1);
   box-shadow: 0 0 18px rgba(216, 255, 86, 0.38);
+}
+
+.zero-proof-reel-controls div button.is-active::before {
+  background: var(--acid);
 }
 
 .zero-evidence-tray {
@@ -1505,7 +1547,7 @@ a:focus-visible {
 .zero-evidence-grid span {
   color: var(--acid);
   font-family: var(--font-mono);
-  font-size: 0.58rem;
+  font-size: 0.66rem;
   font-weight: 950;
   text-transform: uppercase;
 }
@@ -1527,7 +1569,7 @@ a:focus-visible {
 .zero-evidence-grid div,
 .zero-related-logs a {
   border: 1px solid rgba(239, 250, 255, 0.14);
-  background: rgba(239, 250, 255, 0.06);
+  background: rgba(239, 250, 255, 0.072);
   color: var(--fg);
   padding: 10px;
 }
@@ -1555,9 +1597,9 @@ a:focus-visible {
 
 .zero-evidence-grid p {
   margin: 7px 0 0;
-  color: var(--muted);
-  font-size: 0.78rem;
-  line-height: 1.45;
+  color: rgba(239, 250, 255, 0.78);
+  font-size: 0.84rem;
+  line-height: 1.5;
 }
 
 .zero-related-logs {
@@ -1715,12 +1757,14 @@ a:focus-visible {
 
 .zero-detail-visual {
   position: relative;
-  min-height: 610px;
+  position: sticky;
+  top: 126px;
+  min-height: min(640px, calc(100svh - 164px));
 }
 
 .zero-detail-frame {
   position: absolute;
-  inset: 3% 0 7% 4%;
+  inset: 0;
   overflow: hidden;
   border: 2px solid rgba(239, 250, 255, 0.72);
   background:
@@ -1926,6 +1970,32 @@ a:focus-visible {
     0 26px 70px rgba(0, 0, 0, 0.44),
     0 0 42px color-mix(in srgb, var(--route-tone) 22%, transparent);
   backdrop-filter: blur(16px);
+}
+
+.zero-evidence-dock,
+.zero-evidence-dock.is-build,
+.zero-evidence-dock.is-proof,
+.zero-evidence-dock.is-next {
+  position: relative;
+  left: auto;
+  right: auto;
+  top: auto;
+  bottom: auto;
+  width: 100%;
+  max-width: none;
+  border-color: color-mix(in srgb, var(--route-tone) 62%, rgba(239, 250, 255, 0.38));
+  background:
+    linear-gradient(135deg, rgba(3, 16, 31, 0.96), rgba(3, 16, 31, 0.78)),
+    color-mix(in srgb, var(--route-tone) 18%, transparent);
+}
+
+.zero-evidence-dock figure {
+  grid-template-columns: minmax(160px, 0.8fr) minmax(0, 1fr);
+  align-items: end;
+}
+
+.zero-evidence-dock figure div {
+  min-height: 150px;
 }
 
 .zero-evidence-drawer.is-build {
@@ -3577,6 +3647,8 @@ a:focus-visible {
   }
 
   .zero-detail-visual {
+    position: relative;
+    top: auto;
     min-height: 540px;
   }
 
@@ -3675,6 +3747,20 @@ a:focus-visible {
     width: min(360px, calc(100% - 28px));
     max-height: calc(100% - 28px);
     overflow: auto;
+  }
+
+  .zero-evidence-dock,
+  .zero-evidence-dock.is-build,
+  .zero-evidence-dock.is-proof,
+  .zero-evidence-dock.is-next {
+    position: relative;
+    left: auto;
+    right: auto;
+    top: auto;
+    bottom: auto;
+    width: 100%;
+    max-height: none;
+    overflow: visible;
   }
 
   .zero-portrait-porthole,
@@ -3930,7 +4016,7 @@ a:focus-visible {
   }
 
   .zero-detail-visual.has-evidence-drawer {
-    min-height: 340px;
+    min-height: 196px;
   }
 
   .zero-detail-frame {
@@ -4035,6 +4121,22 @@ a:focus-visible {
     width: calc(100% - 20px);
     gap: 7px;
     padding: 12px;
+  }
+
+  .zero-evidence-dock,
+  .zero-evidence-dock.is-build,
+  .zero-evidence-dock.is-proof,
+  .zero-evidence-dock.is-next {
+    position: relative;
+    left: auto;
+    right: auto;
+    top: auto;
+    bottom: auto;
+    width: 100%;
+  }
+
+  .zero-evidence-dock figure {
+    grid-template-columns: 1fr;
   }
 
   .zero-evidence-drawer h3 {

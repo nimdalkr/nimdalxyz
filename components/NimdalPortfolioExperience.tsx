@@ -1098,6 +1098,64 @@ export function NimdalPortfolioExperience() {
                   </div>
                 </section>
 
+                <AnimatePresence>
+                  {drawerPanel ? (
+                    <motion.aside
+                      key={drawerPanel.id}
+                      className={`zero-evidence-drawer zero-evidence-dock is-${drawerPanel.id}`}
+                      role="dialog"
+                      aria-modal="false"
+                      aria-labelledby={`zero-evidence-drawer-${drawerPanel.id}`}
+                      initial={shouldReduceMotion ? false : { opacity: 0, y: 16, scale: 0.98 }}
+                      animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0, scale: 1 }}
+                      exit={shouldReduceMotion ? undefined : { opacity: 0, y: 10, scale: 0.98 }}
+                      transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
+                    >
+                      <button
+                        ref={evidenceCloseRef}
+                        type="button"
+                        className="zero-evidence-drawer-close"
+                        onClick={closeEvidenceDrawer}
+                        aria-label="Close evidence drawer"
+                      >
+                        <X size={15} aria-hidden />
+                      </button>
+                      <span>{drawerPanel.label} evidence</span>
+                      <h3 id={`zero-evidence-drawer-${drawerPanel.id}`}>{drawerPanel.title}</h3>
+                      <p>{drawerPanel.body}</p>
+                      <div className="zero-evidence-drawer-artifact">
+                        <span>{drawerEvidence?.type ?? drawerMedia?.kind ?? "room note"}</span>
+                        <strong>{drawerEvidence?.value ?? drawerEvidence?.label ?? drawerMedia?.label ?? "Project room state"}</strong>
+                        {drawerEvidence?.caveat ? (
+                          <p>{drawerEvidence.caveat}</p>
+                        ) : drawerMedia ? (
+                          <p>{drawerMedia.caption}</p>
+                        ) : null}
+                      </div>
+                      {drawerMedia ? (
+                        <figure>
+                          <div>
+                            <Image
+                              src={drawerMedia.src}
+                              alt={drawerMedia.alt}
+                              fill
+                              sizes="(max-width: 900px) 88vw, 320px"
+                              className="zero-evidence-drawer-image"
+                            />
+                          </div>
+                          <figcaption>{drawerMedia.label}</figcaption>
+                        </figure>
+                      ) : null}
+                      {drawerLink ? (
+                        <a href={drawerLink} target={drawerLink.startsWith("http") ? "_blank" : undefined} rel="noreferrer">
+                          {drawerLinkLabel}
+                          <ExternalLink size={14} aria-hidden />
+                        </a>
+                      ) : null}
+                    </motion.aside>
+                  ) : null}
+                </AnimatePresence>
+
                 <div
                   className={`zero-room-interface is-${selectedRoom?.transition ?? "reef"}`}
                   aria-label={`${selectedProject.client} project room panels`}
@@ -1389,63 +1447,6 @@ export function NimdalPortfolioExperience() {
                       );
                     })}
                   </div>
-                  <AnimatePresence>
-                    {drawerPanel ? (
-                      <motion.aside
-                        key={drawerPanel.id}
-                        className={`zero-evidence-drawer is-${drawerPanel.id}`}
-                        role="dialog"
-                        aria-modal="false"
-                        aria-labelledby={`zero-evidence-drawer-${drawerPanel.id}`}
-                        initial={shouldReduceMotion ? false : { opacity: 0, y: 18, scale: 0.98 }}
-                        animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0, scale: 1 }}
-                        exit={shouldReduceMotion ? undefined : { opacity: 0, y: 12, scale: 0.98 }}
-                        transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
-                      >
-                        <button
-                          ref={evidenceCloseRef}
-                          type="button"
-                          className="zero-evidence-drawer-close"
-                          onClick={closeEvidenceDrawer}
-                          aria-label="Close evidence drawer"
-                        >
-                          <X size={15} aria-hidden />
-                        </button>
-                        <span>{drawerPanel.label} evidence</span>
-                        <h3 id={`zero-evidence-drawer-${drawerPanel.id}`}>{drawerPanel.title}</h3>
-                        <p>{drawerPanel.body}</p>
-                        <div className="zero-evidence-drawer-artifact">
-                          <span>{drawerEvidence?.type ?? drawerMedia?.kind ?? "room note"}</span>
-                          <strong>{drawerEvidence?.value ?? drawerEvidence?.label ?? drawerMedia?.label ?? "Project room state"}</strong>
-                          {drawerEvidence?.caveat ? (
-                            <p>{drawerEvidence.caveat}</p>
-                          ) : drawerMedia ? (
-                            <p>{drawerMedia.caption}</p>
-                          ) : null}
-                        </div>
-                        {drawerMedia ? (
-                          <figure>
-                            <div>
-                              <Image
-                                src={drawerMedia.src}
-                                alt={drawerMedia.alt}
-                                fill
-                                sizes="(max-width: 900px) 72vw, 220px"
-                                className="zero-evidence-drawer-image"
-                              />
-                            </div>
-                            <figcaption>{drawerMedia.label}</figcaption>
-                          </figure>
-                        ) : null}
-                        {drawerLink ? (
-                          <a href={drawerLink} target={drawerLink.startsWith("http") ? "_blank" : undefined} rel="noreferrer">
-                            {drawerLinkLabel}
-                            <ExternalLink size={14} aria-hidden />
-                          </a>
-                        ) : null}
-                      </motion.aside>
-                    ) : null}
-                  </AnimatePresence>
                 </div>
                 <div className="zero-detail-caption">
                   <span>{selectedProject.category}</span>
