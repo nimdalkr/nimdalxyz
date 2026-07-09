@@ -163,9 +163,9 @@ const workCaseStudies: readonly CaseStudy[] = [
     category: "Web3 analytics",
     href: "https://github.com/nimdalkr/ethoskaito",
     media: {
-      src: "/media/projects/ethosalpha.png",
-      alt: "ethosalpha project visual.",
-      cue: "Web3 analytics"
+      src: "/media/projects/ethosalpha-proof.png",
+      alt: "ethosalpha GitHub repository proof screenshot.",
+      cue: "Repository proof"
     },
     title: "Ethos social signal dashboard.",
     oneLiner: "An analytics dashboard for reading Web3 trust, reputation, and social response signals in one place.",
@@ -188,6 +188,7 @@ const workCaseStudies: readonly CaseStudy[] = [
     },
     evidence: [
       { label: "Repository", type: "repository", href: "https://github.com/nimdalkr/ethoskaito" },
+      { label: "Repository screenshot", type: "screenshot", value: "Public GitHub surface captured for proof." },
       { label: "Proof caveat", type: "caveat", caveat: "Presented as a personal prototype until public usage metrics are available." }
     ],
     artifacts: [
@@ -200,9 +201,9 @@ const workCaseStudies: readonly CaseStudy[] = [
     category: "Trading research",
     href: "https://hyperalphaduo.vercel.app/",
     media: {
-      src: "/media/projects/hyperalphaduo.png",
-      alt: "HyperAlphaDuo project visual.",
-      cue: "Trading research"
+      src: "/media/projects/hyperalphaduo-proof.png",
+      alt: "HyperAlphaDuo live trading research tool screenshot.",
+      cue: "Live tool proof"
     },
     title: "Hyperliquid market position search.",
     oneLiner: "A research tool for Hyperliquid positions, tokenized equities, and arbitrage signals across Korean exchanges.",
@@ -225,7 +226,8 @@ const workCaseStudies: readonly CaseStudy[] = [
     },
     evidence: [
       { label: "Live site", type: "live", href: "https://hyperalphaduo.vercel.app/" },
-      { label: "Public proof", type: "screenshot", caveat: "Add current production screenshots and one annotated workflow." }
+      { label: "Production screenshot", type: "screenshot", value: "Live interface captured from production." },
+      { label: "Public proof", type: "caveat", caveat: "Add one annotated workflow before award submission." }
     ],
     artifacts: [
       { label: "Open live tool", kind: "site", href: "https://hyperalphaduo.vercel.app/" }
@@ -250,7 +252,7 @@ const workCaseStudies: readonly CaseStudy[] = [
     ],
     stack: ["crypto", "KOL", "listing research"],
     status: "live",
-    proofLevel: "live-link",
+    proofLevel: "internal-only",
     story: {
       problem: "Crypto KOL activity is visible, but its listing impact and project-selection bias are hard to inspect.",
       audience: "Researchers who watch Korean exchange listings, KOL campaigns, and project attention cycles.",
@@ -260,7 +262,7 @@ const workCaseStudies: readonly CaseStudy[] = [
       next: "Add public sample cases and a source/caveat panel for correlation claims."
     },
     evidence: [
-      { label: "Live site", type: "live", href: "https://kollisting.vercel.app/" },
+      { label: "Gated live surface", type: "live", href: "https://kollisting.vercel.app/", caveat: "The public URL currently opens behind a password gate." },
       { label: "Correlation caveat", type: "caveat", caveat: "Listing influence should be framed as research signal, not causal proof." }
     ],
     artifacts: [

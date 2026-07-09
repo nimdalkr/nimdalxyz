@@ -127,8 +127,8 @@ const contactChannels = [
 ] as const;
 
 const projectVisuals: Record<string, string> = {
-  ethosalpha: "/media/projects/ethosalpha.png",
-  hyperalphaduo: "/media/projects/hyperalphaduo.png",
+  ethosalpha: "/media/projects/ethosalpha-proof.png",
+  hyperalphaduo: "/media/projects/hyperalphaduo-proof.png",
   "kol-listing": "/media/projects/kol-listing.png",
   "tg-finance-search-portal": "/media/projects/tg-finance-search-portal.png",
   "social-poster-one": "/media/projects/social-poster-one.png",
