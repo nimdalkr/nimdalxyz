@@ -25,6 +25,32 @@ export type CaseStudy = {
   strategy: readonly string[];
   metrics?: readonly Metric[];
   stack: readonly string[];
+  status: "live" | "prototype" | "in-progress" | "archived";
+  proofLevel: "live-link" | "screenshot" | "metric-claimed" | "internal-only" | "prototype" | "concept" | "repository";
+  story: {
+    problem: string;
+    audience: string;
+    decision: string;
+    system: string;
+    outcome: string;
+    next: string;
+  };
+  evidence: readonly {
+    label: string;
+    type: "live" | "metric" | "screenshot" | "repository" | "article" | "testimonial" | "caveat";
+    value?: string;
+    href?: string;
+    caveat?: string;
+  }[];
+  artifacts?: readonly {
+    label: string;
+    kind: "site" | "blog" | "demo" | "screenshot" | "deck" | "repo";
+    href?: string;
+  }[];
+  relatedPosts?: readonly {
+    title: string;
+    href: string;
+  }[];
 };
 
 export type OperatingStep = {
@@ -127,7 +153,7 @@ export const languageOptions: readonly {
 
 const sharedContact = {
   email: "0xnimdal@gmail.com",
-  scheduleUrl: "https://cal.com/replace-with-real-booking-link/audit"
+  scheduleUrl: "mailto:0xnimdal@gmail.com"
 };
 
 const workCaseStudies: readonly CaseStudy[] = [
@@ -149,7 +175,24 @@ const workCaseStudies: readonly CaseStudy[] = [
       "Make project trust and community response easier to compare at a glance.",
       "Turn market and community signals into clearer research decisions."
     ],
-    stack: ["web3", "analytics", "social signal"]
+    stack: ["web3", "analytics", "social signal"],
+    status: "prototype",
+    proofLevel: "repository",
+    story: {
+      problem: "Web3 social trust signals are scattered across reputation surfaces, community response, and project-specific metrics.",
+      audience: "Researchers and builders who need to compare reputation signals before spending attention on a project.",
+      decision: "Keep the tool narrow: make the reputation surface readable before adding broader market features.",
+      system: "A focused dashboard pattern that treats social trust as a comparable research layer.",
+      outcome: "A clear personal-project proof of Nimdal's Web3 analytics direction.",
+      next: "Add public screenshots, example datasets, and a short methodology note before presenting it as a mature analytics product."
+    },
+    evidence: [
+      { label: "Repository", type: "repository", href: "https://github.com/nimdalkr/ethoskaito" },
+      { label: "Proof caveat", type: "caveat", caveat: "Presented as a personal prototype until public usage metrics are available." }
+    ],
+    artifacts: [
+      { label: "GitHub repository", kind: "repo", href: "https://github.com/nimdalkr/ethoskaito" }
+    ]
   },
   {
     slug: "hyperalphaduo",
@@ -169,7 +212,24 @@ const workCaseStudies: readonly CaseStudy[] = [
       "Analyze arbitrage between HIP-3 tokenized equities and their underlying listed stocks.",
       "Monitor arbitrage, listings, and deposit/withdrawal availability for Upbit and Bithumb-listed tokens."
     ],
-    stack: ["hyperliquid", "arbitrage", "monitoring"]
+    stack: ["hyperliquid", "arbitrage", "monitoring"],
+    status: "live",
+    proofLevel: "live-link",
+    story: {
+      problem: "Tokenized equity, exchange listing, and deposit/withdrawal signals move across fragmented markets.",
+      audience: "Crypto traders and researchers who need faster comparison across Hyperliquid and Korean exchange surfaces.",
+      decision: "Frame the product as a research console rather than a generic tracker.",
+      system: "Filtered position search, arbitrage views, and exchange availability monitoring.",
+      outcome: "A live artifact that best proves Nimdal's market-research tooling direction.",
+      next: "Add annotated screenshots, known limitations, and example arbitrage reads for stronger public proof."
+    },
+    evidence: [
+      { label: "Live site", type: "live", href: "https://hyperalphaduo.vercel.app/" },
+      { label: "Public proof", type: "screenshot", caveat: "Add current production screenshots and one annotated workflow." }
+    ],
+    artifacts: [
+      { label: "Open live tool", kind: "site", href: "https://hyperalphaduo.vercel.app/" }
+    ]
   },
   {
     slug: "kol-listing",
@@ -188,7 +248,24 @@ const workCaseStudies: readonly CaseStudy[] = [
       "Analyze how major crypto KOL ad and AMA activity correlates with KRW listings.",
       "Map each KOL's advertising behavior and project selection preferences."
     ],
-    stack: ["crypto", "KOL", "listing research"]
+    stack: ["crypto", "KOL", "listing research"],
+    status: "live",
+    proofLevel: "live-link",
+    story: {
+      problem: "Crypto KOL activity is visible, but its listing impact and project-selection bias are hard to inspect.",
+      audience: "Researchers who watch Korean exchange listings, KOL campaigns, and project attention cycles.",
+      decision: "Turn scattered ads and AMA behavior into a repeatable listing-research surface.",
+      system: "KOL activity mapping, campaign tendency reads, and KRW listing-oriented analysis.",
+      outcome: "A live research artifact that connects content behavior to market interpretation.",
+      next: "Add public sample cases and a source/caveat panel for correlation claims."
+    },
+    evidence: [
+      { label: "Live site", type: "live", href: "https://kollisting.vercel.app/" },
+      { label: "Correlation caveat", type: "caveat", caveat: "Listing influence should be framed as research signal, not causal proof." }
+    ],
+    artifacts: [
+      { label: "Open live tool", kind: "site", href: "https://kollisting.vercel.app/" }
+    ]
   },
   {
     slug: "tg-finance-search-portal",
@@ -203,7 +280,23 @@ const workCaseStudies: readonly CaseStudy[] = [
     oneLiner: "A portal for searching, organizing, and revisiting finance-sector content from Telegram.",
     context: "Currently in progress, with the goal of turning scattered Telegram finance posts into a searchable research surface.",
     strategy: ["Build a search portal for finance-sector Telegram content."],
-    stack: ["telegram", "finance", "portal", "in progress"]
+    stack: ["telegram", "finance", "portal", "in progress"],
+    status: "in-progress",
+    proofLevel: "concept",
+    story: {
+      problem: "Useful finance content in Telegram is difficult to retrieve, compare, and revisit after it disappears in chat flow.",
+      audience: "Finance and Web3 readers who treat Telegram as a research source but need archival search.",
+      decision: "Start with portal structure and retrieval logic before broad community features.",
+      system: "Searchable content portal for sector-specific Telegram posts.",
+      outcome: "A directional build that expands Nimdal's research-tool portfolio.",
+      next: "Publish a working capture/search demo and define source-policy boundaries."
+    },
+    evidence: [
+      { label: "Build status", type: "caveat", caveat: "In progress; keep expectations lower than live tools." }
+    ],
+    artifacts: [
+      { label: "Concept visual", kind: "screenshot" }
+    ]
   },
   {
     slug: "social-poster-one",
@@ -218,7 +311,23 @@ const workCaseStudies: readonly CaseStudy[] = [
     oneLiner: "An API-driven posting automation tool for distributing Telegram content to LinkedIn, Threads, and X.",
     context: "Built to reduce repetitive cross-channel posting and manage content distribution as an API-based workflow.",
     strategy: ["Automate SNS posting from Telegram to LinkedIn, Threads, and X through APIs."],
-    stack: ["telegram", "linkedin", "threads", "x", "automation"]
+    stack: ["telegram", "linkedin", "threads", "x", "automation"],
+    status: "prototype",
+    proofLevel: "prototype",
+    story: {
+      problem: "Cross-posting the same Telegram-origin content across social channels wastes time and creates formatting drift.",
+      audience: "Operators who publish research or campaign updates across X, Threads, LinkedIn, and Telegram.",
+      decision: "Treat distribution as an API pipeline rather than a manual publishing checklist.",
+      system: "Telegram-to-social posting automation with channel-specific output handling.",
+      outcome: "A useful automation concept that fits Nimdal's operator identity.",
+      next: "Add one recorded workflow and specify API limitations by platform."
+    },
+    evidence: [
+      { label: "Automation proof", type: "caveat", caveat: "Prototype proof; add workflow capture before presenting as production automation." }
+    ],
+    artifacts: [
+      { label: "Workflow visual", kind: "screenshot" }
+    ]
   },
   {
     slug: "mylol",
@@ -234,7 +343,24 @@ const workCaseStudies: readonly CaseStudy[] = [
     oneLiner: "A Football Manager-style LCK team management simulation game using real player data.",
     context: "Built for PC and Android as a sports management experience grounded in real LCK player data.",
     strategy: ["Use real LCK player data to power a Football Manager-style team management simulation for PC and Android."],
-    stack: ["game", "LCK", "simulation", "PC", "Android"]
+    stack: ["game", "LCK", "simulation", "PC", "Android"],
+    status: "archived",
+    proofLevel: "live-link",
+    story: {
+      problem: "LCK fandom has rich player data, but few fan-made management simulations turn that data into playable decision loops.",
+      audience: "LCK fans who enjoy roster-building, scouting, and FM-style management games.",
+      decision: "Use real player data as the simulation backbone instead of fictional teams.",
+      system: "PC/Android team-management loop with data-driven player comparison.",
+      outcome: "An archived but credible proof of Nimdal's game-system design interest.",
+      next: "Add screenshots, playable clips, and a short postmortem for stronger public review."
+    },
+    evidence: [
+      { label: "Reference community", type: "live", href: "https://cafe.naver.com/xavishowtime" },
+      { label: "Archive caveat", type: "caveat", caveat: "Archived/reference surface; add direct media assets for award-level proof." }
+    ],
+    artifacts: [
+      { label: "Reference page", kind: "site", href: "https://cafe.naver.com/xavishowtime" }
+    ]
   },
   {
     slug: "maple-union",
@@ -249,7 +375,27 @@ const workCaseStudies: readonly CaseStudy[] = [
     oneLiner: "An AFK game built with MapleStory resources and submitted to MapleStoryUniverse VibeCamp.",
     context: "Created a compact AFK game loop with MapleStoryUniverse resources inside a short production window.",
     strategy: ["Use MapleStoryUniverse VibeCamp resources to build a lightweight AFK game loop."],
-    stack: ["MapleStoryUniverse", "VibeCamp", "AFK game"]
+    stack: ["MapleStoryUniverse", "VibeCamp", "AFK game"],
+    status: "prototype",
+    proofLevel: "screenshot",
+    story: {
+      problem: "A small game-jam build needs to show a complete loop quickly: enter, fight, collect, progress, and understand the system.",
+      audience: "MapleStoryUniverse players, game-jam reviewers, and readers interested in game-system prototyping.",
+      decision: "Make the build log and screenshots part of the product proof, not an afterthought.",
+      system: "AFK loop, field visuals, character entry, probability guide, and post-build documentation.",
+      outcome: "The strongest current bridge between Nimdal's playful identity and public build proof.",
+      next: "Connect the project room directly to the build-log article and add before/after media."
+    },
+    evidence: [
+      { label: "Build log", type: "article", href: "https://blog.nimdal.xyz/posts/maple-union-dev-log-2026-07-02/" },
+      { label: "Screenshots", type: "screenshot", caveat: "Blog post contains current screenshot proof; add playable demo if available." }
+    ],
+    artifacts: [
+      { label: "Read build log", kind: "blog", href: "https://blog.nimdal.xyz/posts/maple-union-dev-log-2026-07-02/" }
+    ],
+    relatedPosts: [
+      { title: "maple uNion build log", href: "https://blog.nimdal.xyz/posts/maple-union-dev-log-2026-07-02/" }
+    ]
   },
   {
     slug: "discord-bulk-leave",
@@ -266,7 +412,23 @@ const workCaseStudies: readonly CaseStudy[] = [
     strategy: [
       "Use the official Discord API to select and leave multiple servers in a single managed flow."
     ],
-    stack: ["discord", "official API", "utility", "automation"]
+    stack: ["discord", "official API", "utility", "automation"],
+    status: "prototype",
+    proofLevel: "prototype",
+    story: {
+      problem: "Leaving or organizing many Discord servers one by one is repetitive and hard to manage.",
+      audience: "Discord users who need a controlled cleanup utility rather than manual server-by-server work.",
+      decision: "Use the official API boundary and make bulk selection the core interaction.",
+      system: "Selectable server list, confirmation flow, and batch leave operation.",
+      outcome: "A compact utility example that supports the automation side of Nimdal's portfolio.",
+      next: "Add a safety explanation, permissions caveat, and demo capture."
+    },
+    evidence: [
+      { label: "Safety caveat", type: "caveat", caveat: "Prototype utility; public demo should clearly explain official API and permission boundaries." }
+    ],
+    artifacts: [
+      { label: "Utility visual", kind: "screenshot" }
+    ]
   }
 ];
 

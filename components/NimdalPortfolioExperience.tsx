@@ -192,6 +192,7 @@ export function NimdalPortfolioExperience() {
   const [roomPanelIndex, setRoomPanelIndex] = useState(0);
   const [divingProject, setDivingProject] = useState<CaseStudy | null>(null);
   const diveTimerRef = useRef<number | null>(null);
+  const pointerFrameRef = useRef<number | null>(null);
 
   const activeRoute = currentRoutes.find((route) => route.id === activeRouteId) ?? currentRoutes[0];
   const activeCases = useMemo(
@@ -234,34 +235,37 @@ export function NimdalPortfolioExperience() {
       {
         id: "signal",
         label: "Signal",
-        title: `Why ${selectedProject.client} exists`,
-        body: selectedProject.context,
+        title: selectedProject.story.problem,
+        body: selectedProject.story.audience,
         lines: [selectedProject.oneLiner]
       },
       {
         id: "build",
         label: "Build",
-        title: `${place} mechanics`,
-        body: "The room turns the project into a focused interaction model instead of a static case-study block.",
-        lines: selectedProject.strategy
+        title: `${place} system`,
+        body: selectedProject.story.decision,
+        lines: [selectedProject.story.system, ...selectedProject.strategy.slice(0, 2)]
       },
       {
         id: "proof",
         label: "Proof",
-        title: selectedProject.href ? "Live artifact and stack" : "Artifact and stack",
+        title: `${selectedProject.proofLevel.replace("-", " ")} evidence`,
         body: selectedProject.href
-          ? "A public surface is attached for direct inspection. The stack below marks the core product behavior."
-          : "This item is presented as a portfolio artifact, prototype, or in-progress build. The stack below marks the core product behavior.",
-        lines: selectedProject.stack
+          ? "A public surface or evidence layer is attached for direct inspection."
+          : "This item is presented with its current proof level and caveats instead of overstating maturity.",
+        lines: [
+          ...selectedProject.evidence.map((item) => item.value ?? item.label),
+          ...selectedProject.stack
+        ]
       },
       {
         id: "next",
         label: "Next",
         title: nextProject ? `Continue to ${nextProject.client}` : "Return to Projects",
-        body: nextProject
-          ? `Move laterally from ${selectedProject.client} into ${nextProject.client} without returning to a vertical page.`
-          : "Return to the personal projects surface and choose another project.",
-        lines: nextProject ? [projectRooms[nextProject.slug]?.place ?? nextProject.media.cue, nextProject.oneLiner] : undefined
+        body: selectedProject.story.outcome,
+        lines: nextProject
+          ? [selectedProject.story.next, `Next room: ${projectRooms[nextProject.slug]?.place ?? nextProject.media.cue}`]
+          : [selectedProject.story.next]
       }
     ];
   }, [nextProject, selectedProject, selectedRoom?.place]);
@@ -280,19 +284,31 @@ export function NimdalPortfolioExperience() {
       if (diveTimerRef.current) {
         window.clearTimeout(diveTimerRef.current);
       }
+      if (pointerFrameRef.current) {
+        window.cancelAnimationFrame(pointerFrameRef.current);
+      }
     };
   }, []);
 
   const handlePointerMove = useCallback((event: PointerEvent<HTMLDivElement>) => {
+    if (shouldReduceMotion || event.pointerType === "touch") return;
     const rect = event.currentTarget.getBoundingClientRect();
     const x = (event.clientX - rect.left) / rect.width;
     const y = (event.clientY - rect.top) / rect.height;
+    const cursorX = event.clientX - rect.left;
+    const cursorY = event.clientY - rect.top;
+    const target = event.currentTarget;
 
-    event.currentTarget.style.setProperty("--px", x.toFixed(3));
-    event.currentTarget.style.setProperty("--py", y.toFixed(3));
-    event.currentTarget.style.setProperty("--cursor-x", `${event.clientX - rect.left}px`);
-    event.currentTarget.style.setProperty("--cursor-y", `${event.clientY - rect.top}px`);
-  }, []);
+    if (pointerFrameRef.current) return;
+
+    pointerFrameRef.current = window.requestAnimationFrame(() => {
+      target.style.setProperty("--px", x.toFixed(3));
+      target.style.setProperty("--py", y.toFixed(3));
+      target.style.setProperty("--cursor-x", `${cursorX}px`);
+      target.style.setProperty("--cursor-y", `${cursorY}px`);
+      pointerFrameRef.current = null;
+    });
+  }, [shouldReduceMotion]);
 
   const showScene = useCallback((nextScene: Scene) => {
     setScene(nextScene);
@@ -474,14 +490,8 @@ export function NimdalPortfolioExperience() {
           >
             Projects
           </button>
-          <a href="/blog">nimdalog</a>
+          <a href="https://blog.nimdal.xyz/">nimdalog</a>
           <a href="/portfolio">Portfolio</a>
-          <button className={scene === "identity" ? "is-active" : ""} onClick={() => showScene("identity")}>
-            Identity
-          </button>
-          <button className={scene === "profile" ? "is-active" : ""} onClick={() => showScene("profile")}>
-            Profile
-          </button>
           <button className={scene === "contact" ? "is-active" : ""} onClick={() => showScene("contact")}>
             Contact
           </button>
@@ -601,7 +611,6 @@ export function NimdalPortfolioExperience() {
                       aria-selected={route.id === activeRouteId}
                       className={route.id === activeRouteId ? "is-active" : ""}
                       onClick={() => setActiveRouteId(route.id)}
-                      onMouseEnter={() => setActiveRouteId(route.id)}
                     >
                       <small>{route.label}</small>
                       <strong>{route.title}</strong>
@@ -628,6 +637,17 @@ export function NimdalPortfolioExperience() {
                       <span>{activeCase.category}</span>
                       <h3>{activeCase.client}</h3>
                       <p>{activeCase.oneLiner}</p>
+                      <div className="zero-proof-strip" aria-label={`${activeCase.client} proof status`}>
+                        <b>{activeCase.status}</b>
+                        <b>{activeCase.proofLevel.replace("-", " ")}</b>
+                        <b>{activeCase.evidence.length} evidence items</b>
+                      </div>
+                      <div className="zero-story-preview">
+                        <span>Problem</span>
+                        <p>{activeCase.story.problem}</p>
+                        <span>System</span>
+                        <p>{activeCase.story.system}</p>
+                      </div>
                       <ul>
                         {activeCase.strategy.slice(0, 3).map((line) => (
                           <li key={line}>{line}</li>
@@ -679,6 +699,7 @@ export function NimdalPortfolioExperience() {
           {scene === "project" && selectedProject ? (
             <motion.section
               key={`project-${selectedProject.slug}`}
+              id={`project-${selectedProject.slug}`}
               className="zero-project-detail"
               initial={shouldReduceMotion ? false : { opacity: 0, x: 72, scale: 0.985 }}
               animate={shouldReduceMotion ? undefined : { opacity: 1, x: 0, scale: 1 }}
@@ -769,6 +790,45 @@ export function NimdalPortfolioExperience() {
                     ))}
                   </div>
                 </div>
+
+                <aside className="zero-evidence-tray" aria-label={`${selectedProject.client} evidence tray`}>
+                  <div className="zero-evidence-heading">
+                    <span>Evidence tray</span>
+                    <strong>{selectedProject.proofLevel.replace("-", " ")}</strong>
+                  </div>
+                  <div className="zero-evidence-grid">
+                    {selectedProject.evidence.map((item) => {
+                      const content = (
+                        <>
+                          <span>{item.type}</span>
+                          <strong>{item.value ?? item.label}</strong>
+                          {item.caveat ? <p>{item.caveat}</p> : null}
+                        </>
+                      );
+
+                      return item.href ? (
+                        <a key={`${item.label}-${item.href}`} href={item.href} target="_blank" rel="noreferrer">
+                          {content}
+                        </a>
+                      ) : (
+                        <div key={`${item.label}-${item.type}`}>
+                          {content}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {selectedProject.relatedPosts?.length ? (
+                    <div className="zero-related-logs">
+                      <span>Related log</span>
+                      {selectedProject.relatedPosts.map((post) => (
+                        <a key={post.href} href={post.href}>
+                          {post.title}
+                          <ExternalLink size={14} aria-hidden />
+                        </a>
+                      ))}
+                    </div>
+                  ) : null}
+                </aside>
 
                 <div className="zero-detail-actions">
                   <button onClick={() => moveProject(-1)}>

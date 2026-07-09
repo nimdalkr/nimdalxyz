@@ -6,9 +6,9 @@ import { NimdalPortfolioExperience } from "@/components/NimdalPortfolioExperienc
 export function PortfolioExperience() {
   return (
     <LocaleProvider>
-      <main className="main-shell nimdal-main">
+      <div className="main-shell nimdal-main">
         <NimdalPortfolioExperience />
-      </main>
+      </div>
     </LocaleProvider>
   );
 }
