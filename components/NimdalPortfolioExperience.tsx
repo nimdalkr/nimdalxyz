@@ -37,6 +37,34 @@ type RoomPanel = {
   lines?: readonly string[];
 };
 
+const proofLabels: Record<CaseStudy["proofLevel"], string> = {
+  "live-link": "Live link",
+  screenshot: "Screenshot",
+  "metric-claimed": "Metric claimed",
+  "internal-only": "Internal proof",
+  prototype: "Prototype",
+  concept: "Concept",
+  repository: "Repository"
+};
+
+const projectAtlasPositions: Record<string, { x: string; y: string }> = {
+  ethosalpha: { x: "12%", y: "68%" },
+  hyperalphaduo: { x: "25%", y: "28%" },
+  "kol-listing": { x: "42%", y: "46%" },
+  "tg-finance-search-portal": { x: "58%", y: "22%" },
+  "social-poster-one": { x: "73%", y: "48%" },
+  mylol: { x: "56%", y: "74%" },
+  "maple-union": { x: "31%", y: "78%" },
+  "discord-bulk-leave": { x: "87%", y: "70%" }
+};
+
+const roomHotspotPositions: Record<RoomPanel["id"], { x: string; y: string }> = {
+  signal: { x: "18%", y: "32%" },
+  build: { x: "66%", y: "28%" },
+  proof: { x: "76%", y: "63%" },
+  next: { x: "31%", y: "72%" }
+};
+
 const currentRoutes: CurrentRoute[] = [
   {
     id: "research",
@@ -639,7 +667,7 @@ export function NimdalPortfolioExperience() {
                       <p>{activeCase.oneLiner}</p>
                       <div className="zero-proof-strip" aria-label={`${activeCase.client} proof status`}>
                         <b>{activeCase.status}</b>
-                        <b>{activeCase.proofLevel.replace("-", " ")}</b>
+                        <b>{proofLabels[activeCase.proofLevel]}</b>
                         <b>{activeCase.evidence.length} evidence items</b>
                       </div>
                       <div className="zero-story-preview">
@@ -676,6 +704,36 @@ export function NimdalPortfolioExperience() {
                       </div>
                     </motion.article>
                   </AnimatePresence>
+                  <div className="zero-project-atlas" aria-label="Interactive project atlas">
+                    <span>Project atlas</span>
+                    <div className="zero-atlas-surface">
+                      {allCases.map((item, index) => {
+                        const nodeRoute = getRouteForProject(item.slug) ?? currentRoutes[0];
+                        const nodePosition = projectAtlasPositions[item.slug] ?? { x: "50%", y: "50%" };
+                        const isCurrent = item.slug === activeCase.slug;
+
+                        return (
+                          <button
+                            key={item.slug}
+                            className={isCurrent ? "is-active" : ""}
+                            style={
+                              {
+                                "--node-x": nodePosition.x,
+                                "--node-y": nodePosition.y,
+                                "--node-tone": nodeRoute.tone
+                              } as CSSProperties
+                            }
+                            onClick={() => focusProject(item)}
+                            aria-current={isCurrent ? "true" : undefined}
+                          >
+                            <span>{String(index + 1).padStart(2, "0")}</span>
+                            <strong>{item.client}</strong>
+                            <small>{proofLabels[item.proofLevel]}</small>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
                   <div className="zero-project-rail" aria-label="Projects in this category">
                     {activeCases.map((item, index) => (
                       <button
@@ -794,7 +852,7 @@ export function NimdalPortfolioExperience() {
                 <aside className="zero-evidence-tray" aria-label={`${selectedProject.client} evidence tray`}>
                   <div className="zero-evidence-heading">
                     <span>Evidence tray</span>
-                    <strong>{selectedProject.proofLevel.replace("-", " ")}</strong>
+                    <strong>{proofLabels[selectedProject.proofLevel]}</strong>
                   </div>
                   <div className="zero-evidence-grid">
                     {selectedProject.evidence.map((item) => {
@@ -868,6 +926,33 @@ export function NimdalPortfolioExperience() {
                     sizes="(max-width: 900px) 92vw, 46vw"
                     className="zero-detail-image"
                   />
+                  <div className="zero-proof-lens" aria-label={`${selectedProject.client} proof summary`}>
+                    <span>{selectedProject.status}</span>
+                    <strong>{proofLabels[selectedProject.proofLevel]}</strong>
+                    <small>{selectedProject.evidence.length} evidence items</small>
+                  </div>
+                  <div className="zero-room-hotspots" aria-label={`${selectedProject.client} visual story controls`}>
+                    {roomPanels.map((panel, index) => {
+                      const point = roomHotspotPositions[panel.id];
+
+                      return (
+                        <button
+                          key={panel.id}
+                          className={index === roomPanelIndex ? "is-active" : ""}
+                          style={
+                            {
+                              "--hotspot-x": point.x,
+                              "--hotspot-y": point.y
+                            } as CSSProperties
+                          }
+                          onClick={() => setRoomPanelIndex(index)}
+                          aria-current={index === roomPanelIndex ? "true" : undefined}
+                        >
+                          <span>{panel.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
                 <div className="zero-detail-caption">
                   <span>{selectedProject.category}</span>

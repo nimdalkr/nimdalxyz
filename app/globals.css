@@ -637,6 +637,120 @@ a:focus-visible {
   padding: 0 18px;
 }
 
+.zero-project-atlas {
+  position: absolute;
+  right: 22px;
+  top: 26px;
+  width: min(360px, 38vw);
+  z-index: 2;
+  display: grid;
+  gap: 10px;
+  pointer-events: auto;
+}
+
+.zero-project-atlas > span {
+  justify-self: end;
+  color: var(--acid);
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  font-weight: 950;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.zero-atlas-surface {
+  position: relative;
+  overflow: hidden;
+  height: 230px;
+  border: 1px solid rgba(239, 250, 255, 0.16);
+  background:
+    radial-gradient(circle at var(--current-x) var(--current-y), color-mix(in srgb, var(--route-tone) 16%, transparent), transparent 24%),
+    repeating-linear-gradient(90deg, rgba(239, 250, 255, 0.08) 0 1px, transparent 1px 22px),
+    repeating-linear-gradient(180deg, rgba(239, 250, 255, 0.06) 0 1px, transparent 1px 22px),
+    rgba(3, 16, 31, 0.24);
+  clip-path: polygon(7% 0, 100% 0, 100% 82%, 89% 100%, 0 100%, 0 12%);
+}
+
+.zero-atlas-surface::before,
+.zero-atlas-surface::after {
+  position: absolute;
+  pointer-events: none;
+  content: "";
+}
+
+.zero-atlas-surface::before {
+  inset: 18px;
+  border: 1px solid rgba(239, 250, 255, 0.12);
+  clip-path: polygon(8% 0, 84% 11%, 100% 46%, 66% 100%, 14% 84%, 0 39%);
+}
+
+.zero-atlas-surface::after {
+  left: var(--current-x);
+  top: var(--current-y);
+  width: 140px;
+  height: 140px;
+  border: 1px solid color-mix(in srgb, var(--route-tone) 38%, transparent);
+  border-radius: 999px;
+  box-shadow: 0 0 34px color-mix(in srgb, var(--route-tone) 24%, transparent);
+  transform: translate(-50%, -50%);
+  animation: zeroAtlasPulse 3.6s var(--ease-out) infinite;
+}
+
+.zero-atlas-surface button {
+  position: absolute;
+  left: var(--node-x);
+  top: var(--node-y);
+  z-index: 2;
+  display: grid;
+  min-width: 104px;
+  gap: 2px;
+  border: 1px solid color-mix(in srgb, var(--node-tone) 38%, rgba(239, 250, 255, 0.16));
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--node-tone) 15%, rgba(3, 16, 31, 0.76)), rgba(3, 16, 31, 0.42));
+  color: var(--fg);
+  padding: 8px 9px;
+  text-align: left;
+  transform: translate(-50%, -50%);
+  transition: border-color 180ms var(--ease-out), box-shadow 180ms var(--ease-out), transform 180ms var(--ease-out);
+}
+
+.zero-atlas-surface button::before {
+  position: absolute;
+  left: -8px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  content: "";
+  background: var(--node-tone);
+  box-shadow: 0 0 18px var(--node-tone);
+  transform: translateY(-50%);
+}
+
+.zero-atlas-surface button:hover,
+.zero-atlas-surface button.is-active {
+  border-color: var(--acid);
+  box-shadow: 0 0 28px color-mix(in srgb, var(--node-tone) 32%, transparent);
+  transform: translate(-50%, -54%);
+}
+
+.zero-atlas-surface button span,
+.zero-atlas-surface button small {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.52rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.zero-atlas-surface button strong {
+  max-width: 98px;
+  overflow: hidden;
+  font-size: 0.78rem;
+  line-height: 1.08;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .zero-project-rail {
   position: absolute;
   left: 34px;
@@ -1119,6 +1233,85 @@ a:focus-visible {
     linear-gradient(180deg, transparent 0 70%, rgba(1, 9, 20, 0.5) 100%),
     repeating-linear-gradient(180deg, rgba(239, 250, 255, 0.13) 0 1px, transparent 1px 8px);
   mix-blend-mode: soft-light;
+}
+
+.zero-proof-lens {
+  position: absolute;
+  left: 18px;
+  top: 22px;
+  z-index: 4;
+  display: grid;
+  gap: 3px;
+  border: 1px solid rgba(239, 250, 255, 0.24);
+  background:
+    linear-gradient(135deg, rgba(3, 16, 31, 0.78), rgba(3, 16, 31, 0.34)),
+    color-mix(in srgb, var(--route-tone) 12%, transparent);
+  padding: 12px 13px;
+  backdrop-filter: blur(12px);
+}
+
+.zero-proof-lens span,
+.zero-proof-lens small,
+.zero-room-hotspots button span {
+  color: var(--acid);
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  font-weight: 950;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.zero-proof-lens strong {
+  color: var(--fg);
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  line-height: 0.9;
+  text-transform: uppercase;
+}
+
+.zero-proof-lens small {
+  color: var(--muted);
+}
+
+.zero-room-hotspots {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.zero-room-hotspots button {
+  position: absolute;
+  left: var(--hotspot-x);
+  top: var(--hotspot-y);
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(239, 250, 255, 0.42);
+  background: rgba(3, 16, 31, 0.5);
+  color: var(--fg);
+  padding: 0 10px;
+  pointer-events: auto;
+  transform: translate(-50%, -50%);
+  transition: border-color 180ms var(--ease-out), background 180ms var(--ease-out), transform 180ms var(--ease-out);
+}
+
+.zero-room-hotspots button::before {
+  width: 8px;
+  height: 8px;
+  content: "";
+  background: var(--route-tone);
+  box-shadow:
+    0 0 0 6px color-mix(in srgb, var(--route-tone) 15%, transparent),
+    0 0 22px var(--route-tone);
+}
+
+.zero-room-hotspots button:hover,
+.zero-room-hotspots button.is-active {
+  border-color: var(--acid);
+  background: rgba(216, 255, 86, 0.13);
+  transform: translate(-50%, -58%);
 }
 
 .zero-detail-image {
@@ -1661,6 +1854,19 @@ a:focus-visible {
   to {
     transform: scale(1.26) rotate(8deg);
     opacity: 0.9;
+  }
+}
+
+@keyframes zeroAtlasPulse {
+  0%,
+  100% {
+    opacity: 0.32;
+    transform: translate(-50%, -50%) scale(0.82);
+  }
+
+  50% {
+    opacity: 0.78;
+    transform: translate(-50%, -50%) scale(1);
   }
 }
 
@@ -2691,6 +2897,16 @@ a:focus-visible {
     bottom: 0;
   }
 
+  .zero-proof-lens {
+    left: 14px;
+    top: 18px;
+  }
+
+  .zero-room-hotspots button {
+    min-height: 30px;
+    padding: 0 8px;
+  }
+
   .zero-portrait-porthole,
   .zero-portrait-scan {
     left: 0;
@@ -2735,13 +2951,36 @@ a:focus-visible {
     padding-left: 18px;
   }
 
+  .zero-project-atlas {
+    position: relative;
+    right: auto;
+    top: auto;
+    width: 100%;
+    margin-top: 8px;
+    order: 3;
+  }
+
+  .zero-atlas-surface {
+    height: 190px;
+  }
+
+  .zero-atlas-surface button {
+    min-width: 86px;
+    padding: 7px 8px;
+  }
+
+  .zero-atlas-surface button strong {
+    max-width: 78px;
+    font-size: 0.68rem;
+  }
+
   .zero-project-index {
     left: 18px;
   }
 
   .zero-project-card {
     min-height: 290px;
-    padding: 34px 0 72px;
+    padding: 34px 0 18px;
   }
 
   .zero-project-card h3 {
@@ -2857,6 +3096,10 @@ a:focus-visible {
   }
 
   .zero-project-rail {
+    display: none;
+  }
+
+  .zero-project-atlas {
     display: none;
   }
 
