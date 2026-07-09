@@ -921,6 +921,170 @@ a:focus-visible {
   line-height: 1.35;
 }
 
+.zero-scan-console {
+  position: relative;
+  display: grid;
+  gap: 11px;
+  overflow: hidden;
+  border: 1px solid rgba(239, 250, 255, 0.18);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--route-tone) 14%, transparent), transparent 48%),
+    rgba(3, 16, 31, 0.24);
+  padding: 13px;
+}
+
+.zero-scan-console::before {
+  position: absolute;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, transparent, color-mix(in srgb, var(--route-tone) 18%, transparent), transparent),
+    repeating-linear-gradient(180deg, rgba(239, 250, 255, 0.06) 0 1px, transparent 1px 9px);
+  opacity: 0.28;
+  transform: translateX(-55%);
+}
+
+.zero-scan-console.is-active::before {
+  animation: zero-console-scan 2.6s linear infinite;
+}
+
+.zero-scan-console-head,
+.zero-scan-readout {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.zero-scan-console-head > span,
+.zero-scan-readout strong,
+.zero-scan-nodes span,
+.zero-scan-nodes small {
+  font-family: var(--font-mono);
+  font-weight: 950;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.zero-scan-console-head > span,
+.zero-scan-readout strong {
+  color: var(--acid);
+  font-size: 0.62rem;
+}
+
+.zero-scan-console-head button {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  border: 1px solid rgba(239, 250, 255, 0.34);
+  background: rgba(3, 16, 31, 0.32);
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 950;
+  padding: 0 12px;
+  text-transform: uppercase;
+  transition: transform 180ms var(--ease-out), border-color 180ms var(--ease-out), background 180ms var(--ease-out);
+}
+
+.zero-scan-console-head button[aria-pressed="true"] {
+  border-color: var(--acid);
+  background: rgba(216, 255, 86, 0.16);
+  color: var(--acid);
+}
+
+.zero-scan-console-head button:hover {
+  border-color: var(--acid);
+  transform: translateY(-2px);
+}
+
+.zero-scan-progress {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  height: 8px;
+  border: 1px solid rgba(239, 250, 255, 0.14);
+  background: rgba(3, 16, 31, 0.42);
+}
+
+.zero-scan-progress span {
+  display: block;
+  height: 100%;
+  background:
+    linear-gradient(90deg, var(--coral), var(--route-tone), var(--acid));
+  box-shadow: 0 0 22px color-mix(in srgb, var(--route-tone) 42%, transparent);
+  transition: width 240ms var(--ease-out);
+}
+
+.zero-scan-readout p {
+  overflow: hidden;
+  max-width: 38ch;
+  margin: 0;
+  color: rgba(239, 250, 255, 0.72);
+  font-size: 0.78rem;
+  line-height: 1.35;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.zero-scan-nodes {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.zero-scan-nodes button {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+  border: 1px solid rgba(239, 250, 255, 0.14);
+  background: rgba(239, 250, 255, 0.055);
+  color: var(--fg);
+  padding: 9px;
+  text-align: left;
+  transition: transform 180ms var(--ease-out), border-color 180ms var(--ease-out), background 180ms var(--ease-out);
+}
+
+.zero-scan-nodes button:hover,
+.zero-scan-nodes button.is-active {
+  border-color: var(--acid);
+  transform: translateY(-2px);
+}
+
+.zero-scan-nodes button.is-scanned {
+  border-color: color-mix(in srgb, var(--route-tone) 72%, rgba(239, 250, 255, 0.2));
+  background: color-mix(in srgb, var(--route-tone) 16%, rgba(239, 250, 255, 0.055));
+}
+
+.zero-scan-nodes span {
+  color: var(--coral);
+  font-size: 0.56rem;
+}
+
+.zero-scan-nodes strong {
+  overflow: hidden;
+  font-size: 0.72rem;
+  line-height: 1.1;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.zero-scan-nodes small {
+  color: var(--muted);
+  font-size: 0.52rem;
+}
+
+.zero-scan-nodes button.is-scanned small {
+  color: var(--acid);
+}
+
 .zero-room-interface {
   position: relative;
   overflow: hidden;
@@ -1050,10 +1214,16 @@ a:focus-visible {
   max-width: 560px;
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(2rem, 3.4vw, 3.35rem);
+  font-size: clamp(1.65rem, 2.65vw, 2.7rem);
   font-weight: 950;
-  line-height: 0.88;
+  line-height: 0.94;
   text-transform: uppercase;
+}
+
+.zero-room-panel.is-next h3 {
+  max-width: 620px;
+  font-size: clamp(1.48rem, 2.25vw, 2.25rem);
+  line-height: 0.98;
 }
 
 .zero-room-panel p {
@@ -1115,6 +1285,10 @@ a:focus-visible {
 .zero-room-dots button.is-active {
   width: 48px;
   background: var(--route-tone);
+}
+
+.zero-room-dots button.is-scanned {
+  background: color-mix(in srgb, var(--route-tone) 70%, rgba(239, 250, 255, 0.28));
 }
 
 .zero-evidence-tray {
@@ -1340,10 +1514,12 @@ a:focus-visible {
 }
 
 .zero-project-detail .zero-detail-actions {
-  position: fixed;
-  left: 60px;
-  bottom: 34px;
-  z-index: 46;
+  position: relative;
+  left: auto;
+  bottom: auto;
+  z-index: 2;
+  align-self: start;
+  margin-top: 4px;
 }
 
 .zero-detail-visual {
@@ -1428,6 +1604,65 @@ a:focus-visible {
   color: var(--muted);
 }
 
+.zero-scan-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--route-tone) 14%, transparent), transparent 30%),
+    repeating-linear-gradient(0deg, rgba(239, 250, 255, 0.08) 0 1px, transparent 1px 12px);
+  mix-blend-mode: screen;
+}
+
+.zero-scan-sweep {
+  position: absolute;
+  left: -8%;
+  top: 0;
+  width: 116%;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--acid), var(--route-tone), transparent);
+  box-shadow:
+    0 0 22px var(--acid),
+    0 0 58px color-mix(in srgb, var(--route-tone) 68%, transparent);
+  animation: zero-frame-scan 2.2s linear infinite;
+}
+
+.zero-scan-target {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(48%, 280px);
+  aspect-ratio: 1;
+  border: 1px solid color-mix(in srgb, var(--route-tone) 78%, rgba(239, 250, 255, 0.2));
+  border-radius: 999px;
+  box-shadow:
+    inset 0 0 0 1px rgba(239, 250, 255, 0.18),
+    0 0 42px color-mix(in srgb, var(--route-tone) 30%, transparent);
+  transform: translate(-50%, -50%);
+}
+
+.zero-scan-target::before,
+.zero-scan-target::after {
+  position: absolute;
+  content: "";
+  background: rgba(239, 250, 255, 0.48);
+}
+
+.zero-scan-target::before {
+  left: 50%;
+  top: 8%;
+  width: 1px;
+  height: 84%;
+}
+
+.zero-scan-target::after {
+  left: 8%;
+  top: 50%;
+  width: 84%;
+  height: 1px;
+}
+
 .zero-room-hotspots {
   position: absolute;
   inset: 0;
@@ -1467,6 +1702,18 @@ a:focus-visible {
   border-color: var(--acid);
   background: rgba(216, 255, 86, 0.13);
   transform: translate(-50%, -58%);
+}
+
+.zero-room-hotspots button.is-scanned {
+  border-color: color-mix(in srgb, var(--route-tone) 76%, var(--acid));
+  background: color-mix(in srgb, var(--route-tone) 24%, rgba(3, 16, 31, 0.5));
+}
+
+.zero-room-hotspots button.is-scanned::before {
+  background: var(--acid);
+  box-shadow:
+    0 0 0 6px rgba(216, 255, 86, 0.18),
+    0 0 26px var(--acid);
 }
 
 .zero-detail-image {
@@ -2050,6 +2297,26 @@ a:focus-visible {
 
   to {
     transform: translate(-50%, -50%) scale(1.08) rotate(8deg);
+  }
+}
+
+@keyframes zero-console-scan {
+  from {
+    transform: translateX(-65%);
+  }
+
+  to {
+    transform: translateX(65%);
+  }
+}
+
+@keyframes zero-frame-scan {
+  from {
+    transform: translateY(-20px);
+  }
+
+  to {
+    transform: translateY(640px);
   }
 }
 
@@ -3356,6 +3623,54 @@ a:focus-visible {
   .zero-case-room p,
   .zero-case-room dl div:nth-child(n+2),
   .zero-proof-media figcaption p {
+    display: none;
+  }
+
+  .zero-scan-console {
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .zero-scan-console-head button {
+    min-height: 40px;
+    padding: 0 10px;
+    font-size: 0.56rem;
+  }
+
+  .zero-scan-readout {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .zero-scan-readout p {
+    display: -webkit-box;
+    overflow: hidden;
+    max-width: none;
+    text-align: left;
+    white-space: normal;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .zero-scan-nodes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .zero-scan-nodes button {
+    min-height: 44px;
+    padding: 8px;
+  }
+
+  .zero-scan-nodes strong {
+    font-size: 0.66rem;
+  }
+
+  .zero-scan-overlay {
+    opacity: 0.58;
+  }
+
+  .zero-scan-target {
     display: none;
   }
 

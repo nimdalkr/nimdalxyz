@@ -218,6 +218,8 @@ export function NimdalPortfolioExperience() {
   const [activeCaseIndex, setActiveCaseIndex] = useState(0);
   const [selectedProjectSlug, setSelectedProjectSlug] = useState<string | null>(null);
   const [roomPanelIndex, setRoomPanelIndex] = useState(0);
+  const [scanMode, setScanMode] = useState(false);
+  const [scannedPanelIds, setScannedPanelIds] = useState<RoomPanel["id"][]>([]);
   const [divingProject, setDivingProject] = useState<CaseStudy | null>(null);
   const diveTimerRef = useRef<number | null>(null);
   const pointerFrameRef = useRef<number | null>(null);
@@ -300,6 +302,18 @@ export function NimdalPortfolioExperience() {
     ];
   }, [nextProject, selectedProject, selectedRoom?.place]);
   const activeRoomPanel = roomPanels[roomPanelIndex] ?? roomPanels[0];
+  const scanProgress = roomPanels.length ? Math.round((scannedPanelIds.length / roomPanels.length) * 100) : 0;
+  const isRoomMapped = roomPanels.length > 0 && scannedPanelIds.length >= roomPanels.length;
+
+  const markScannedPanel = useCallback((panelId?: RoomPanel["id"]) => {
+    if (!panelId) return;
+
+    setScannedPanelIds((current) => (current.includes(panelId) ? current : [...current, panelId]));
+  }, []);
+
+  const toggleScanMode = useCallback(() => {
+    setScanMode((current) => !current);
+  }, []);
 
   useEffect(() => {
     setActiveCaseIndex(0);
@@ -307,7 +321,14 @@ export function NimdalPortfolioExperience() {
 
   useEffect(() => {
     setRoomPanelIndex(0);
+    setScanMode(false);
+    setScannedPanelIds([]);
   }, [selectedProject?.slug]);
+
+  useEffect(() => {
+    if (!scanMode) return;
+    markScannedPanel(activeRoomPanel?.id);
+  }, [activeRoomPanel?.id, markScannedPanel, scanMode]);
 
   useEffect(() => {
     return () => {
@@ -476,6 +497,11 @@ export function NimdalPortfolioExperience() {
       }
 
       if (scene === "project") {
+        if (event.key.toLowerCase() === "s") {
+          event.preventDefault();
+          toggleScanMode();
+        }
+
         if (event.key === "ArrowRight") {
           event.preventDefault();
           moveRoomPanel(1);
@@ -507,7 +533,7 @@ export function NimdalPortfolioExperience() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [moveCase, moveRoomPanel, scene, showScene]);
+  }, [moveCase, moveRoomPanel, scene, showScene, toggleScanMode]);
 
   return (
     <div
@@ -848,6 +874,48 @@ export function NimdalPortfolioExperience() {
                   </section>
                 ) : null}
 
+                <section
+                  className={`zero-scan-console ${scanMode ? "is-active" : ""} ${isRoomMapped ? "is-complete" : ""}`}
+                  aria-label={`${selectedProject.client} interactive scan console`}
+                >
+                  <div className="zero-scan-console-head">
+                    <span>Nimdal scanner</span>
+                    <button type="button" onClick={toggleScanMode} aria-pressed={scanMode}>
+                      {scanMode ? "Scanner active" : "Start scan"}
+                    </button>
+                  </div>
+                  <div className="zero-scan-progress" aria-label={`Room scan progress ${scanProgress}%`}>
+                    <span style={{ width: `${scanProgress}%` }} />
+                  </div>
+                  <div className="zero-scan-readout" aria-live="polite">
+                    <strong>{isRoomMapped ? "Room mapped" : `${scanProgress}% mapped`}</strong>
+                    <p>{activeRoomPanel?.title}</p>
+                  </div>
+                  <div className="zero-scan-nodes" aria-label="Scan nodes">
+                    {roomPanels.map((panel, index) => {
+                      const isScanned = scannedPanelIds.includes(panel.id);
+                      const isActive = index === roomPanelIndex;
+
+                      return (
+                        <button
+                          key={panel.id}
+                          type="button"
+                          className={`${isActive ? "is-active" : ""} ${isScanned ? "is-scanned" : ""}`}
+                          onClick={() => {
+                            setRoomPanelIndex(index);
+                            if (scanMode) markScannedPanel(panel.id);
+                          }}
+                          aria-current={isActive ? "true" : undefined}
+                        >
+                          <span>{String(index + 1).padStart(2, "0")}</span>
+                          <strong>{panel.label}</strong>
+                          <small>{isScanned ? "logged" : "pending"}</small>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </section>
+
                 <div
                   className={`zero-room-interface is-${selectedRoom?.transition ?? "reef"}`}
                   aria-label={`${selectedProject.client} project room panels`}
@@ -905,8 +973,13 @@ export function NimdalPortfolioExperience() {
                     {roomPanels.map((panel, index) => (
                       <button
                         key={panel.id}
-                        className={index === roomPanelIndex ? "is-active" : ""}
-                        onClick={() => setRoomPanelIndex(index)}
+                        className={`${index === roomPanelIndex ? "is-active" : ""} ${
+                          scannedPanelIds.includes(panel.id) ? "is-scanned" : ""
+                        }`}
+                        onClick={() => {
+                          setRoomPanelIndex(index);
+                          if (scanMode) markScannedPanel(panel.id);
+                        }}
                         aria-label={`Open ${panel.label} panel`}
                         aria-current={index === roomPanelIndex ? "true" : undefined}
                       />
@@ -1025,21 +1098,31 @@ export function NimdalPortfolioExperience() {
                     <strong>{proofLabels[selectedProject.proofLevel]}</strong>
                     <small>{selectedProject.evidence.length} evidence items</small>
                   </div>
+                  {scanMode ? (
+                    <div className="zero-scan-overlay" aria-hidden>
+                      <span className="zero-scan-sweep" />
+                      <span className="zero-scan-target" />
+                    </div>
+                  ) : null}
                   <div className="zero-room-hotspots" aria-label={`${selectedProject.client} visual story controls`}>
                     {roomPanels.map((panel, index) => {
                       const point = roomHotspotPositions[panel.id];
+                      const isScanned = scannedPanelIds.includes(panel.id);
 
                       return (
                         <button
                           key={panel.id}
-                          className={index === roomPanelIndex ? "is-active" : ""}
+                          className={`${index === roomPanelIndex ? "is-active" : ""} ${isScanned ? "is-scanned" : ""}`}
                           style={
                             {
                               "--hotspot-x": point.x,
                               "--hotspot-y": point.y
                             } as CSSProperties
                           }
-                          onClick={() => setRoomPanelIndex(index)}
+                          onClick={() => {
+                            setRoomPanelIndex(index);
+                            if (scanMode) markScannedPanel(panel.id);
+                          }}
                           aria-current={index === roomPanelIndex ? "true" : undefined}
                         >
                           <span>{panel.label}</span>
