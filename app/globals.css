@@ -3569,14 +3569,14 @@ a:focus-visible {
 
   .zero-project-detail {
     align-self: start;
-    gap: 14px;
-    padding-top: 74px;
+    gap: 12px;
+    padding-top: 22px;
   }
 
   .zero-detail-visual {
     display: block;
-    margin-top: 18px;
-    min-height: 224px;
+    margin-top: 0;
+    min-height: 196px;
     order: -1;
   }
 
@@ -3684,10 +3684,11 @@ a:focus-visible {
 
   .zero-detail-back {
     display: inline-flex;
-    position: fixed;
-    left: 18px;
-    top: 74px;
+    position: static;
+    left: auto;
+    top: auto;
     z-index: 55;
+    justify-self: start;
     background: rgba(4, 24, 45, 0.78);
     min-height: 42px;
     padding: 0 14px;
@@ -3696,8 +3697,9 @@ a:focus-visible {
   }
 
   .zero-detail-heading h2 {
-    margin-top: 10px;
-    font-size: 2rem;
+    margin-top: 8px;
+    font-size: 1.82rem;
+    line-height: 0.92;
   }
 
   .zero-detail-heading > p {
@@ -3709,7 +3711,8 @@ a:focus-visible {
   }
 
   .zero-detail-meta span {
-    padding: 7px 9px;
+    padding: 6px 8px;
+    font-size: 0.54rem;
   }
 
   .zero-detail-context,
@@ -3732,18 +3735,19 @@ a:focus-visible {
     z-index: 40;
     display: flex;
     width: 100%;
-    margin-top: 10px;
+    margin-top: 4px;
     border: 1px solid rgba(239, 250, 255, 0.16);
     background: rgba(4, 24, 45, 0.74);
-    padding: 8px;
+    padding: 7px;
     backdrop-filter: blur(18px);
   }
 
   .zero-detail-actions button,
   .zero-detail-actions a {
-    min-height: 40px;
-    padding: 0 12px;
-    font-size: 0.62rem;
+    flex: 1 1 0;
+    min-height: 42px;
+    padding: 0 9px;
+    font-size: 0.56rem;
   }
 
   .zero-room-interface {
