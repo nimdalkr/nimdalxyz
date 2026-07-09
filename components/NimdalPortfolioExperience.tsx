@@ -65,6 +65,16 @@ const roomHotspotPositions: Record<RoomPanel["id"], { x: string; y: string }> = 
   next: { x: "31%", y: "72%" }
 };
 
+const roomPanelOrder: RoomPanel["id"][] = ["signal", "build", "proof", "next"];
+
+function isRoomPanelId(value: string | null): value is RoomPanel["id"] {
+  return Boolean(value && roomPanelOrder.includes(value as RoomPanel["id"]));
+}
+
+function withCaseRoomProofHash(href: string) {
+  return `${href.split("#")[0]}#case-room-proof`;
+}
+
 const currentRoutes: CurrentRoute[] = [
   {
     id: "research",
@@ -224,6 +234,7 @@ export function NimdalPortfolioExperience() {
   const [divingProject, setDivingProject] = useState<CaseStudy | null>(null);
   const diveTimerRef = useRef<number | null>(null);
   const evidenceCloseRef = useRef<HTMLButtonElement | null>(null);
+  const pendingRoomRef = useRef<RoomPanel["id"] | null>(null);
   const pointerFrameRef = useRef<number | null>(null);
   const hydratedProjectRef = useRef(false);
 
@@ -320,15 +331,25 @@ export function NimdalPortfolioExperience() {
   const drawerMedia = selectedProject?.proofMedia?.length
     ? selectedProject.proofMedia[drawerPanelIndex % selectedProject.proofMedia.length]
     : undefined;
+  const relatedProofHref = selectedProject?.relatedPosts?.[0]?.href
+    ? withCaseRoomProofHash(selectedProject.relatedPosts[0].href)
+    : undefined;
+  const drawerEvidenceHref = drawerEvidence?.href
+    ? drawerPanel?.id === "proof" && drawerEvidence.type === "article"
+      ? withCaseRoomProofHash(drawerEvidence.href)
+      : drawerEvidence.href
+    : undefined;
   const drawerLink =
-    drawerEvidence?.href ??
-    (drawerPanel?.id === "proof" ? selectedProject?.href : undefined) ??
-    (drawerPanel?.id === "next" ? selectedProject?.relatedPosts?.[0]?.href : undefined);
-  const drawerLinkLabel = drawerEvidence?.href
+    drawerEvidenceHref ??
+    (drawerPanel?.id === "proof" ? relatedProofHref ?? selectedProject?.href : undefined) ??
+    (drawerPanel?.id === "next" ? relatedProofHref : undefined);
+  const drawerLinkLabel = drawerEvidenceHref
     ? "Open artifact"
-    : drawerPanel?.id === "proof" && selectedProject?.href
-      ? "Open live surface"
-      : drawerPanel?.id === "next" && selectedProject?.relatedPosts?.[0]?.href
+    : drawerPanel?.id === "proof" && relatedProofHref
+      ? "Open proof section"
+      : drawerPanel?.id === "proof" && selectedProject?.href
+        ? "Open live surface"
+        : drawerPanel?.id === "next" && relatedProofHref
         ? "Open related log"
         : "Open source";
 
@@ -389,6 +410,19 @@ export function NimdalPortfolioExperience() {
   }, [activeRouteId]);
 
   useEffect(() => {
+    const pendingRoomId = pendingRoomRef.current;
+
+    if (pendingRoomId) {
+      const roomIndex = Math.max(0, roomPanelOrder.indexOf(pendingRoomId));
+
+      setRoomPanelIndex(roomIndex);
+      setScanMode(true);
+      setScannedPanelIds(roomPanelOrder.slice(0, roomIndex + 1));
+      setOpenEvidencePanelId(pendingRoomId);
+      pendingRoomRef.current = null;
+      return;
+    }
+
     setRoomPanelIndex(0);
     setScanMode(false);
     setScannedPanelIds([]);
@@ -508,7 +542,15 @@ export function NimdalPortfolioExperience() {
     if (hydratedProjectRef.current || !allCases.length || typeof window === "undefined") return;
 
     const params = new URLSearchParams(window.location.search);
-    const projectSlug = params.get("project") ?? window.location.hash.replace(/^#project-/, "");
+    const hashMatch = window.location.hash.match(/^#project-([a-z0-9-]+)(?:-room-(signal|build|proof|next))?$/);
+    const roomParam = params.get("room");
+    const hashRoomParam = hashMatch?.[2] ?? null;
+    const projectSlug = params.get("project") ?? hashMatch?.[1] ?? "";
+    const requestedRoomId = isRoomPanelId(roomParam)
+      ? roomParam
+      : isRoomPanelId(hashRoomParam)
+        ? hashRoomParam
+        : null;
     hydratedProjectRef.current = true;
 
     if (!projectSlug) return;
@@ -519,6 +561,16 @@ export function NimdalPortfolioExperience() {
     focusProject(project);
     setDivingProject(null);
     setScene("project");
+
+    if (requestedRoomId) {
+      const roomIndex = Math.max(0, roomPanelOrder.indexOf(requestedRoomId));
+
+      pendingRoomRef.current = requestedRoomId;
+      setRoomPanelIndex(roomIndex);
+      setScanMode(true);
+      setScannedPanelIds(roomPanelOrder.slice(0, roomIndex + 1));
+      setOpenEvidencePanelId(requestedRoomId);
+    }
   }, [allCases, focusProject]);
 
   const moveCase = useCallback(

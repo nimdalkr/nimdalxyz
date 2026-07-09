@@ -481,14 +481,14 @@ const workCaseStudies: readonly CaseStudy[] = [
       }
     ],
     evidence: [
-      { label: "Build log", type: "article", href: "https://blog.nimdal.xyz/posts/maple-union-dev-log-2026-07-02/" },
+      { label: "Build log", type: "article", href: "https://blog.nimdal.xyz/posts/maple-union-dev-log-2026-07-02/#case-room-proof" },
       { label: "Screenshots", type: "screenshot", caveat: "Blog post contains current screenshot proof; add playable demo if available." }
     ],
     artifacts: [
-      { label: "Read build log", kind: "blog", href: "https://blog.nimdal.xyz/posts/maple-union-dev-log-2026-07-02/" }
+      { label: "Read build log", kind: "blog", href: "https://blog.nimdal.xyz/posts/maple-union-dev-log-2026-07-02/#case-room-proof" }
     ],
     relatedPosts: [
-      { title: "maple uNion build log", href: "https://blog.nimdal.xyz/posts/maple-union-dev-log-2026-07-02/" }
+      { title: "maple uNion build log", href: "https://blog.nimdal.xyz/posts/maple-union-dev-log-2026-07-02/#case-room-proof" }
     ]
   },
   {
