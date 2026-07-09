@@ -158,6 +158,27 @@ a:focus-visible {
   image-rendering: pixelated;
 }
 
+.zero-skip-link {
+  position: fixed;
+  left: 22px;
+  top: 18px;
+  z-index: 120;
+  border: 1px solid rgba(216, 255, 86, 0.82);
+  background: rgba(3, 16, 31, 0.9);
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 950;
+  padding: 10px 12px;
+  text-transform: uppercase;
+  transform: translateY(-160%);
+  transition: transform 180ms var(--ease-out);
+}
+
+.zero-skip-link:focus {
+  transform: translateY(0);
+}
+
 .zero-header {
   position: fixed;
   left: 48px;
@@ -841,6 +862,65 @@ a:focus-visible {
   box-shadow: 0 0 24px color-mix(in srgb, var(--route-tone) 28%, transparent);
 }
 
+.zero-case-room {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(210px, 0.9fr);
+  gap: 12px;
+  border: 1px solid rgba(239, 250, 255, 0.16);
+  background:
+    radial-gradient(circle at 12% 18%, color-mix(in srgb, var(--route-tone) 16%, transparent), transparent 46%),
+    rgba(3, 16, 31, 0.24);
+  padding: 14px;
+}
+
+.zero-case-room span,
+.zero-case-room dt,
+.zero-proof-media-heading span,
+.zero-proof-media figcaption span {
+  color: var(--acid);
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.zero-case-room strong,
+.zero-proof-media-heading strong,
+.zero-proof-media figcaption strong {
+  display: block;
+  margin-top: 5px;
+  color: var(--fg);
+  font-size: 0.94rem;
+  line-height: 1.25;
+}
+
+.zero-case-room p {
+  max-width: 58ch;
+  margin: 9px 0 0;
+  color: rgba(239, 250, 255, 0.78);
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+.zero-case-room dl {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.zero-case-room dl div {
+  border-left: 2px solid var(--route-tone);
+  background: rgba(239, 250, 255, 0.05);
+  padding: 8px 10px;
+}
+
+.zero-case-room dd {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
 .zero-room-interface {
   position: relative;
   overflow: hidden;
@@ -1121,6 +1201,81 @@ a:focus-visible {
 
 .zero-related-logs a {
   margin-top: 0;
+}
+
+.zero-proof-media {
+  display: grid;
+  gap: 12px;
+}
+
+.zero-proof-media-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid rgba(239, 250, 255, 0.14);
+  padding-bottom: 10px;
+}
+
+.zero-proof-media-heading strong {
+  margin-top: 0;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  text-transform: uppercase;
+}
+
+.zero-proof-media-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.zero-proof-media figure {
+  display: grid;
+  overflow: hidden;
+  min-width: 0;
+  border: 1px solid rgba(239, 250, 255, 0.16);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--route-tone) 8%, transparent), transparent 52%),
+    rgba(239, 250, 255, 0.055);
+  margin: 0;
+}
+
+.zero-proof-media figure > div {
+  position: relative;
+  overflow: hidden;
+  min-height: 132px;
+  border-bottom: 1px solid rgba(239, 250, 255, 0.12);
+  background: rgba(3, 16, 31, 0.32);
+}
+
+.zero-proof-media-image {
+  object-fit: cover;
+  object-position: top center;
+  filter: saturate(1.06) contrast(1.04);
+  transition: transform 520ms var(--ease-out), filter 520ms var(--ease-out);
+}
+
+.zero-proof-media figure:hover .zero-proof-media-image {
+  filter: saturate(1.16) contrast(1.08);
+  transform: scale(1.035);
+}
+
+.zero-proof-media figcaption {
+  display: grid;
+  gap: 5px;
+  padding: 10px;
+}
+
+.zero-proof-media figcaption strong {
+  margin-top: 0;
+}
+
+.zero-proof-media figcaption p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.42;
 }
 
 .zero-detail-context,
@@ -2888,6 +3043,14 @@ a:focus-visible {
     gap: 15px;
   }
 
+  .zero-case-room {
+    grid-template-columns: 1fr;
+  }
+
+  .zero-proof-media-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .zero-detail-frame {
     inset: 0 0 24px;
   }
@@ -3144,6 +3307,24 @@ a:focus-visible {
   .zero-detail-stack,
   .zero-detail-strategy li:nth-child(n+2) {
     display: none;
+  }
+
+  .zero-case-room {
+    padding: 11px;
+  }
+
+  .zero-case-room p,
+  .zero-case-room dl div:nth-child(n+2),
+  .zero-proof-media figcaption p {
+    display: none;
+  }
+
+  .zero-proof-media-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .zero-proof-media figure > div {
+    min-height: 140px;
   }
 
   .zero-detail-back {

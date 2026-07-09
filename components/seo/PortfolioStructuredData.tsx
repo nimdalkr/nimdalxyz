@@ -35,12 +35,19 @@ export function PortfolioStructuredData({ data }: Props) {
         headline: item.title,
         description: item.oneLiner,
         url: item.href ?? `https://nimdal.xyz/#project-${item.slug}`,
+        image: `https://nimdal.xyz${item.proofMedia?.[0]?.src ?? item.media.src}`,
         creator: {
           "@type": "Person",
           name: "Tak Chanwoo",
           alternateName: "Nimdal"
         },
         about: item.stack,
+        keywords: [item.category, item.proofLevel, ...item.stack],
+        workExample: item.artifacts?.map((artifact) => ({
+          "@type": "CreativeWork",
+          name: artifact.label,
+          url: artifact.href
+        })),
         isAccessibleForFree: true
       }))
     ]

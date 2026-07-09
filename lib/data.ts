@@ -35,6 +35,21 @@ export type CaseStudy = {
     outcome: string;
     next: string;
   };
+  caseRoom?: {
+    verdict: string;
+    judgeNote: string;
+    checkpoints: readonly {
+      label: string;
+      value: string;
+    }[];
+  };
+  proofMedia?: readonly {
+    label: string;
+    kind: "capture" | "workflow" | "log" | "repo" | "redacted";
+    src: string;
+    alt: string;
+    caption: string;
+  }[];
   evidence: readonly {
     label: string;
     type: "live" | "metric" | "screenshot" | "repository" | "article" | "testimonial" | "caveat";
@@ -186,6 +201,24 @@ const workCaseStudies: readonly CaseStudy[] = [
       outcome: "A clear personal-project proof of Nimdal's Web3 analytics direction.",
       next: "Add public screenshots, example datasets, and a short methodology note before presenting it as a mature analytics product."
     },
+    caseRoom: {
+      verdict: "Strong concept, repository-level proof.",
+      judgeNote: "The project already supports Nimdal's research identity, but needs a public methodology screen before it can be judged as a finished analytics product.",
+      checkpoints: [
+        { label: "Visible proof", value: "GitHub repository" },
+        { label: "Current gap", value: "No public usage screen" },
+        { label: "Next asset", value: "Annotated dashboard capture" }
+      ]
+    },
+    proofMedia: [
+      {
+        label: "Repository surface",
+        kind: "repo",
+        src: "/media/projects/ethosalpha-proof.png",
+        alt: "ethosalpha public GitHub repository screenshot.",
+        caption: "Public repository proof keeps this project honest: it is shown as a prototype until a product screen and methodology note are added."
+      }
+    ],
     evidence: [
       { label: "Repository", type: "repository", href: "https://github.com/nimdalkr/ethoskaito" },
       { label: "Repository screenshot", type: "screenshot", value: "Public GitHub surface captured for proof." },
@@ -224,6 +257,24 @@ const workCaseStudies: readonly CaseStudy[] = [
       outcome: "A live artifact that best proves Nimdal's market-research tooling direction.",
       next: "Add annotated screenshots, known limitations, and example arbitrage reads for stronger public proof."
     },
+    caseRoom: {
+      verdict: "Best current proof candidate.",
+      judgeNote: "This is the clearest live product in the personal project set because the user can open it, inspect the interface, and understand the market-research use case.",
+      checkpoints: [
+        { label: "Visible proof", value: "Live Vercel app" },
+        { label: "Interaction value", value: "Filtered research console" },
+        { label: "Next asset", value: "One annotated arbitrage workflow" }
+      ]
+    },
+    proofMedia: [
+      {
+        label: "Production interface",
+        kind: "capture",
+        src: "/media/projects/hyperalphaduo-proof.png",
+        alt: "HyperAlphaDuo production interface screenshot.",
+        caption: "A live production capture is used instead of a decorative placeholder, so the case room starts from inspectable product proof."
+      }
+    ],
     evidence: [
       { label: "Live site", type: "live", href: "https://hyperalphaduo.vercel.app/" },
       { label: "Production screenshot", type: "screenshot", value: "Live interface captured from production." },
@@ -260,6 +311,15 @@ const workCaseStudies: readonly CaseStudy[] = [
       system: "KOL activity mapping, campaign tendency reads, and KRW listing-oriented analysis.",
       outcome: "A live research artifact that connects content behavior to market interpretation.",
       next: "Add public sample cases and a source/caveat panel for correlation claims."
+    },
+    caseRoom: {
+      verdict: "Useful but gated.",
+      judgeNote: "The idea is strong, but the public portfolio should explicitly mark the password gate and show redacted sample logic before claiming strong proof.",
+      checkpoints: [
+        { label: "Visible proof", value: "Gated live URL" },
+        { label: "Risk", value: "Correlation claims" },
+        { label: "Next asset", value: "Redacted sample case" }
+      ]
     },
     evidence: [
       { label: "Gated live surface", type: "live", href: "https://kollisting.vercel.app/", caveat: "The public URL currently opens behind a password gate." },
@@ -388,6 +448,38 @@ const workCaseStudies: readonly CaseStudy[] = [
       outcome: "The strongest current bridge between Nimdal's playful identity and public build proof.",
       next: "Connect the project room directly to the build-log article and add before/after media."
     },
+    caseRoom: {
+      verdict: "Strongest story-to-proof bridge.",
+      judgeNote: "The case room works because screenshots, system notes, and the build log support each other. This is the model the other projects should move toward.",
+      checkpoints: [
+        { label: "Visible proof", value: "Multiple gameplay captures" },
+        { label: "Narrative strength", value: "Build log connected" },
+        { label: "Next asset", value: "Playable demo or short clip" }
+      ]
+    },
+    proofMedia: [
+      {
+        label: "Field loop",
+        kind: "capture",
+        src: "/media/projects/proof/maple-union-field-proof.png",
+        alt: "maple uNion field loop screenshot with combat UI and bottom HUD.",
+        caption: "The field capture shows the AFK loop, skill feedback, guide layer, and HUD in one frame."
+      },
+      {
+        label: "Stage sheet",
+        kind: "workflow",
+        src: "/media/projects/proof/maple-union-stage-proof.png",
+        alt: "maple uNion stage contact sheet showing multiple map and monster environments.",
+        caption: "The stage sheet proves the project is not a single mock screen; it has repeated environment logic."
+      },
+      {
+        label: "Map QA",
+        kind: "log",
+        src: "/media/projects/proof/maple-union-qa-proof.png",
+        alt: "maple uNion map render QA sheet.",
+        caption: "The QA sheet makes the craft visible: original map assets had to be adapted to a playable auto-hunting loop."
+      }
+    ],
     evidence: [
       { label: "Build log", type: "article", href: "https://blog.nimdal.xyz/posts/maple-union-dev-log-2026-07-02/" },
       { label: "Screenshots", type: "screenshot", caveat: "Blog post contains current screenshot proof; add playable demo if available." }

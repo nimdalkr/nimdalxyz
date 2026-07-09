@@ -277,7 +277,7 @@ export function NimdalPortfolioExperience() {
       {
         id: "proof",
         label: "Proof",
-        title: `${selectedProject.proofLevel.replace("-", " ")} evidence`,
+        title: `${proofLabels[selectedProject.proofLevel]} evidence`,
         body: selectedProject.href
           ? "A public surface or evidence layer is attached for direct inspection."
           : "This item is presented with its current proof level and caveats instead of overstating maturity.",
@@ -481,6 +481,9 @@ export function NimdalPortfolioExperience() {
         } as CSSProperties
       }
     >
+      <a className="zero-skip-link" href="#nimdal-main">
+        Skip to portfolio content
+      </a>
       <div className="zero-depth-map" aria-hidden />
       <div className="zero-waterfield" aria-hidden>
         {Array.from({ length: 120 }).map((_, index) => (
@@ -535,7 +538,7 @@ export function NimdalPortfolioExperience() {
         <span>PORTFOLIO</span>
       </aside>
 
-      <main className="zero-main">
+      <main className="zero-main" id="nimdal-main">
         <AnimatePresence mode="wait">
           {scene === "gate" ? (
             <motion.section
@@ -715,6 +718,7 @@ export function NimdalPortfolioExperience() {
                         return (
                           <button
                             key={item.slug}
+                            type="button"
                             className={isCurrent ? "is-active" : ""}
                             style={
                               {
@@ -723,7 +727,7 @@ export function NimdalPortfolioExperience() {
                                 "--node-tone": nodeRoute.tone
                               } as CSSProperties
                             }
-                            onClick={() => focusProject(item)}
+                            onClick={() => openProject(item)}
                             aria-current={isCurrent ? "true" : undefined}
                           >
                             <span>{String(index + 1).padStart(2, "0")}</span>
@@ -782,6 +786,24 @@ export function NimdalPortfolioExperience() {
                   <span>{selectedProjectRoute?.title ?? "Personal Projects"}</span>
                   <span>{selectedProject.title}</span>
                 </div>
+
+                {selectedProject.caseRoom ? (
+                  <section className="zero-case-room" aria-label={`${selectedProject.client} case room verdict`}>
+                    <div>
+                      <span>Case verdict</span>
+                      <strong>{selectedProject.caseRoom.verdict}</strong>
+                      <p>{selectedProject.caseRoom.judgeNote}</p>
+                    </div>
+                    <dl>
+                      {selectedProject.caseRoom.checkpoints.map((item) => (
+                        <div key={item.label}>
+                          <dt>{item.label}</dt>
+                          <dd>{item.value}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  </section>
+                ) : null}
 
                 <div
                   className={`zero-room-interface is-${selectedRoom?.transition ?? "reef"}`}
@@ -888,6 +910,35 @@ export function NimdalPortfolioExperience() {
                   ) : null}
                 </aside>
 
+                {selectedProject.proofMedia?.length ? (
+                  <section className="zero-proof-media" aria-label={`${selectedProject.client} proof media`}>
+                    <div className="zero-proof-media-heading">
+                      <span>Proof media</span>
+                      <strong>{selectedProject.proofMedia.length} captured assets</strong>
+                    </div>
+                    <div className="zero-proof-media-grid">
+                      {selectedProject.proofMedia.map((item) => (
+                        <figure key={`${item.label}-${item.src}`}>
+                          <div>
+                            <Image
+                              src={item.src}
+                              alt={item.alt}
+                              fill
+                              sizes="(max-width: 900px) 88vw, 24vw"
+                              className="zero-proof-media-image"
+                            />
+                          </div>
+                          <figcaption>
+                            <span>{item.kind}</span>
+                            <strong>{item.label}</strong>
+                            <p>{item.caption}</p>
+                          </figcaption>
+                        </figure>
+                      ))}
+                    </div>
+                  </section>
+                ) : null}
+
                 <div className="zero-detail-actions">
                   <button onClick={() => moveProject(-1)}>
                     <ArrowLeft size={16} aria-hidden />
@@ -921,7 +972,7 @@ export function NimdalPortfolioExperience() {
                 <div className="zero-detail-frame">
                   <Image
                     src={selectedProjectVisual}
-                    alt={`${selectedProject.client} project visual placeholder.`}
+                    alt={`${selectedProject.client} project visual evidence.`}
                     fill
                     sizes="(max-width: 900px) 92vw, 46vw"
                     className="zero-detail-image"
