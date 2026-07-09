@@ -3,7 +3,7 @@
 import Image from "next/image";
 import type { CSSProperties, PointerEvent } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, ArrowRight, ExternalLink, Waves } from "lucide-react";
+import { ArrowLeft, ArrowRight, ExternalLink, Waves, X } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { usePortfolioData } from "@/components/LocaleProvider";
 import type { CaseStudy } from "@/lib/data";
@@ -220,8 +220,10 @@ export function NimdalPortfolioExperience() {
   const [roomPanelIndex, setRoomPanelIndex] = useState(0);
   const [scanMode, setScanMode] = useState(false);
   const [scannedPanelIds, setScannedPanelIds] = useState<RoomPanel["id"][]>([]);
+  const [openEvidencePanelId, setOpenEvidencePanelId] = useState<RoomPanel["id"] | null>(null);
   const [divingProject, setDivingProject] = useState<CaseStudy | null>(null);
   const diveTimerRef = useRef<number | null>(null);
+  const evidenceCloseRef = useRef<HTMLButtonElement | null>(null);
   const pointerFrameRef = useRef<number | null>(null);
   const hydratedProjectRef = useRef(false);
 
@@ -304,6 +306,31 @@ export function NimdalPortfolioExperience() {
   const activeRoomPanel = roomPanels[roomPanelIndex] ?? roomPanels[0];
   const scanProgress = roomPanels.length ? Math.round((scannedPanelIds.length / roomPanels.length) * 100) : 0;
   const isRoomMapped = roomPanels.length > 0 && scannedPanelIds.length >= roomPanels.length;
+  const scanStageLabel = isRoomMapped ? "Complete" : scanMode ? activeRoomPanel?.label ?? "Signal" : "Idle";
+  const scanButtonLabel = isRoomMapped ? "Reset scan" : scanMode ? "Map next" : "Start scan";
+  const drawerPanel = openEvidencePanelId
+    ? roomPanels.find((panel) => panel.id === openEvidencePanelId)
+    : undefined;
+  const drawerPanelIndex = drawerPanel
+    ? Math.max(0, roomPanels.findIndex((panel) => panel.id === drawerPanel.id))
+    : 0;
+  const drawerEvidence = selectedProject?.evidence.length
+    ? selectedProject.evidence[drawerPanelIndex % selectedProject.evidence.length]
+    : undefined;
+  const drawerMedia = selectedProject?.proofMedia?.length
+    ? selectedProject.proofMedia[drawerPanelIndex % selectedProject.proofMedia.length]
+    : undefined;
+  const drawerLink =
+    drawerEvidence?.href ??
+    (drawerPanel?.id === "proof" ? selectedProject?.href : undefined) ??
+    (drawerPanel?.id === "next" ? selectedProject?.relatedPosts?.[0]?.href : undefined);
+  const drawerLinkLabel = drawerEvidence?.href
+    ? "Open artifact"
+    : drawerPanel?.id === "proof" && selectedProject?.href
+      ? "Open live surface"
+      : drawerPanel?.id === "next" && selectedProject?.relatedPosts?.[0]?.href
+        ? "Open related log"
+        : "Open source";
 
   const markScannedPanel = useCallback((panelId?: RoomPanel["id"]) => {
     if (!panelId) return;
@@ -311,8 +338,50 @@ export function NimdalPortfolioExperience() {
     setScannedPanelIds((current) => (current.includes(panelId) ? current : [...current, panelId]));
   }, []);
 
-  const toggleScanMode = useCallback(() => {
-    setScanMode((current) => !current);
+  const selectRoomPanel = useCallback(
+    (index: number, options: { openEvidence?: boolean } = {}) => {
+      const panel = roomPanels[index];
+      if (!panel) return;
+
+      setRoomPanelIndex(index);
+
+      if (scanMode || options.openEvidence) {
+        setScanMode(true);
+        markScannedPanel(panel.id);
+      }
+
+      if (options.openEvidence) {
+        setOpenEvidencePanelId(panel.id);
+      }
+    },
+    [markScannedPanel, roomPanels, scanMode]
+  );
+
+  const handleScanControl = useCallback(() => {
+    if (!roomPanels.length) return;
+
+    if (isRoomMapped) {
+      setScanMode(false);
+      setScannedPanelIds([]);
+      setRoomPanelIndex(0);
+      setOpenEvidencePanelId(null);
+      return;
+    }
+
+    const currentPanel = roomPanels[roomPanelIndex] ?? roomPanels[0];
+    const currentIsScanned = scannedPanelIds.includes(currentPanel.id);
+    const nextUnscannedIndex = roomPanels.findIndex((panel) => !scannedPanelIds.includes(panel.id));
+    const targetIndex = currentIsScanned && nextUnscannedIndex >= 0 ? nextUnscannedIndex : roomPanelIndex;
+    const targetPanel = roomPanels[targetIndex] ?? currentPanel;
+
+    setScanMode(true);
+    setRoomPanelIndex(targetIndex);
+    markScannedPanel(targetPanel.id);
+    setOpenEvidencePanelId(targetPanel.id);
+  }, [isRoomMapped, markScannedPanel, roomPanelIndex, roomPanels, scannedPanelIds]);
+
+  const closeEvidenceDrawer = useCallback(() => {
+    setOpenEvidencePanelId(null);
   }, []);
 
   useEffect(() => {
@@ -323,12 +392,18 @@ export function NimdalPortfolioExperience() {
     setRoomPanelIndex(0);
     setScanMode(false);
     setScannedPanelIds([]);
+    setOpenEvidencePanelId(null);
   }, [selectedProject?.slug]);
 
   useEffect(() => {
     if (!scanMode) return;
     markScannedPanel(activeRoomPanel?.id);
   }, [activeRoomPanel?.id, markScannedPanel, scanMode]);
+
+  useEffect(() => {
+    if (!drawerPanel) return;
+    evidenceCloseRef.current?.focus();
+  }, [drawerPanel]);
 
   useEffect(() => {
     return () => {
@@ -499,7 +574,7 @@ export function NimdalPortfolioExperience() {
       if (scene === "project") {
         if (event.key.toLowerCase() === "s") {
           event.preventDefault();
-          toggleScanMode();
+          handleScanControl();
         }
 
         if (event.key === "ArrowRight") {
@@ -514,6 +589,10 @@ export function NimdalPortfolioExperience() {
 
         if (event.key === "Escape" || event.key === "Esc") {
           event.preventDefault();
+          if (drawerPanel) {
+            closeEvidenceDrawer();
+            return;
+          }
           showScene("currents");
         }
       }
@@ -533,7 +612,7 @@ export function NimdalPortfolioExperience() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [moveCase, moveRoomPanel, scene, showScene, toggleScanMode]);
+  }, [closeEvidenceDrawer, drawerPanel, handleScanControl, moveCase, moveRoomPanel, scene, showScene]);
 
   return (
     <div
@@ -880,9 +959,13 @@ export function NimdalPortfolioExperience() {
                 >
                   <div className="zero-scan-console-head">
                     <span>Nimdal scanner</span>
-                    <button type="button" onClick={toggleScanMode} aria-pressed={scanMode}>
-                      {scanMode ? "Scanner active" : "Start scan"}
+                    <button type="button" onClick={handleScanControl} aria-pressed={scanMode || isRoomMapped}>
+                      {scanButtonLabel}
                     </button>
+                  </div>
+                  <div className="zero-scan-stage" aria-live="polite">
+                    <span>Stage</span>
+                    <strong>{scanStageLabel}</strong>
                   </div>
                   <div className="zero-scan-progress" aria-label={`Room scan progress ${scanProgress}%`}>
                     <span style={{ width: `${scanProgress}%` }} />
@@ -902,8 +985,7 @@ export function NimdalPortfolioExperience() {
                           type="button"
                           className={`${isActive ? "is-active" : ""} ${isScanned ? "is-scanned" : ""}`}
                           onClick={() => {
-                            setRoomPanelIndex(index);
-                            if (scanMode) markScannedPanel(panel.id);
+                            selectRoomPanel(index, { openEvidence: true });
                           }}
                           aria-current={isActive ? "true" : undefined}
                         >
@@ -977,8 +1059,7 @@ export function NimdalPortfolioExperience() {
                           scannedPanelIds.includes(panel.id) ? "is-scanned" : ""
                         }`}
                         onClick={() => {
-                          setRoomPanelIndex(index);
-                          if (scanMode) markScannedPanel(panel.id);
+                          selectRoomPanel(index);
                         }}
                         aria-label={`Open ${panel.label} panel`}
                         aria-current={index === roomPanelIndex ? "true" : undefined}
@@ -1074,7 +1155,7 @@ export function NimdalPortfolioExperience() {
               </div>
 
               <motion.div
-                className="zero-detail-visual"
+                className={`zero-detail-visual ${drawerPanel ? "has-evidence-drawer" : ""}`}
                 animate={
                   shouldReduceMotion
                     ? undefined
@@ -1120,8 +1201,7 @@ export function NimdalPortfolioExperience() {
                             } as CSSProperties
                           }
                           onClick={() => {
-                            setRoomPanelIndex(index);
-                            if (scanMode) markScannedPanel(panel.id);
+                            selectRoomPanel(index, { openEvidence: true });
                           }}
                           aria-current={index === roomPanelIndex ? "true" : undefined}
                         >
@@ -1130,6 +1210,63 @@ export function NimdalPortfolioExperience() {
                       );
                     })}
                   </div>
+                  <AnimatePresence>
+                    {drawerPanel ? (
+                      <motion.aside
+                        key={drawerPanel.id}
+                        className={`zero-evidence-drawer is-${drawerPanel.id}`}
+                        role="dialog"
+                        aria-modal="false"
+                        aria-labelledby={`zero-evidence-drawer-${drawerPanel.id}`}
+                        initial={shouldReduceMotion ? false : { opacity: 0, y: 18, scale: 0.98 }}
+                        animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0, scale: 1 }}
+                        exit={shouldReduceMotion ? undefined : { opacity: 0, y: 12, scale: 0.98 }}
+                        transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
+                      >
+                        <button
+                          ref={evidenceCloseRef}
+                          type="button"
+                          className="zero-evidence-drawer-close"
+                          onClick={closeEvidenceDrawer}
+                          aria-label="Close evidence drawer"
+                        >
+                          <X size={15} aria-hidden />
+                        </button>
+                        <span>{drawerPanel.label} evidence</span>
+                        <h3 id={`zero-evidence-drawer-${drawerPanel.id}`}>{drawerPanel.title}</h3>
+                        <p>{drawerPanel.body}</p>
+                        <div className="zero-evidence-drawer-artifact">
+                          <span>{drawerEvidence?.type ?? drawerMedia?.kind ?? "room note"}</span>
+                          <strong>{drawerEvidence?.value ?? drawerEvidence?.label ?? drawerMedia?.label ?? "Project room state"}</strong>
+                          {drawerEvidence?.caveat ? (
+                            <p>{drawerEvidence.caveat}</p>
+                          ) : drawerMedia ? (
+                            <p>{drawerMedia.caption}</p>
+                          ) : null}
+                        </div>
+                        {drawerMedia ? (
+                          <figure>
+                            <div>
+                              <Image
+                                src={drawerMedia.src}
+                                alt={drawerMedia.alt}
+                                fill
+                                sizes="(max-width: 900px) 72vw, 220px"
+                                className="zero-evidence-drawer-image"
+                              />
+                            </div>
+                            <figcaption>{drawerMedia.label}</figcaption>
+                          </figure>
+                        ) : null}
+                        {drawerLink ? (
+                          <a href={drawerLink} target={drawerLink.startsWith("http") ? "_blank" : undefined} rel="noreferrer">
+                            {drawerLinkLabel}
+                            <ExternalLink size={14} aria-hidden />
+                          </a>
+                        ) : null}
+                      </motion.aside>
+                    ) : null}
+                  </AnimatePresence>
                 </div>
                 <div className="zero-detail-caption">
                   <span>{selectedProject.category}</span>

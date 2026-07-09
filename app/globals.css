@@ -1006,6 +1006,35 @@ a:focus-visible {
   transform: translateY(-2px);
 }
 
+.zero-scan-stage {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1px solid rgba(239, 250, 255, 0.16);
+  background: rgba(3, 16, 31, 0.22);
+  padding: 8px 10px;
+}
+
+.zero-scan-stage span,
+.zero-scan-stage strong {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 950;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.zero-scan-stage span {
+  color: var(--muted);
+}
+
+.zero-scan-stage strong {
+  color: var(--acid);
+}
+
 .zero-scan-progress {
   position: relative;
   z-index: 1;
@@ -1719,6 +1748,131 @@ a:focus-visible {
   box-shadow:
     0 0 0 6px rgba(216, 255, 86, 0.18),
     0 0 26px var(--acid);
+}
+
+.zero-evidence-drawer {
+  position: absolute;
+  right: 22px;
+  bottom: 22px;
+  z-index: 8;
+  display: grid;
+  width: min(390px, calc(100% - 44px));
+  gap: 10px;
+  border: 1px solid rgba(239, 250, 255, 0.48);
+  background:
+    linear-gradient(135deg, rgba(3, 16, 31, 0.94), rgba(3, 16, 31, 0.74)),
+    color-mix(in srgb, var(--route-tone) 15%, transparent);
+  color: var(--fg);
+  padding: 16px;
+  pointer-events: auto;
+  box-shadow:
+    0 26px 70px rgba(0, 0, 0, 0.44),
+    0 0 42px color-mix(in srgb, var(--route-tone) 22%, transparent);
+  backdrop-filter: blur(16px);
+}
+
+.zero-evidence-drawer.is-build {
+  right: auto;
+  left: 22px;
+}
+
+.zero-evidence-drawer.is-proof {
+  right: auto;
+  bottom: auto;
+  left: 22px;
+  top: 22px;
+}
+
+.zero-evidence-drawer.is-next {
+  bottom: auto;
+  top: 22px;
+}
+
+.zero-evidence-drawer-close {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  display: inline-flex;
+  width: 32px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(239, 250, 255, 0.32);
+  background: rgba(3, 16, 31, 0.5);
+  color: var(--fg);
+}
+
+.zero-evidence-drawer > span,
+.zero-evidence-drawer-artifact span,
+.zero-evidence-drawer figcaption {
+  color: var(--acid);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 950;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.zero-evidence-drawer h3 {
+  max-width: calc(100% - 42px);
+  margin: 0;
+  color: var(--fg);
+  font-size: 1.08rem;
+  line-height: 1.18;
+}
+
+.zero-evidence-drawer p {
+  margin: 0;
+  color: rgba(239, 250, 255, 0.82);
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.zero-evidence-drawer-artifact {
+  display: grid;
+  gap: 5px;
+  border-left: 3px solid var(--route-tone);
+  background: rgba(239, 250, 255, 0.07);
+  padding: 10px 12px;
+}
+
+.zero-evidence-drawer-artifact strong {
+  color: var(--fg);
+  font-size: 0.95rem;
+  line-height: 1.22;
+}
+
+.zero-evidence-drawer figure {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+}
+
+.zero-evidence-drawer figure div {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  border: 1px solid rgba(239, 250, 255, 0.22);
+  background: rgba(239, 250, 255, 0.06);
+}
+
+.zero-evidence-drawer-image {
+  object-fit: cover;
+}
+
+.zero-evidence-drawer a {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid rgba(216, 255, 86, 0.62);
+  background: rgba(216, 255, 86, 0.12);
+  color: var(--acid);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 950;
+  text-transform: uppercase;
 }
 
 .zero-detail-image {
@@ -3358,6 +3512,14 @@ a:focus-visible {
     padding: 0 8px;
   }
 
+  .zero-evidence-drawer {
+    right: 14px;
+    bottom: 14px;
+    width: min(360px, calc(100% - 28px));
+    max-height: calc(100% - 28px);
+    overflow: auto;
+  }
+
   .zero-portrait-porthole,
   .zero-portrait-scan {
     left: 0;
@@ -3610,6 +3772,10 @@ a:focus-visible {
     order: -1;
   }
 
+  .zero-detail-visual.has-evidence-drawer {
+    min-height: 340px;
+  }
+
   .zero-detail-frame {
     inset: 0;
     clip-path: polygon(7% 0, 100% 0, 100% 84%, 88% 100%, 0 100%, 0 10%);
@@ -3699,6 +3865,36 @@ a:focus-visible {
   .zero-scan-nodes span,
   .zero-scan-nodes small {
     font-size: 0.68rem;
+  }
+
+  .zero-evidence-drawer,
+  .zero-evidence-drawer.is-build,
+  .zero-evidence-drawer.is-proof,
+  .zero-evidence-drawer.is-next {
+    left: 10px;
+    right: 10px;
+    top: auto;
+    bottom: 10px;
+    width: calc(100% - 20px);
+    gap: 7px;
+    padding: 12px;
+  }
+
+  .zero-evidence-drawer h3 {
+    font-size: 0.92rem;
+  }
+
+  .zero-evidence-drawer p,
+  .zero-evidence-drawer-artifact strong {
+    font-size: 0.78rem;
+  }
+
+  .zero-evidence-drawer figure {
+    display: none;
+  }
+
+  .zero-detail-visual.has-evidence-drawer .zero-detail-caption {
+    display: none;
   }
 
   .zero-scan-overlay {
