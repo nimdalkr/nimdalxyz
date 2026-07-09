@@ -15,6 +15,9 @@
   --font-body: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-display: Impact, "Arial Narrow", "Roboto Condensed", "Helvetica Neue", Arial, sans-serif;
   --font-mono: "Geist Mono", "SFMono-Regular", "Cascadia Code", Consolas, monospace;
+  --zero-label-size: 0.8125rem;
+  --zero-compact-label-size: 0.75rem;
+  --zero-control-size: 44px;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -49,7 +52,8 @@ a {
 }
 
 button:focus-visible,
-a:focus-visible {
+a:focus-visible,
+summary:focus-visible {
   outline: 3px solid var(--acid);
   outline-offset: 5px;
   box-shadow: 0 0 0 6px rgba(3, 16, 31, 0.72);
@@ -225,7 +229,7 @@ a:focus-visible {
   margin-top: 4px;
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 0.62rem;
+  font-size: var(--zero-compact-label-size);
   font-weight: 950;
   letter-spacing: 0;
 }
@@ -241,11 +245,11 @@ a:focus-visible {
   background: rgba(3, 16, 31, 0.28);
   color: rgba(239, 250, 255, 0.88);
   display: inline-flex;
-  min-height: 44px;
+  min-height: var(--zero-control-size);
   align-items: center;
   justify-content: center;
   font-family: var(--font-mono);
-  font-size: 0.76rem;
+  font-size: var(--zero-label-size);
   font-weight: 950;
   letter-spacing: 0;
   padding: 0 8px;
@@ -355,7 +359,7 @@ a:focus-visible {
 .zero-detail-actions button,
 .zero-detail-actions a {
   display: inline-flex;
-  min-height: 44px;
+  min-height: var(--zero-control-size);
   align-items: center;
   justify-content: center;
   gap: 9px;
@@ -363,7 +367,7 @@ a:focus-visible {
   background: transparent;
   color: var(--fg);
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: var(--zero-label-size);
   font-weight: 950;
   letter-spacing: 0;
   padding: 0 18px;
@@ -827,7 +831,7 @@ a:focus-visible {
 
 .zero-detail-back {
   justify-self: start;
-  min-height: 40px;
+  min-height: var(--zero-control-size);
   padding: 0 14px;
 }
 
@@ -856,7 +860,7 @@ a:focus-visible {
   background: rgba(3, 16, 31, 0.24);
   color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 0.62rem;
+  font-size: var(--zero-compact-label-size);
   font-weight: 950;
   letter-spacing: 0;
   padding: 8px 10px;
@@ -898,7 +902,7 @@ a:focus-visible {
 .zero-proof-media figcaption span {
   color: var(--acid);
   font-family: var(--font-mono);
-  font-size: 0.58rem;
+  font-size: var(--zero-compact-label-size);
   font-weight: 950;
   text-transform: uppercase;
 }
@@ -917,7 +921,7 @@ a:focus-visible {
   max-width: 58ch;
   margin: 9px 0 0;
   color: rgba(239, 250, 255, 0.78);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   line-height: 1.5;
 }
 
@@ -991,18 +995,18 @@ a:focus-visible {
 .zero-scan-console-head > span,
 .zero-scan-readout strong {
   color: var(--acid);
-  font-size: 0.68rem;
+  font-size: var(--zero-label-size);
 }
 
 .zero-scan-console-head button {
   display: inline-flex;
-  min-height: 36px;
+  min-height: var(--zero-control-size);
   align-items: center;
   border: 1px solid rgba(239, 250, 255, 0.34);
   background: rgba(3, 16, 31, 0.32);
   color: var(--fg);
   font-family: var(--font-mono);
-  font-size: 0.68rem;
+  font-size: var(--zero-label-size);
   font-weight: 950;
   padding: 0 12px;
   text-transform: uppercase;
@@ -1035,7 +1039,7 @@ a:focus-visible {
 .zero-scan-stage span,
 .zero-scan-stage strong {
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: var(--zero-label-size);
   font-weight: 950;
   letter-spacing: 0;
   text-transform: uppercase;
@@ -1072,7 +1076,7 @@ a:focus-visible {
   max-width: 38ch;
   margin: 0;
   color: rgba(239, 250, 255, 0.86);
-  font-size: 0.86rem;
+  font-size: 0.9rem;
   line-height: 1.42;
   text-align: right;
   text-overflow: ellipsis;
@@ -1090,7 +1094,7 @@ a:focus-visible {
 .zero-scan-nodes button {
   display: grid;
   min-width: 0;
-  min-height: 58px;
+  min-height: 68px;
   gap: 4px;
   border: 1px solid rgba(239, 250, 255, 0.22);
   background: rgba(239, 250, 255, 0.075);
@@ -1113,12 +1117,12 @@ a:focus-visible {
 
 .zero-scan-nodes span {
   color: var(--coral);
-  font-size: 0.64rem;
+  font-size: var(--zero-compact-label-size);
 }
 
 .zero-scan-nodes strong {
   overflow: hidden;
-  font-size: 0.82rem;
+  font-size: 0.875rem;
   line-height: 1.1;
   text-overflow: ellipsis;
   text-transform: uppercase;
@@ -1127,7 +1131,7 @@ a:focus-visible {
 
 .zero-scan-nodes small {
   color: var(--muted);
-  font-size: 0.62rem;
+  font-size: var(--zero-compact-label-size);
 }
 
 .zero-scan-nodes button.is-scanned small {
@@ -1185,7 +1189,7 @@ a:focus-visible {
 .zero-room-toolbar > span {
   color: var(--acid);
   font-family: var(--font-mono);
-  font-size: 0.64rem;
+  font-size: var(--zero-compact-label-size);
   font-weight: 950;
   letter-spacing: 0;
   text-transform: uppercase;
@@ -1200,7 +1204,7 @@ a:focus-visible {
 .zero-room-panel a,
 .zero-room-panel button {
   display: inline-flex;
-  min-height: 36px;
+  min-height: var(--zero-control-size);
   align-items: center;
   justify-content: center;
   gap: 8px;
@@ -1208,7 +1212,7 @@ a:focus-visible {
   background: rgba(3, 16, 31, 0.28);
   color: var(--fg);
   font-family: var(--font-mono);
-  font-size: 0.62rem;
+  font-size: var(--zero-compact-label-size);
   font-weight: 950;
   letter-spacing: 0;
   padding: 0 12px;
@@ -1217,7 +1221,7 @@ a:focus-visible {
 }
 
 .zero-room-toolbar button {
-  width: 38px;
+  width: var(--zero-control-size);
   padding: 0;
 }
 
@@ -1253,7 +1257,7 @@ a:focus-visible {
 .zero-room-panel > span {
   color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 0.6rem;
+  font-size: var(--zero-compact-label-size);
   font-weight: 950;
   letter-spacing: 0;
   text-transform: uppercase;
@@ -1324,27 +1328,39 @@ a:focus-visible {
 
 .zero-room-dots button {
   position: relative;
-  width: 32px;
-  height: 24px;
-  border: 0;
-  background: transparent;
+  display: grid;
+  width: var(--zero-control-size);
+  height: var(--zero-control-size);
+  place-items: center;
+  border: 1px solid rgba(239, 250, 255, 0.24);
+  background: rgba(239, 250, 255, 0.06);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: var(--zero-compact-label-size);
+  font-weight: 950;
   padding: 0;
-  transition: width 180ms var(--ease-out), background 180ms var(--ease-out);
+  transition: border-color 180ms var(--ease-out), background 180ms var(--ease-out), color 180ms var(--ease-out);
 }
 
 .zero-room-dots button::before {
   position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  height: 5px;
+  left: 7px;
+  right: 7px;
+  bottom: 5px;
+  height: 3px;
   content: "";
   background: rgba(239, 250, 255, 0.32);
-  transform: translateY(-50%);
+}
+
+.zero-room-dots button span {
+  position: relative;
+  z-index: 1;
 }
 
 .zero-room-dots button.is-active {
-  width: 48px;
+  border-color: var(--route-tone);
+  background: color-mix(in srgb, var(--route-tone) 18%, rgba(3, 16, 31, 0.42));
+  color: var(--fg);
 }
 
 .zero-room-dots button.is-active::before {
@@ -1393,18 +1409,18 @@ a:focus-visible {
 .zero-proof-reel-head span,
 .zero-proof-reel figcaption span {
   color: var(--acid);
-  font-size: 0.66rem;
+  font-size: var(--zero-compact-label-size);
 }
 
 .zero-proof-reel-head strong {
   color: var(--fg);
-  font-size: 0.82rem;
+  font-size: 0.875rem;
 }
 
 .zero-proof-reel-head > button,
 .zero-proof-reel-controls > button {
   display: inline-flex;
-  min-height: 38px;
+  min-height: var(--zero-control-size);
   align-items: center;
   justify-content: center;
   gap: 8px;
@@ -1475,7 +1491,7 @@ a:focus-visible {
 .zero-proof-reel figcaption p {
   margin: 0;
   color: rgba(239, 250, 255, 0.78);
-  font-size: 0.84rem;
+  font-size: 0.9rem;
   line-height: 1.48;
 }
 
@@ -1500,23 +1516,38 @@ a:focus-visible {
 
 .zero-proof-reel-controls div button {
   position: relative;
-  width: 24px;
-  height: 24px;
+  display: grid;
+  width: var(--zero-control-size);
+  height: var(--zero-control-size);
+  place-items: center;
   border: 1px solid rgba(239, 250, 255, 0.32);
   background: rgba(239, 250, 255, 0.04);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: var(--zero-compact-label-size);
+  font-weight: 950;
   padding: 0;
 }
 
 .zero-proof-reel-controls div button::before {
   position: absolute;
-  inset: 7px;
+  left: 7px;
+  right: 7px;
+  bottom: 5px;
+  height: 3px;
   content: "";
   background: rgba(239, 250, 255, 0.16);
+}
+
+.zero-proof-reel-controls div button span {
+  position: relative;
+  z-index: 1;
 }
 
 .zero-proof-reel-controls div button.is-active {
   border-color: var(--acid);
   background: rgba(216, 255, 86, 0.1);
+  color: var(--fg);
   box-shadow: 0 0 18px rgba(216, 255, 86, 0.38);
 }
 
@@ -1547,7 +1578,7 @@ a:focus-visible {
 .zero-evidence-grid span {
   color: var(--acid);
   font-family: var(--font-mono);
-  font-size: 0.66rem;
+  font-size: var(--zero-compact-label-size);
   font-weight: 950;
   text-transform: uppercase;
 }
@@ -1555,7 +1586,7 @@ a:focus-visible {
 .zero-evidence-heading strong {
   color: var(--fg);
   font-family: var(--font-mono);
-  font-size: 0.62rem;
+  font-size: var(--zero-compact-label-size);
   text-transform: uppercase;
 }
 
@@ -1576,6 +1607,7 @@ a:focus-visible {
 
 .zero-evidence-grid a,
 .zero-related-logs a {
+  min-height: var(--zero-control-size);
   transition: border-color 180ms var(--ease-out), transform 180ms var(--ease-out);
 }
 
@@ -1598,7 +1630,7 @@ a:focus-visible {
 .zero-evidence-grid p {
   margin: 7px 0 0;
   color: rgba(239, 250, 255, 0.78);
-  font-size: 0.84rem;
+  font-size: 0.875rem;
   line-height: 1.5;
 }
 
@@ -1627,7 +1659,7 @@ a:focus-visible {
 .zero-proof-media-heading strong {
   margin-top: 0;
   font-family: var(--font-mono);
-  font-size: 0.62rem;
+  font-size: var(--zero-compact-label-size);
   text-transform: uppercase;
 }
 
@@ -1681,7 +1713,7 @@ a:focus-visible {
 .zero-proof-media figcaption p {
   margin: 0;
   color: var(--muted);
-  font-size: 0.78rem;
+  font-size: 0.875rem;
   line-height: 1.42;
 }
 
@@ -1696,7 +1728,7 @@ a:focus-visible {
   margin: 0;
   color: var(--acid);
   font-family: var(--font-mono);
-  font-size: 0.66rem;
+  font-size: var(--zero-compact-label-size);
   font-weight: 950;
   letter-spacing: 0;
   text-transform: uppercase;
@@ -1821,7 +1853,7 @@ a:focus-visible {
 .zero-room-hotspots button span {
   color: var(--acid);
   font-family: var(--font-mono);
-  font-size: 0.68rem;
+  font-size: var(--zero-label-size);
   font-weight: 950;
   letter-spacing: 0;
   text-transform: uppercase;
@@ -2020,8 +2052,8 @@ a:focus-visible {
   right: 10px;
   top: 10px;
   display: inline-flex;
-  width: 32px;
-  height: 32px;
+  width: var(--zero-control-size);
+  height: var(--zero-control-size);
   align-items: center;
   justify-content: center;
   border: 1px solid rgba(239, 250, 255, 0.32);
@@ -2034,7 +2066,7 @@ a:focus-visible {
 .zero-evidence-drawer figcaption {
   color: var(--acid);
   font-family: var(--font-mono);
-  font-size: 0.66rem;
+  font-size: var(--zero-compact-label-size);
   font-weight: 950;
   letter-spacing: 0;
   text-transform: uppercase;
@@ -2051,7 +2083,7 @@ a:focus-visible {
 .zero-evidence-drawer p {
   margin: 0;
   color: rgba(239, 250, 255, 0.82);
-  font-size: 0.86rem;
+  font-size: 0.9rem;
   line-height: 1.45;
 }
 
@@ -2089,7 +2121,7 @@ a:focus-visible {
 
 .zero-evidence-drawer a {
   display: inline-flex;
-  min-height: 38px;
+  min-height: var(--zero-control-size);
   align-items: center;
   justify-content: center;
   gap: 8px;
@@ -2097,7 +2129,7 @@ a:focus-visible {
   background: rgba(216, 255, 86, 0.12);
   color: var(--acid);
   font-family: var(--font-mono);
-  font-size: 0.68rem;
+  font-size: var(--zero-compact-label-size);
   font-weight: 950;
   text-transform: uppercase;
 }
@@ -2126,7 +2158,7 @@ a:focus-visible {
 .zero-detail-caption span {
   color: var(--acid);
   font-family: var(--font-mono);
-  font-size: 0.62rem;
+  font-size: var(--zero-label-size);
   font-weight: 950;
   letter-spacing: 0;
   text-transform: uppercase;
@@ -3676,7 +3708,7 @@ a:focus-visible {
 
   .zero-nav button,
   .zero-nav a {
-    font-size: 0.68rem;
+    font-size: var(--zero-label-size);
   }
 
   .zero-main {
@@ -3737,8 +3769,8 @@ a:focus-visible {
   }
 
   .zero-room-hotspots button {
-    min-height: 40px;
-    padding: 0 8px;
+    min-height: var(--zero-control-size);
+    padding: 0 10px;
   }
 
   .zero-evidence-drawer {
@@ -3924,9 +3956,9 @@ a:focus-visible {
 
   .zero-nav button,
   .zero-nav a {
-    min-height: 40px;
-    font-size: 0.7rem;
-    padding: 0 3px;
+    min-height: var(--zero-control-size);
+    font-size: var(--zero-label-size);
+    padding: 0 4px;
   }
 
   .zero-main {
@@ -3993,7 +4025,7 @@ a:focus-visible {
   }
 
   .zero-proof-strip b {
-    font-size: 0.62rem;
+    font-size: var(--zero-compact-label-size);
     padding: 6px 8px;
   }
 
@@ -4071,9 +4103,9 @@ a:focus-visible {
   }
 
   .zero-scan-console-head button {
-    min-height: 40px;
+    min-height: var(--zero-control-size);
     padding: 0 10px;
-    font-size: 0.7rem;
+    font-size: var(--zero-label-size);
   }
 
   .zero-scan-readout {
@@ -4097,17 +4129,17 @@ a:focus-visible {
   }
 
   .zero-scan-nodes button {
-    min-height: 44px;
+    min-height: 64px;
     padding: 8px;
   }
 
   .zero-scan-nodes strong {
-    font-size: 0.76rem;
+    font-size: 0.875rem;
   }
 
   .zero-scan-nodes span,
   .zero-scan-nodes small {
-    font-size: 0.68rem;
+    font-size: var(--zero-compact-label-size);
   }
 
   .zero-evidence-drawer,
@@ -4140,12 +4172,12 @@ a:focus-visible {
   }
 
   .zero-evidence-drawer h3 {
-    font-size: 0.92rem;
+    font-size: 1rem;
   }
 
   .zero-evidence-drawer p,
   .zero-evidence-drawer-artifact strong {
-    font-size: 0.78rem;
+    font-size: 0.875rem;
   }
 
   .zero-evidence-drawer figure {
@@ -4182,8 +4214,8 @@ a:focus-visible {
 
   .zero-proof-reel-controls > button {
     flex: 1 1 120px;
-    min-height: 40px;
-    font-size: 0.66rem;
+    min-height: var(--zero-control-size);
+    font-size: var(--zero-compact-label-size);
   }
 
   .zero-proof-reel-controls div {
@@ -4216,9 +4248,9 @@ a:focus-visible {
     z-index: 55;
     justify-self: start;
     background: rgba(4, 24, 45, 0.78);
-    min-height: 42px;
+    min-height: var(--zero-control-size);
     padding: 0 14px;
-    font-size: 0.64rem;
+    font-size: var(--zero-compact-label-size);
     backdrop-filter: blur(14px);
   }
 
@@ -4238,7 +4270,7 @@ a:focus-visible {
 
   .zero-detail-meta span {
     padding: 6px 8px;
-    font-size: 0.62rem;
+    font-size: var(--zero-compact-label-size);
   }
 
   .zero-detail-context,
@@ -4271,9 +4303,9 @@ a:focus-visible {
   .zero-detail-actions button,
   .zero-detail-actions a {
     flex: 1 1 0;
-    min-height: 42px;
+    min-height: var(--zero-control-size);
     padding: 0 9px;
-    font-size: 0.7rem;
+    font-size: var(--zero-label-size);
   }
 
   .zero-room-interface {
@@ -4300,8 +4332,8 @@ a:focus-visible {
 
   .zero-room-panel p,
   .zero-room-panel li {
-    font-size: 0.78rem;
-    line-height: 1.28;
+    font-size: 0.875rem;
+    line-height: 1.4;
   }
 
   .zero-room-panel p {
@@ -4320,15 +4352,15 @@ a:focus-visible {
   }
 
   .zero-room-dots button {
-    width: 44px;
-    height: 44px;
+    width: var(--zero-control-size);
+    height: var(--zero-control-size);
     border: 1px solid rgba(239, 250, 255, 0.18);
     background: rgba(239, 250, 255, 0.1);
   }
 
   .zero-room-dots button.is-active {
-    width: 44px;
     background: var(--route-tone);
+    color: var(--ink);
   }
 
   .zero-evidence-tray {
@@ -4343,7 +4375,7 @@ a:focus-visible {
 
   .zero-evidence-grid strong,
   .zero-related-logs a {
-    font-size: 0.78rem;
+    font-size: 0.875rem;
   }
 
   .zero-profile-metrics,

@@ -1221,7 +1221,9 @@ export function NimdalPortfolioExperience() {
                         }}
                         aria-label={`Open ${panel.label} panel`}
                         aria-current={index === roomPanelIndex ? "true" : undefined}
-                      />
+                      >
+                        <span aria-hidden>{String(index + 1).padStart(2, "0")}</span>
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -1294,7 +1296,9 @@ export function NimdalPortfolioExperience() {
                             }}
                             aria-label={`Open proof frame ${index + 1}: ${frame.label}`}
                             aria-current={index === proofFrameIndex ? "true" : undefined}
-                          />
+                          >
+                            <span aria-hidden>{String(index + 1).padStart(2, "0")}</span>
+                          </button>
                         ))}
                       </div>
                       <button type="button" onClick={() => moveProofFrame(1)} disabled={proofReelFrames.length < 2}>
