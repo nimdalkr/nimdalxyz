@@ -3,7 +3,7 @@
 import Image from "next/image";
 import type { CSSProperties, PointerEvent } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, ArrowRight, ExternalLink, Waves, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, ExternalLink, Pause, Play, Waves, X } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { usePortfolioData } from "@/components/LocaleProvider";
 import type { CaseStudy } from "@/lib/data";
@@ -231,6 +231,8 @@ export function NimdalPortfolioExperience() {
   const [scanMode, setScanMode] = useState(false);
   const [scannedPanelIds, setScannedPanelIds] = useState<RoomPanel["id"][]>([]);
   const [openEvidencePanelId, setOpenEvidencePanelId] = useState<RoomPanel["id"] | null>(null);
+  const [proofFrameIndex, setProofFrameIndex] = useState(0);
+  const [isProofReelPlaying, setIsProofReelPlaying] = useState(false);
   const [divingProject, setDivingProject] = useState<CaseStudy | null>(null);
   const diveTimerRef = useRef<number | null>(null);
   const evidenceCloseRef = useRef<HTMLButtonElement | null>(null);
@@ -261,6 +263,27 @@ export function NimdalPortfolioExperience() {
   const selectedProjectVisual = selectedProject
     ? projectVisuals[selectedProject.slug] ?? selectedProject.media.src
     : "/media/identity-octopus.jpg";
+  const proofReelFrames = useMemo(() => {
+    if (!selectedProject) return [];
+
+    if (selectedProject.proofMedia?.length) {
+      return selectedProject.proofMedia;
+    }
+
+    return [
+      {
+        label: "Project visual",
+        kind: "capture" as const,
+        src: selectedProjectVisual,
+        alt: selectedProject.media.alt,
+        caption: selectedProject.context
+      }
+    ];
+  }, [selectedProject, selectedProjectVisual]);
+  const activeProofFrame = proofReelFrames[proofFrameIndex % Math.max(proofReelFrames.length, 1)];
+  const proofReelProgress = proofReelFrames.length
+    ? Math.round(((proofFrameIndex + 1) / proofReelFrames.length) * 100)
+    : 0;
   const selectedRoom = selectedProject
     ? projectRooms[selectedProject.slug]
     : undefined;
@@ -405,6 +428,17 @@ export function NimdalPortfolioExperience() {
     setOpenEvidencePanelId(null);
   }, []);
 
+  const moveProofFrame = useCallback(
+    (direction: 1 | -1) => {
+      setIsProofReelPlaying(false);
+      setProofFrameIndex((current) => {
+        if (!proofReelFrames.length) return 0;
+        return (current + direction + proofReelFrames.length) % proofReelFrames.length;
+      });
+    },
+    [proofReelFrames.length]
+  );
+
   useEffect(() => {
     setActiveCaseIndex(0);
   }, [activeRouteId]);
@@ -419,6 +453,8 @@ export function NimdalPortfolioExperience() {
       setScanMode(true);
       setScannedPanelIds(roomPanelOrder.slice(0, roomIndex + 1));
       setOpenEvidencePanelId(pendingRoomId);
+      setProofFrameIndex(0);
+      setIsProofReelPlaying(false);
       pendingRoomRef.current = null;
       return;
     }
@@ -427,7 +463,19 @@ export function NimdalPortfolioExperience() {
     setScanMode(false);
     setScannedPanelIds([]);
     setOpenEvidencePanelId(null);
+    setProofFrameIndex(0);
+    setIsProofReelPlaying(false);
   }, [selectedProject?.slug]);
+
+  useEffect(() => {
+    if (shouldReduceMotion || !isProofReelPlaying || proofReelFrames.length < 2) return;
+
+    const timer = window.setInterval(() => {
+      setProofFrameIndex((current) => (current + 1) % proofReelFrames.length);
+    }, 2200);
+
+    return () => window.clearInterval(timer);
+  }, [isProofReelPlaying, proofReelFrames.length, shouldReduceMotion]);
 
   useEffect(() => {
     if (!scanMode) return;
@@ -1119,6 +1167,85 @@ export function NimdalPortfolioExperience() {
                     ))}
                   </div>
                 </div>
+
+                {activeProofFrame ? (
+                  <section
+                    className={`zero-proof-reel ${isProofReelPlaying ? "is-playing" : ""}`}
+                    aria-label={`${selectedProject.client} playable proof reel`}
+                  >
+                    <div className="zero-proof-reel-head">
+                      <div>
+                        <span>Playable proof reel</span>
+                        <strong>
+                          {String(proofFrameIndex + 1).padStart(2, "0")} / {String(proofReelFrames.length).padStart(2, "0")}
+                        </strong>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setIsProofReelPlaying((current) => !current)}
+                        aria-pressed={isProofReelPlaying}
+                        disabled={proofReelFrames.length < 2}
+                      >
+                        {isProofReelPlaying ? <Pause size={15} aria-hidden /> : <Play size={15} aria-hidden />}
+                        {isProofReelPlaying ? "Pause" : "Play"}
+                      </button>
+                    </div>
+                    <figure>
+                      <div className="zero-proof-reel-media">
+                        <AnimatePresence mode="wait">
+                          <motion.div
+                            key={activeProofFrame.src}
+                            initial={shouldReduceMotion ? false : { opacity: 0, x: 22 }}
+                            animate={shouldReduceMotion ? undefined : { opacity: 1, x: 0 }}
+                            exit={shouldReduceMotion ? undefined : { opacity: 0, x: -18 }}
+                            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+                          >
+                            <Image
+                              src={activeProofFrame.src}
+                              alt={activeProofFrame.alt}
+                              fill
+                              sizes="(max-width: 900px) 86vw, 34vw"
+                              className="zero-proof-reel-image"
+                            />
+                          </motion.div>
+                        </AnimatePresence>
+                      </div>
+                      <figcaption>
+                        <span>{activeProofFrame.kind}</span>
+                        <strong>{activeProofFrame.label}</strong>
+                        <p>{activeProofFrame.caption}</p>
+                      </figcaption>
+                    </figure>
+                    <div className="zero-proof-reel-progress" aria-label={`Proof reel frame ${proofFrameIndex + 1} of ${proofReelFrames.length}`}>
+                      <span style={{ width: `${proofReelProgress}%` }} />
+                    </div>
+                    <div className="zero-proof-reel-controls">
+                      <button type="button" onClick={() => moveProofFrame(-1)} disabled={proofReelFrames.length < 2}>
+                        <ArrowLeft size={14} aria-hidden />
+                        Previous
+                      </button>
+                      <div aria-label="Proof reel frames">
+                        {proofReelFrames.map((frame, index) => (
+                          <button
+                            key={`${frame.label}-${frame.src}`}
+                            type="button"
+                            className={index === proofFrameIndex ? "is-active" : ""}
+                            onClick={() => {
+                              setIsProofReelPlaying(false);
+                              setProofFrameIndex(index);
+                            }}
+                            aria-label={`Open proof frame ${index + 1}: ${frame.label}`}
+                            aria-current={index === proofFrameIndex ? "true" : undefined}
+                          />
+                        ))}
+                      </div>
+                      <button type="button" onClick={() => moveProofFrame(1)} disabled={proofReelFrames.length < 2}>
+                        Next
+                        <ArrowRight size={14} aria-hidden />
+                      </button>
+                    </div>
+                  </section>
+                ) : null}
 
                 <aside className="zero-evidence-tray" aria-label={`${selectedProject.client} evidence tray`}>
                   <div className="zero-evidence-heading">

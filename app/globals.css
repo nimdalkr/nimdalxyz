@@ -1325,6 +1325,163 @@ a:focus-visible {
   background: color-mix(in srgb, var(--route-tone) 70%, rgba(239, 250, 255, 0.28));
 }
 
+.zero-proof-reel {
+  display: grid;
+  gap: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(239, 250, 255, 0.18);
+  background:
+    radial-gradient(circle at 82% 18%, color-mix(in srgb, var(--route-tone) 18%, transparent), transparent 32%),
+    rgba(3, 16, 31, 0.24);
+  padding: 13px;
+}
+
+.zero-proof-reel-head,
+.zero-proof-reel-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.zero-proof-reel-head div {
+  display: grid;
+  gap: 4px;
+}
+
+.zero-proof-reel-head span,
+.zero-proof-reel-head strong,
+.zero-proof-reel figcaption span,
+.zero-proof-reel-controls button,
+.zero-proof-reel-progress {
+  font-family: var(--font-mono);
+  font-weight: 950;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.zero-proof-reel-head span,
+.zero-proof-reel figcaption span {
+  color: var(--acid);
+  font-size: 0.66rem;
+}
+
+.zero-proof-reel-head strong {
+  color: var(--fg);
+  font-size: 0.82rem;
+}
+
+.zero-proof-reel-head > button,
+.zero-proof-reel-controls > button {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid rgba(239, 250, 255, 0.28);
+  background: rgba(239, 250, 255, 0.06);
+  color: var(--fg);
+  padding: 0 12px;
+  transition: border-color 180ms var(--ease-out), background 180ms var(--ease-out), color 180ms var(--ease-out), transform 180ms var(--ease-out);
+}
+
+.zero-proof-reel-head > button:hover,
+.zero-proof-reel-head > button[aria-pressed="true"],
+.zero-proof-reel-controls > button:hover {
+  border-color: var(--acid);
+  background: rgba(216, 255, 86, 0.12);
+  color: var(--acid);
+  transform: translateY(-1px);
+}
+
+.zero-proof-reel-head > button:disabled,
+.zero-proof-reel-controls > button:disabled {
+  cursor: not-allowed;
+  opacity: 0.54;
+  transform: none;
+}
+
+.zero-proof-reel figure {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(220px, 0.9fr);
+  gap: 12px;
+  margin: 0;
+}
+
+.zero-proof-reel-media {
+  position: relative;
+  overflow: hidden;
+  min-height: 180px;
+  border: 1px solid rgba(239, 250, 255, 0.2);
+  background:
+    linear-gradient(135deg, rgba(239, 250, 255, 0.06), transparent),
+    rgba(3, 16, 31, 0.36);
+}
+
+.zero-proof-reel-media > div {
+  position: absolute;
+  inset: 0;
+}
+
+.zero-proof-reel-image {
+  object-fit: cover;
+}
+
+.zero-proof-reel figcaption {
+  display: grid;
+  align-content: center;
+  gap: 7px;
+  border-left: 3px solid var(--route-tone);
+  background: rgba(239, 250, 255, 0.055);
+  padding: 12px 14px;
+}
+
+.zero-proof-reel figcaption strong {
+  color: var(--fg);
+  font-size: 1.02rem;
+  line-height: 1.2;
+}
+
+.zero-proof-reel figcaption p {
+  margin: 0;
+  color: rgba(239, 250, 255, 0.78);
+  font-size: 0.84rem;
+  line-height: 1.48;
+}
+
+.zero-proof-reel-progress {
+  overflow: hidden;
+  height: 6px;
+  border: 1px solid rgba(239, 250, 255, 0.12);
+  background: rgba(3, 16, 31, 0.42);
+}
+
+.zero-proof-reel-progress span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--route-tone), var(--acid));
+  transition: width 220ms var(--ease-out);
+}
+
+.zero-proof-reel-controls div {
+  display: inline-flex;
+  gap: 7px;
+}
+
+.zero-proof-reel-controls div button {
+  width: 10px;
+  height: 10px;
+  border: 1px solid rgba(239, 250, 255, 0.32);
+  background: rgba(239, 250, 255, 0.08);
+  padding: 0;
+}
+
+.zero-proof-reel-controls div button.is-active {
+  border-color: var(--acid);
+  background: var(--acid);
+  box-shadow: 0 0 18px rgba(216, 255, 86, 0.38);
+}
+
 .zero-evidence-tray {
   display: grid;
   gap: 12px;
@@ -3895,6 +4052,42 @@ a:focus-visible {
 
   .zero-detail-visual.has-evidence-drawer .zero-detail-caption {
     display: none;
+  }
+
+  .zero-proof-reel {
+    padding: 10px;
+  }
+
+  .zero-proof-reel figure {
+    grid-template-columns: 1fr;
+  }
+
+  .zero-proof-reel-media {
+    min-height: 154px;
+  }
+
+  .zero-proof-reel figcaption p {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  .zero-proof-reel-controls {
+    align-items: stretch;
+    flex-wrap: wrap;
+  }
+
+  .zero-proof-reel-controls > button {
+    flex: 1 1 120px;
+    min-height: 40px;
+    font-size: 0.66rem;
+  }
+
+  .zero-proof-reel-controls div {
+    order: -1;
+    width: 100%;
+    justify-content: center;
   }
 
   .zero-scan-overlay {
