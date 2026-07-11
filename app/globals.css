@@ -529,6 +529,8 @@ summary:focus-visible {
 
 .zero-project-stage {
   position: relative;
+  display: grid;
+  gap: 18px;
   min-height: 570px;
   border-left: 1px solid rgba(239, 250, 255, 0.24);
   padding-left: 34px;
@@ -561,7 +563,7 @@ summary:focus-visible {
   display: grid;
   min-height: 430px;
   align-content: center;
-  padding: 46px 0 92px;
+  padding: 46px 0 24px;
 }
 
 .zero-project-card h3 {
@@ -671,10 +673,8 @@ summary:focus-visible {
 }
 
 .zero-project-atlas {
-  position: absolute;
-  right: 22px;
-  top: 26px;
-  width: min(360px, 38vw);
+  position: relative;
+  width: 100%;
   z-index: 2;
   display: grid;
   gap: 10px;
@@ -682,7 +682,7 @@ summary:focus-visible {
 }
 
 .zero-project-atlas > span {
-  justify-self: end;
+  justify-self: start;
   color: var(--acid);
   font-family: var(--font-mono);
   font-size: 0.58rem;
@@ -693,14 +693,19 @@ summary:focus-visible {
 
 .zero-atlas-surface {
   position: relative;
+  display: grid;
   overflow: hidden;
-  height: 230px;
+  min-height: 190px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  align-items: stretch;
   border: 1px solid rgba(239, 250, 255, 0.16);
   background:
     radial-gradient(circle at var(--current-x) var(--current-y), color-mix(in srgb, var(--route-tone) 16%, transparent), transparent 24%),
     repeating-linear-gradient(90deg, rgba(239, 250, 255, 0.08) 0 1px, transparent 1px 22px),
     repeating-linear-gradient(180deg, rgba(239, 250, 255, 0.06) 0 1px, transparent 1px 22px),
     rgba(3, 16, 31, 0.24);
+  padding: 22px;
   clip-path: polygon(7% 0, 100% 0, 100% 82%, 89% 100%, 0 100%, 0 12%);
 }
 
@@ -730,12 +735,11 @@ summary:focus-visible {
 }
 
 .zero-atlas-surface button {
-  position: absolute;
-  left: var(--node-x);
-  top: var(--node-y);
+  position: relative;
   z-index: 2;
   display: grid;
-  min-width: 104px;
+  min-width: 0;
+  min-height: 68px;
   gap: 2px;
   border: 1px solid color-mix(in srgb, var(--node-tone) 38%, rgba(239, 250, 255, 0.16));
   background:
@@ -743,7 +747,6 @@ summary:focus-visible {
   color: var(--fg);
   padding: 8px 9px;
   text-align: left;
-  transform: translate(-50%, -50%);
   transition: border-color 180ms var(--ease-out), box-shadow 180ms var(--ease-out), transform 180ms var(--ease-out);
 }
 
@@ -763,7 +766,7 @@ summary:focus-visible {
 .zero-atlas-surface button.is-active {
   border-color: var(--acid);
   box-shadow: 0 0 28px color-mix(in srgb, var(--node-tone) 32%, transparent);
-  transform: translate(-50%, -54%);
+  transform: translateY(-2px);
 }
 
 .zero-atlas-surface button span,
@@ -776,20 +779,17 @@ summary:focus-visible {
 }
 
 .zero-atlas-surface button strong {
-  max-width: 98px;
-  overflow: hidden;
+  max-width: 100%;
   font-size: 0.78rem;
-  line-height: 1.08;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.16;
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .zero-project-rail {
-  position: absolute;
-  left: 34px;
-  right: 0;
-  bottom: 8px;
-  display: flex;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 8px;
 }
 
@@ -3949,7 +3949,8 @@ summary:focus-visible {
   }
 
   .zero-atlas-surface {
-    height: 190px;
+    height: auto;
+    min-height: 190px;
   }
 
   .zero-atlas-surface button {
