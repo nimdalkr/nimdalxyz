@@ -34,7 +34,7 @@ export function PortfolioStructuredData({ data }: Props) {
         name: item.client,
         headline: item.title,
         description: item.oneLiner,
-        url: item.href ?? `https://nimdal.xyz/#project-${item.slug}`,
+        url: `https://nimdal.xyz/projects/${item.slug}/proof`,
         image: `https://nimdal.xyz${item.proofMedia?.[0]?.src ?? item.media.src}`,
         creator: {
           "@type": "Person",

@@ -45,6 +45,21 @@ export function middleware(request: NextRequest) {
   const host = cleanHost(request.headers.get("host"));
   const { pathname } = request.nextUrl;
 
+  if (pathname === "/" && request.nextUrl.searchParams.has("project")) {
+    const project = request.nextUrl.searchParams.get("project") ?? "";
+    const requestedRoom = request.nextUrl.searchParams.get("room") ?? "signal";
+    const room = ["signal", "build", "proof", "next"].includes(requestedRoom)
+      ? requestedRoom
+      : "signal";
+
+    if (/^[a-z0-9-]+$/.test(project)) {
+      const url = request.nextUrl.clone();
+      url.pathname = `/projects/${project}/${room}`;
+      url.search = "";
+      return NextResponse.redirect(url, 308);
+    }
+  }
+
   if (host === BLOG_HOST) {
     if (pathname === "/blog" || pathname.startsWith("/blog/")) {
       const url = request.nextUrl.clone();

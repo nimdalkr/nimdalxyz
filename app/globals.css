@@ -1382,6 +1382,11 @@ summary:focus-visible {
   padding: 13px;
 }
 
+.zero-proof-reel:focus-visible {
+  outline: 2px solid var(--acid);
+  outline-offset: 3px;
+}
+
 .zero-proof-reel-head,
 .zero-proof-reel-controls {
   display: flex;
@@ -1495,6 +1500,38 @@ summary:focus-visible {
   line-height: 1.48;
 }
 
+.zero-proof-frame-meta {
+  display: grid;
+  gap: 6px;
+  margin: 4px 0 0;
+}
+
+.zero-proof-frame-meta div {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  gap: 8px;
+  border-top: 1px solid rgba(239, 250, 255, 0.12);
+  padding-top: 6px;
+}
+
+.zero-proof-frame-meta dt,
+.zero-proof-frame-meta dd {
+  margin: 0;
+  font-size: 0.76rem;
+  line-height: 1.38;
+}
+
+.zero-proof-frame-meta dt {
+  color: var(--acid);
+  font-family: var(--font-mono);
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.zero-proof-frame-meta dd {
+  color: rgba(239, 250, 255, 0.78);
+}
+
 .zero-proof-reel-progress {
   overflow: hidden;
   height: 6px;
@@ -1553,6 +1590,69 @@ summary:focus-visible {
 
 .zero-proof-reel-controls div button.is-active::before {
   background: var(--acid);
+}
+
+.zero-proof-manifest {
+  display: grid;
+  gap: 12px;
+  border: 1px solid rgba(216, 255, 86, 0.32);
+  background:
+    linear-gradient(135deg, rgba(216, 255, 86, 0.08), transparent 42%),
+    rgba(3, 16, 31, 0.3);
+  padding: 14px;
+}
+
+.zero-proof-manifest-heading {
+  display: grid;
+  gap: 4px;
+}
+
+.zero-proof-manifest-heading span,
+.zero-proof-manifest dt {
+  color: var(--acid);
+  font-family: var(--font-mono);
+  font-size: var(--zero-compact-label-size);
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.zero-proof-manifest-heading strong {
+  color: var(--fg);
+  font-size: 1rem;
+}
+
+.zero-proof-manifest dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+.zero-proof-manifest dl div {
+  border-top: 1px solid rgba(239, 250, 255, 0.14);
+  padding-top: 8px;
+}
+
+.zero-proof-manifest dd {
+  margin: 5px 0 0;
+  color: rgba(239, 250, 255, 0.8);
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.zero-proof-manifest > a {
+  display: inline-flex;
+  min-height: var(--zero-control-size);
+  width: fit-content;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(239, 250, 255, 0.24);
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: var(--zero-compact-label-size);
+  font-weight: 950;
+  padding: 0 12px;
+  text-transform: uppercase;
 }
 
 .zero-evidence-tray {
@@ -4222,6 +4322,14 @@ summary:focus-visible {
     order: -1;
     width: 100%;
     justify-content: center;
+  }
+
+  .zero-proof-frame-meta div {
+    grid-template-columns: 52px minmax(0, 1fr);
+  }
+
+  .zero-proof-manifest dl {
+    grid-template-columns: 1fr;
   }
 
   .zero-scan-overlay {

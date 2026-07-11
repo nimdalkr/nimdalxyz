@@ -49,7 +49,20 @@ export type CaseStudy = {
     src: string;
     alt: string;
     caption: string;
+    capturedAt?: string;
+    source?: string;
+    claim?: string;
+    limitation?: string;
   }[];
+  proofManifest?: {
+    status: string;
+    capturedAt: string;
+    buildRef: string;
+    environment: string;
+    reproduction: string;
+    limitation: string;
+    sourceHref?: string;
+  };
   evidence: readonly {
     label: string;
     type: "live" | "metric" | "screenshot" | "repository" | "article" | "testimonial" | "caveat";
@@ -290,7 +303,7 @@ const workCaseStudies: readonly CaseStudy[] = [
     category: "Crypto research",
     href: "https://kollisting.vercel.app/",
     media: {
-      src: "/media/projects/kol-listing.png",
+      src: "/media/projects/kol-listing.webp",
       alt: "KOL Listing project visual.",
       cue: "Crypto research"
     },
@@ -334,7 +347,7 @@ const workCaseStudies: readonly CaseStudy[] = [
     client: "TG Finance Search Portal",
     category: "In progress",
     media: {
-      src: "/media/projects/tg-finance-search-portal.png",
+      src: "/media/projects/tg-finance-search-portal.webp",
       alt: "TG Finance Search Portal project visual.",
       cue: "Search portal"
     },
@@ -365,7 +378,7 @@ const workCaseStudies: readonly CaseStudy[] = [
     client: "Social Poster-One",
     category: "Automation",
     media: {
-      src: "/media/projects/social-poster-one.png",
+      src: "/media/projects/social-poster-one.webp",
       alt: "Social Poster-One project visual.",
       cue: "Automation"
     },
@@ -397,7 +410,7 @@ const workCaseStudies: readonly CaseStudy[] = [
     category: "Game",
     href: "https://cafe.naver.com/xavishowtime",
     media: {
-      src: "/media/projects/mylol.png",
+      src: "/media/projects/mylol.webp",
       alt: "myLoL project visual.",
       cue: "Simulation game"
     },
@@ -429,7 +442,7 @@ const workCaseStudies: readonly CaseStudy[] = [
     client: "maple uNion",
     category: "Game jam",
     media: {
-      src: "/media/projects/maple-union.png",
+      src: "/media/projects/maple-union.webp",
       alt: "maple uNion project visual.",
       cue: "Game jam"
     },
@@ -457,27 +470,48 @@ const workCaseStudies: readonly CaseStudy[] = [
         { label: "Next asset", value: "Playable demo or short clip" }
       ]
     },
+    proofManifest: {
+      status: "Captured prototype / not publicly playable",
+      capturedAt: "2026-07-02",
+      buildRef: "MapleStoryUniverse VibeCamp submission build",
+      environment: "Desktop browser / 1280 x 720 capture",
+      reproduction: "Build log -> field loop -> stage sheet -> map-render QA",
+      limitation: "Screenshot evidence only; a playable build is not embedded.",
+      sourceHref: "https://blog.nimdal.xyz/posts/maple-union-dev-log-2026-07-02/#case-room-proof"
+    },
     proofMedia: [
       {
         label: "Field loop",
         kind: "capture",
-        src: "/media/projects/proof/maple-union-field-proof.png",
+        src: "/media/projects/proof/maple-union-field-proof.webp",
         alt: "maple uNion field loop screenshot with combat UI and bottom HUD.",
-        caption: "The field capture shows the AFK loop, skill feedback, guide layer, and HUD in one frame."
+        caption: "The field capture shows the AFK loop, skill feedback, guide layer, and HUD in one frame.",
+        capturedAt: "2026-07-02",
+        source: "Gameplay capture",
+        claim: "AFK loop, skill feedback, guide layer, and HUD coexist in the running build.",
+        limitation: "Static capture; input and timing cannot be inspected."
       },
       {
         label: "Stage sheet",
         kind: "workflow",
-        src: "/media/projects/proof/maple-union-stage-proof.png",
+        src: "/media/projects/proof/maple-union-stage-proof.webp",
         alt: "maple uNion stage contact sheet showing multiple map and monster environments.",
-        caption: "The stage sheet proves the project is not a single mock screen; it has repeated environment logic."
+        caption: "The stage sheet proves the project is not a single mock screen; it has repeated environment logic.",
+        capturedAt: "2026-07-02",
+        source: "Stage contact sheet",
+        claim: "Multiple map and monster combinations were assembled in the build.",
+        limitation: "Contact sheet; live traversal is not shown."
       },
       {
         label: "Map QA",
         kind: "log",
-        src: "/media/projects/proof/maple-union-qa-proof.png",
+        src: "/media/projects/proof/maple-union-qa-proof.webp",
         alt: "maple uNion map render QA sheet.",
-        caption: "The QA sheet makes the craft visible: original map assets had to be adapted to a playable auto-hunting loop."
+        caption: "The QA sheet makes the craft visible: original map assets had to be adapted to a playable auto-hunting loop.",
+        capturedAt: "2026-07-02",
+        source: "Map-render QA sheet",
+        claim: "Source map assets were tested and adapted for the auto-hunting viewport.",
+        limitation: "Visual QA only; performance measurements are not included."
       }
     ],
     evidence: [
@@ -496,7 +530,7 @@ const workCaseStudies: readonly CaseStudy[] = [
     client: "Discord Bulk Leave Tool",
     category: "Utility",
     media: {
-      src: "/media/projects/discord-bulk-leave.png",
+      src: "/media/projects/discord-bulk-leave.webp",
       alt: "Discord Bulk Leave Tool project visual.",
       cue: "Utility"
     },

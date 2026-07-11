@@ -167,12 +167,12 @@ const contactChannels = [
 const projectVisuals: Record<string, string> = {
   ethosalpha: "/media/projects/ethosalpha-proof.png",
   hyperalphaduo: "/media/projects/hyperalphaduo-proof.png",
-  "kol-listing": "/media/projects/kol-listing.png",
-  "tg-finance-search-portal": "/media/projects/tg-finance-search-portal.png",
-  "social-poster-one": "/media/projects/social-poster-one.png",
-  mylol: "/media/projects/mylol.png",
-  "maple-union": "/media/projects/maple-union.png",
-  "discord-bulk-leave": "/media/projects/discord-bulk-leave.png"
+  "kol-listing": "/media/projects/kol-listing.webp",
+  "tg-finance-search-portal": "/media/projects/tg-finance-search-portal.webp",
+  "social-poster-one": "/media/projects/social-poster-one.webp",
+  mylol: "/media/projects/mylol.webp",
+  "maple-union": "/media/projects/maple-union.webp",
+  "discord-bulk-leave": "/media/projects/discord-bulk-leave.webp"
 };
 
 const projectRooms: Record<string, ProjectRoomMeta> = {
@@ -220,25 +220,47 @@ function getRouteForProject(slug: string) {
   return currentRoutes.find((route) => route.slugs.includes(slug));
 }
 
-export function NimdalPortfolioExperience() {
+type NimdalPortfolioExperienceProps = {
+  initialProjectSlug?: string;
+  initialRoomId?: string;
+};
+
+export function NimdalPortfolioExperience({
+  initialProjectSlug,
+  initialRoomId
+}: NimdalPortfolioExperienceProps = {}) {
   const { caseStudies } = usePortfolioData();
   const shouldReduceMotion = useReducedMotion();
-  const [scene, setScene] = useState<Scene>("gate");
-  const [activeRouteId, setActiveRouteId] = useState(currentRoutes[0].id);
-  const [activeCaseIndex, setActiveCaseIndex] = useState(0);
-  const [selectedProjectSlug, setSelectedProjectSlug] = useState<string | null>(null);
-  const [roomPanelIndex, setRoomPanelIndex] = useState(0);
-  const [scanMode, setScanMode] = useState(false);
-  const [scannedPanelIds, setScannedPanelIds] = useState<RoomPanel["id"][]>([]);
+  const initialProject = caseStudies.find((item) => item.slug === initialProjectSlug);
+  const initialRoute = initialProject ? getRouteForProject(initialProject.slug) : undefined;
+  const initialRouteCases = initialRoute ? getCases(caseStudies, initialRoute.slugs) : [];
+  const initialCaseIndex = initialProject
+    ? Math.max(0, initialRouteCases.findIndex((item) => item.slug === initialProject.slug))
+    : 0;
+  const initialRoomCandidate = initialRoomId ?? null;
+  const initialRoom: RoomPanel["id"] | null = isRoomPanelId(initialRoomCandidate)
+    ? initialRoomCandidate
+    : null;
+  const initialRoomIndex = initialRoom ? Math.max(0, roomPanelOrder.indexOf(initialRoom)) : 0;
+  const [scene, setScene] = useState<Scene>(initialProject ? "project" : "gate");
+  const [activeRouteId, setActiveRouteId] = useState(initialRoute?.id ?? currentRoutes[0].id);
+  const [activeCaseIndex, setActiveCaseIndex] = useState(initialCaseIndex);
+  const [selectedProjectSlug, setSelectedProjectSlug] = useState<string | null>(initialProject?.slug ?? null);
+  const [roomPanelIndex, setRoomPanelIndex] = useState(initialRoomIndex);
+  const [scanMode, setScanMode] = useState(Boolean(initialRoom));
+  const [scannedPanelIds, setScannedPanelIds] = useState<RoomPanel["id"][]>(
+    initialRoom ? roomPanelOrder.slice(0, initialRoomIndex + 1) : []
+  );
   const [openEvidencePanelId, setOpenEvidencePanelId] = useState<RoomPanel["id"] | null>(null);
   const [proofFrameIndex, setProofFrameIndex] = useState(0);
   const [isProofReelPlaying, setIsProofReelPlaying] = useState(false);
   const [divingProject, setDivingProject] = useState<CaseStudy | null>(null);
   const diveTimerRef = useRef<number | null>(null);
   const evidenceCloseRef = useRef<HTMLButtonElement | null>(null);
-  const pendingRoomRef = useRef<RoomPanel["id"] | null>(null);
+  const drawerFocusReadyRef = useRef(false);
+  const pendingRoomRef = useRef<RoomPanel["id"] | null>(initialRoom);
   const pointerFrameRef = useRef<number | null>(null);
-  const hydratedProjectRef = useRef(false);
+  const hydratedProjectRef = useRef(Boolean(initialProject));
 
   const activeRoute = currentRoutes.find((route) => route.id === activeRouteId) ?? currentRoutes[0];
   const activeCases = useMemo(
@@ -440,10 +462,6 @@ export function NimdalPortfolioExperience() {
   );
 
   useEffect(() => {
-    setActiveCaseIndex(0);
-  }, [activeRouteId]);
-
-  useEffect(() => {
     const pendingRoomId = pendingRoomRef.current;
 
     if (pendingRoomId) {
@@ -452,7 +470,7 @@ export function NimdalPortfolioExperience() {
       setRoomPanelIndex(roomIndex);
       setScanMode(true);
       setScannedPanelIds(roomPanelOrder.slice(0, roomIndex + 1));
-      setOpenEvidencePanelId(pendingRoomId);
+      setOpenEvidencePanelId(null);
       setProofFrameIndex(0);
       setIsProofReelPlaying(false);
       pendingRoomRef.current = null;
@@ -483,8 +501,13 @@ export function NimdalPortfolioExperience() {
   }, [activeRoomPanel?.id, markScannedPanel, scanMode]);
 
   useEffect(() => {
+    if (!drawerFocusReadyRef.current) {
+      drawerFocusReadyRef.current = true;
+      return;
+    }
+
     if (!drawerPanel) return;
-    evidenceCloseRef.current?.focus();
+    evidenceCloseRef.current?.focus({ preventScroll: true });
   }, [drawerPanel]);
 
   useEffect(() => {
@@ -521,20 +544,7 @@ export function NimdalPortfolioExperience() {
   const clearProjectUrl = useCallback(() => {
     if (typeof window === "undefined") return;
 
-    const url = new URL(window.location.href);
-    if (!url.searchParams.has("project")) return;
-
-    url.searchParams.delete("project");
-    window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
-  }, []);
-
-  const syncProjectUrl = useCallback((project: CaseStudy) => {
-    if (typeof window === "undefined") return;
-
-    const url = new URL(window.location.href);
-    url.searchParams.set("project", project.slug);
-    url.hash = "";
-    window.history.replaceState(null, "", `${url.pathname}${url.search}`);
+    window.history.replaceState(null, "", "/");
   }, []);
 
   const showScene = useCallback((nextScene: Scene) => {
@@ -565,7 +575,6 @@ export function NimdalPortfolioExperience() {
     (project = activeCase) => {
       if (!project) return;
       focusProject(project);
-      syncProjectUrl(project);
 
       if (shouldReduceMotion) {
         setDivingProject(null);
@@ -583,8 +592,19 @@ export function NimdalPortfolioExperience() {
         window.setTimeout(() => setDivingProject(null), 260);
       }, 360);
     },
-    [activeCase, focusProject, shouldReduceMotion, syncProjectUrl]
+    [activeCase, focusProject, shouldReduceMotion]
   );
+
+  useEffect(() => {
+    if (scene !== "project" || !selectedProject || !activeRoomPanel || typeof window === "undefined") {
+      return;
+    }
+
+    const projectPath = `/projects/${selectedProject.slug}/${activeRoomPanel.id}`;
+    if (window.location.pathname !== projectPath || window.location.search || window.location.hash) {
+      window.history.replaceState(null, "", projectPath);
+    }
+  }, [activeRoomPanel, scene, selectedProject]);
 
   useEffect(() => {
     if (hydratedProjectRef.current || !allCases.length || typeof window === "undefined") return;
@@ -642,10 +662,9 @@ export function NimdalPortfolioExperience() {
       const nextProject = allCases[(currentIndex + direction + allCases.length) % allCases.length];
 
       focusProject(nextProject);
-      syncProjectUrl(nextProject);
       setRoomPanelIndex(0);
     },
-    [allCases, focusProject, selectedProject?.slug, syncProjectUrl]
+    [allCases, focusProject, selectedProject?.slug]
   );
 
   const moveRoomPanel = useCallback(
@@ -889,7 +908,10 @@ export function NimdalPortfolioExperience() {
                       role="tab"
                       aria-selected={route.id === activeRouteId}
                       className={route.id === activeRouteId ? "is-active" : ""}
-                      onClick={() => setActiveRouteId(route.id)}
+                      onClick={() => {
+                        setActiveRouteId(route.id);
+                        setActiveCaseIndex(0);
+                      }}
                     >
                       <small>{route.label}</small>
                       <strong>{route.title}</strong>
@@ -1231,11 +1253,19 @@ export function NimdalPortfolioExperience() {
                 {activeProofFrame ? (
                   <section
                     className={`zero-proof-reel ${isProofReelPlaying ? "is-playing" : ""}`}
-                    aria-label={`${selectedProject.client} playable proof reel`}
+                    aria-label={`${selectedProject.client} evidence player`}
+                    tabIndex={0}
+                    onKeyDown={(event) => {
+                      if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        moveProofFrame(event.key === "ArrowRight" ? 1 : -1);
+                      }
+                    }}
                   >
                     <div className="zero-proof-reel-head">
                       <div>
-                        <span>Playable proof reel</span>
+                        <span>Evidence player</span>
                         <strong>
                           {String(proofFrameIndex + 1).padStart(2, "0")} / {String(proofReelFrames.length).padStart(2, "0")}
                         </strong>
@@ -1274,6 +1304,14 @@ export function NimdalPortfolioExperience() {
                         <span>{activeProofFrame.kind}</span>
                         <strong>{activeProofFrame.label}</strong>
                         <p>{activeProofFrame.caption}</p>
+                        {activeProofFrame.source || activeProofFrame.capturedAt ? (
+                          <dl className="zero-proof-frame-meta">
+                            {activeProofFrame.source ? <div><dt>Source</dt><dd>{activeProofFrame.source}</dd></div> : null}
+                            {activeProofFrame.capturedAt ? <div><dt>Captured</dt><dd>{activeProofFrame.capturedAt}</dd></div> : null}
+                            {activeProofFrame.claim ? <div><dt>Claim</dt><dd>{activeProofFrame.claim}</dd></div> : null}
+                            {activeProofFrame.limitation ? <div><dt>Limit</dt><dd>{activeProofFrame.limitation}</dd></div> : null}
+                          </dl>
+                        ) : null}
                       </figcaption>
                     </figure>
                     <div className="zero-proof-reel-progress" aria-label={`Proof reel frame ${proofFrameIndex + 1} of ${proofReelFrames.length}`}>
@@ -1284,7 +1322,7 @@ export function NimdalPortfolioExperience() {
                         <ArrowLeft size={14} aria-hidden />
                         Previous
                       </button>
-                      <div aria-label="Proof reel frames">
+                      <div aria-label="Evidence player frames">
                         {proofReelFrames.map((frame, index) => (
                           <button
                             key={`${frame.label}-${frame.src}`}
@@ -1306,6 +1344,29 @@ export function NimdalPortfolioExperience() {
                         <ArrowRight size={14} aria-hidden />
                       </button>
                     </div>
+                  </section>
+                ) : null}
+
+                {selectedProject.proofManifest ? (
+                  <section className="zero-proof-manifest" aria-labelledby="proof-manifest-title">
+                    <div className="zero-proof-manifest-heading">
+                      <span>Proof manifest</span>
+                      <strong id="proof-manifest-title">What this evidence can verify</strong>
+                    </div>
+                    <dl>
+                      <div><dt>Status</dt><dd>{selectedProject.proofManifest.status}</dd></div>
+                      <div><dt>Captured</dt><dd>{selectedProject.proofManifest.capturedAt}</dd></div>
+                      <div><dt>Build ref</dt><dd>{selectedProject.proofManifest.buildRef}</dd></div>
+                      <div><dt>Environment</dt><dd>{selectedProject.proofManifest.environment}</dd></div>
+                      <div><dt>Reproduce</dt><dd>{selectedProject.proofManifest.reproduction}</dd></div>
+                      <div><dt>Limitation</dt><dd>{selectedProject.proofManifest.limitation}</dd></div>
+                    </dl>
+                    {selectedProject.proofManifest.sourceHref ? (
+                      <a href={selectedProject.proofManifest.sourceHref} target="_blank" rel="noreferrer">
+                        Inspect source log
+                        <ExternalLink size={14} aria-hidden />
+                      </a>
+                    ) : null}
                   </section>
                 ) : null}
 
