@@ -1,10 +1,11 @@
-import type { PortfolioContent } from "@/lib/data";
+import { featuredProjectSlugs, type PortfolioContent } from "@/lib/data";
 
 type Props = {
   data: PortfolioContent;
 };
 
 export function PortfolioStructuredData({ data }: Props) {
+  const featuredProjectSet = new Set<string>(featuredProjectSlugs);
   const graph = {
     "@context": "https://schema.org",
     "@graph": [
@@ -29,27 +30,29 @@ export function PortfolioStructuredData({ data }: Props) {
         url: "https://nimdal.xyz/",
         description: data.profile.subheadline
       },
-      ...data.caseStudies.map((item) => ({
-        "@type": "CreativeWork",
-        name: item.client,
-        headline: item.title,
-        description: item.oneLiner,
-        url: `https://nimdal.xyz/projects/${item.slug}/proof`,
-        image: `https://nimdal.xyz${item.proofMedia?.[0]?.src ?? item.media.src}`,
-        creator: {
-          "@type": "Person",
-          name: "Tak Chanwoo",
-          alternateName: "Nimdal"
-        },
-        about: item.stack,
-        keywords: [item.category, item.proofLevel, ...item.stack],
-        workExample: item.artifacts?.map((artifact) => ({
+      ...data.caseStudies
+        .filter((item) => featuredProjectSet.has(item.slug))
+        .map((item) => ({
           "@type": "CreativeWork",
-          name: artifact.label,
-          url: artifact.href
-        })),
-        isAccessibleForFree: true
-      }))
+          name: item.client,
+          headline: item.title,
+          description: item.oneLiner,
+          url: `https://nimdal.xyz/projects/${item.slug}/proof`,
+          image: `https://nimdal.xyz${item.proofMedia?.[0]?.src ?? item.media.src}`,
+          creator: {
+            "@type": "Person",
+            name: "Tak Chanwoo",
+            alternateName: "Nimdal"
+          },
+          about: item.stack,
+          keywords: [item.category, item.proofLevel, ...item.stack],
+          workExample: item.artifacts?.map((artifact) => ({
+            "@type": "CreativeWork",
+            name: artifact.label,
+            url: artifact.href
+          })),
+          isAccessibleForFree: true
+        }))
     ]
   };
 

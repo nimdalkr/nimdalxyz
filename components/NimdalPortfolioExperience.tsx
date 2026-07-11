@@ -6,7 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, ExternalLink, Pause, Play, Waves, X } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { usePortfolioData } from "@/components/LocaleProvider";
-import type { CaseStudy } from "@/lib/data";
+import { featuredProjectSlugs, type CaseStudy } from "@/lib/data";
 
 type Scene = "gate" | "currents" | "project" | "identity" | "profile" | "contact";
 
@@ -47,17 +47,6 @@ const proofLabels: Record<CaseStudy["proofLevel"], string> = {
   repository: "Repository"
 };
 
-const projectAtlasPositions: Record<string, { x: string; y: string }> = {
-  ethosalpha: { x: "12%", y: "68%" },
-  hyperalphaduo: { x: "25%", y: "28%" },
-  "kol-listing": { x: "42%", y: "46%" },
-  "tg-finance-search-portal": { x: "58%", y: "22%" },
-  "social-poster-one": { x: "73%", y: "48%" },
-  mylol: { x: "56%", y: "74%" },
-  "maple-union": { x: "31%", y: "78%" },
-  "discord-bulk-leave": { x: "87%", y: "70%" }
-};
-
 const roomHotspotPositions: Record<RoomPanel["id"], { x: string; y: string }> = {
   signal: { x: "18%", y: "32%" },
   build: { x: "66%", y: "28%" },
@@ -77,37 +66,33 @@ function withCaseRoomProofHash(href: string) {
 
 const currentRoutes: CurrentRoute[] = [
   {
-    id: "research",
-    label: "GROUP 01",
-    title: "Research Systems",
-    subtitle: "Crypto markets, KOL activity, reputation data, and searchable financial research tools.",
+    id: "featured",
+    label: "SELECTED 03",
+    title: "Featured Projects",
+    subtitle: "Three projects with enough product depth, current proof, and public context to inspect closely.",
     depth: "01",
     tone: "#8beaff",
-    slugs: ["hyperalphaduo", "kol-listing", "ethosalpha", "tg-finance-search-portal"],
+    slugs: [...featuredProjectSlugs],
     x: "23%",
     y: "48%"
   },
   {
-    id: "automation",
-    label: "GROUP 02",
-    title: "Automation Channels",
-    subtitle: "API-driven tools for reducing repetitive social and server workflows.",
+    id: "etc",
+    label: "ETC / 06",
+    title: "Smaller Builds",
+    subtitle: "Experiments and utilities kept as concise references instead of full case studies.",
     depth: "02",
-    tone: "#d8ff56",
-    slugs: ["social-poster-one", "discord-bulk-leave"],
+    tone: "#ff74a5",
+    slugs: [
+      "ethosalpha",
+      "kol-listing",
+      "tg-finance-search-portal",
+      "social-poster-one",
+      "maple-union",
+      "discord-bulk-leave"
+    ],
     x: "57%",
     y: "66%"
-  },
-  {
-    id: "play",
-    label: "GROUP 03",
-    title: "Playable Worlds",
-    subtitle: "Game-like products built from real data, fandom culture, and idle loops.",
-    depth: "03",
-    tone: "#ff74a5",
-    slugs: ["mylol", "maple-union"],
-    x: "78%",
-    y: "36%"
   }
 ];
 
@@ -165,17 +150,22 @@ const contactChannels = [
 ] as const;
 
 const projectVisuals: Record<string, string> = {
+  "arcdu-nft": "/media/projects/arcdu-nft.webp",
   ethosalpha: "/media/projects/ethosalpha-proof.png",
   hyperalphaduo: "/media/projects/hyperalphaduo-proof.png",
   "kol-listing": "/media/projects/kol-listing.webp",
   "tg-finance-search-portal": "/media/projects/tg-finance-search-portal.webp",
   "social-poster-one": "/media/projects/social-poster-one.webp",
-  mylol: "/media/projects/mylol.webp",
+  mylol: "/media/projects/proof/mylol-draft.webp",
   "maple-union": "/media/projects/maple-union.webp",
   "discord-bulk-leave": "/media/projects/discord-bulk-leave.webp"
 };
 
 const projectRooms: Record<string, ProjectRoomMeta> = {
+  "arcdu-nft": {
+    place: "Arc Intelligence Port",
+    transition: "harbor"
+  },
   ethosalpha: {
     place: "Reputation Reef",
     transition: "reef"
@@ -263,24 +253,34 @@ export function NimdalPortfolioExperience({
   const hydratedProjectRef = useRef(Boolean(initialProject));
 
   const activeRoute = currentRoutes.find((route) => route.id === activeRouteId) ?? currentRoutes[0];
-  const activeCases = useMemo(
-    () => getCases(caseStudies, activeRoute.slugs),
-    [activeRoute.slugs, caseStudies]
+  const featuredCases = useMemo(
+    () => getCases(caseStudies, featuredProjectSlugs),
+    [caseStudies]
+  );
+  const etcCases = useMemo(
+    () => getCases(caseStudies, currentRoutes[1].slugs),
+    [caseStudies]
   );
   const allCases = useMemo(
     () => currentRoutes.flatMap((route) => getCases(caseStudies, route.slugs)),
     [caseStudies]
   );
-  const activeCase = activeCases[activeCaseIndex] ?? activeCases[0];
+  const activeCase = featuredCases[activeCaseIndex] ?? featuredCases[0];
+  const activeCaseRepoHref = activeCase?.artifacts?.find(
+    (artifact) => artifact.kind === "repo" && artifact.href
+  )?.href;
   const selectedProject =
     allCases.find((item) => item.slug === selectedProjectSlug) ?? activeCase ?? allCases[0];
+  const projectSequence = selectedProject && featuredProjectSlugs.some((slug) => slug === selectedProject.slug)
+    ? featuredCases
+    : allCases;
   const selectedProjectRoute = selectedProject ? getRouteForProject(selectedProject.slug) : activeRoute;
   const selectedProjectIndex = selectedProject
-    ? Math.max(0, allCases.findIndex((item) => item.slug === selectedProject.slug))
+    ? Math.max(0, projectSequence.findIndex((item) => item.slug === selectedProject.slug))
     : 0;
   const selectedProjectNumber = selectedProjectIndex + 1;
-  const nextProject = allCases.length
-    ? allCases[(selectedProjectIndex + 1) % allCases.length]
+  const nextProject = projectSequence.length
+    ? projectSequence[(selectedProjectIndex + 1) % projectSequence.length]
     : undefined;
   const selectedProjectVisual = selectedProject
     ? projectVisuals[selectedProject.slug] ?? selectedProject.media.src
@@ -552,6 +552,11 @@ export function NimdalPortfolioExperience({
       clearProjectUrl();
     }
 
+    if (nextScene === "currents") {
+      setActiveRouteId(currentRoutes[0].id);
+      setActiveCaseIndex(0);
+    }
+
     setScene(nextScene);
   }, [clearProjectUrl]);
 
@@ -644,27 +649,29 @@ export function NimdalPortfolioExperience({
   const moveCase = useCallback(
     (direction: 1 | -1) => {
       setActiveCaseIndex((current) => {
-        if (!activeCases.length) return 0;
-        return (current + direction + activeCases.length) % activeCases.length;
+        if (!featuredCases.length) return 0;
+        return (current + direction + featuredCases.length) % featuredCases.length;
       });
     },
-    [activeCases.length]
+    [featuredCases.length]
   );
 
   const moveProject = useCallback(
     (direction: 1 | -1) => {
-      if (!allCases.length) return;
+      if (!projectSequence.length) return;
 
       const currentIndex = Math.max(
         0,
-        allCases.findIndex((item) => item.slug === selectedProject?.slug)
+        projectSequence.findIndex((item) => item.slug === selectedProject?.slug)
       );
-      const nextProject = allCases[(currentIndex + direction + allCases.length) % allCases.length];
+      const nextProject = projectSequence[
+        (currentIndex + direction + projectSequence.length) % projectSequence.length
+      ];
 
       focusProject(nextProject);
       setRoomPanelIndex(0);
     },
-    [allCases, focusProject, selectedProject?.slug]
+    [focusProject, projectSequence, selectedProject?.slug]
   );
 
   const moveRoomPanel = useCallback(
@@ -898,23 +905,23 @@ export function NimdalPortfolioExperience({
               transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
             >
               <div className="zero-current-intro">
-                <p className="zero-kicker">Personal projects</p>
-                <h2>{activeRoute.title}</h2>
-                <p>{activeRoute.subtitle}</p>
-                <div className="zero-current-tabs" role="tablist" aria-label="Personal project categories">
-                  {currentRoutes.map((route) => (
+                <p className="zero-kicker">Selected work / 03</p>
+                <h2>Featured Projects</h2>
+                <p>Only projects with substantial product depth and inspectable proof receive full case rooms.</p>
+                <div className="zero-current-tabs" role="tablist" aria-label="Featured projects">
+                  {featuredCases.map((project, index) => (
                     <button
-                      key={route.id}
+                      key={project.slug}
                       role="tab"
-                      aria-selected={route.id === activeRouteId}
-                      className={route.id === activeRouteId ? "is-active" : ""}
+                      aria-selected={index === activeCaseIndex}
+                      className={index === activeCaseIndex ? "is-active" : ""}
                       onClick={() => {
-                        setActiveRouteId(route.id);
-                        setActiveCaseIndex(0);
+                        setActiveRouteId(currentRoutes[0].id);
+                        setActiveCaseIndex(index);
                       }}
                     >
-                      <small>{route.label}</small>
-                      <strong>{route.title}</strong>
+                      <small>{String(index + 1).padStart(2, "0")} / {proofLabels[project.proofLevel]}</small>
+                      <strong>{project.client}</strong>
                     </button>
                   ))}
                 </div>
@@ -924,7 +931,7 @@ export function NimdalPortfolioExperience({
                 <div className="zero-project-stage">
                   <div className="zero-project-index">
                     <span>{String(activeCaseIndex + 1).padStart(2, "0")}</span>
-                    <span>/ {String(activeCases.length).padStart(2, "0")}</span>
+                    <span>/ {String(featuredCases.length).padStart(2, "0")}</span>
                   </div>
                   <AnimatePresence mode="wait">
                     <motion.article
@@ -943,6 +950,19 @@ export function NimdalPortfolioExperience({
                         <b>{proofLabels[activeCase.proofLevel]}</b>
                         <b>{activeCase.evidence.length} evidence items</b>
                       </div>
+                      <figure className="zero-featured-preview">
+                        <Image
+                          src={projectVisuals[activeCase.slug] ?? activeCase.media.src}
+                          alt={activeCase.media.alt}
+                          fill
+                          sizes="(max-width: 900px) 88vw, 54vw"
+                          className="zero-featured-preview-image"
+                        />
+                        <figcaption>
+                          <span>{activeCase.media.cue}</span>
+                          <strong>Current proof surface</strong>
+                        </figcaption>
+                      </figure>
                       <div className="zero-story-preview">
                         <span>Problem</span>
                         <p>{activeCase.story.problem}</p>
@@ -974,55 +994,44 @@ export function NimdalPortfolioExperience({
                             <ExternalLink size={15} aria-hidden />
                           </a>
                         ) : null}
+                        {activeCaseRepoHref ? (
+                          <a href={activeCaseRepoHref} target="_blank" rel="noreferrer">
+                            GitHub
+                            <ExternalLink size={15} aria-hidden />
+                          </a>
+                        ) : null}
                       </div>
                     </motion.article>
                   </AnimatePresence>
-                  <div className="zero-project-atlas" aria-label="Interactive project atlas">
-                    <span>Project atlas</span>
-                    <div className="zero-atlas-surface">
-                      {allCases.map((item, index) => {
-                        const nodeRoute = getRouteForProject(item.slug) ?? currentRoutes[0];
-                        const nodePosition = projectAtlasPositions[item.slug] ?? { x: "50%", y: "50%" };
-                        const isCurrent = item.slug === activeCase.slug;
+                  <section className="zero-etc-projects" aria-labelledby="etc-projects-title">
+                    <div className="zero-etc-heading">
+                      <div>
+                        <span>ETC / archive</span>
+                        <strong id="etc-projects-title">Smaller experiments</strong>
+                      </div>
+                      <small>{String(etcCases.length).padStart(2, "0")} references</small>
+                    </div>
+                    <div className="zero-etc-list">
+                      {etcCases.map((item, index) => {
+                        const href = item.href ?? item.relatedPosts?.[0]?.href ?? `/projects/${item.slug}/proof`;
+                        const isExternal = href.startsWith("http");
 
                         return (
-                          <button
+                          <a
                             key={item.slug}
-                            type="button"
-                            className={isCurrent ? "is-active" : ""}
-                            style={
-                              {
-                                "--node-x": nodePosition.x,
-                                "--node-y": nodePosition.y,
-                                "--node-tone": nodeRoute.tone
-                              } as CSSProperties
-                            }
-                            onClick={() => openProject(item)}
-                            aria-current={isCurrent ? "true" : undefined}
+                            href={href}
+                            target={isExternal ? "_blank" : undefined}
+                            rel={isExternal ? "noreferrer" : undefined}
                           >
                             <span>{String(index + 1).padStart(2, "0")}</span>
                             <strong>{item.client}</strong>
-                            <small>{proofLabels[item.proofLevel]}</small>
-                          </button>
+                            <p>{item.oneLiner}</p>
+                            {isExternal ? <ExternalLink size={14} aria-hidden /> : <ArrowRight size={14} aria-hidden />}
+                          </a>
                         );
                       })}
                     </div>
-                  </div>
-                  <div className="zero-project-rail" aria-label="Projects in this category">
-                    {activeCases.map((item, index) => (
-                      <button
-                        key={item.slug}
-                        className={index === activeCaseIndex ? "is-active" : ""}
-                        onClick={() => {
-                          setActiveCaseIndex(index);
-                          openProject(item);
-                        }}
-                      >
-                        <span>{String(index + 1).padStart(2, "0")}</span>
-                        {item.client}
-                      </button>
-                    ))}
-                  </div>
+                  </section>
                 </div>
               ) : null}
             </motion.section>

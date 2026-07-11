@@ -184,7 +184,80 @@ const sharedContact = {
   scheduleUrl: "mailto:0xnimdal@gmail.com"
 };
 
+export const featuredProjectSlugs = ["arcdu-nft", "mylol", "hyperalphaduo"] as const;
+
 const workCaseStudies: readonly CaseStudy[] = [
+  {
+    slug: "arcdu-nft",
+    client: "ARCDU NFT",
+    category: "Web3 product",
+    href: "https://arcdu.vercel.app/",
+    media: {
+      src: "/media/projects/arcdu-nft.webp",
+      alt: "ARCDU NFT live wallet intelligence interface with Genesis NFT access gate.",
+      cue: "Live Arc Testnet MVP"
+    },
+    title: "NFT wallet intelligence and settlement on Arc.",
+    oneLiner: "A live Arc Testnet product combining NFT membership, mint intelligence, signed wallet tracking, Telegram utilities, and reviewed stablecoin settlement.",
+    context: "Built as a production-style testnet MVP with an onchain membership gate, public repository, live indexing paths, and explicit boundaries around read-only analytics and testnet funds.",
+    strategy: [
+      "Gate member utilities with a free, soulbound ARCDU Genesis NFT verified on Arc Testnet.",
+      "Turn signed Ethereum NFT activity into mint signals, wallet tracking, sweep alerts, and Telegram commands.",
+      "Route reviewed testnet USDC settlement to Arc through Circle Gateway Unified Balance while preserving a recovery journal."
+    ],
+    stack: ["Arc Testnet", "NFT indexing", "Circle Gateway", "Telegram", "Solidity"],
+    status: "live",
+    proofLevel: "live-link",
+    story: {
+      problem: "NFT activity, wallet monitoring, member access, alerts, and cross-chain settlement are fragmented across separate tools.",
+      audience: "NFT operators who need read-only wallet intelligence and controlled testnet settlement behind a verifiable membership gate.",
+      decision: "Use the Genesis NFT as the access primitive, keep analytics read-only, and disclose unavailable data instead of fabricating prices or history.",
+      system: "Live mint radar, signed wallet tracker, Telegram Bot App, NFT portfolio ledger, and Circle Gateway settlement on Arc Testnet.",
+      outcome: "A public, inspectable MVP with a live deployment, active repository, onchain access contract, and verified testnet settlement receipts.",
+      next: "Expand qualified live signal coverage and member onboarding while retaining signature, recovery, and testnet disclosure boundaries."
+    },
+    caseRoom: {
+      verdict: "Strongest current end-to-end product proof.",
+      judgeNote: "ARCDU connects a public interface, active codebase, wallet-gated member flow, serverless event processing, Telegram delivery, and onchain testnet receipts.",
+      checkpoints: [
+        { label: "Live surface", value: "arcdu.vercel.app" },
+        { label: "Current build", value: "GitHub e559852" },
+        { label: "Onchain proof", value: "Arc Testnet settlement receipt" }
+      ]
+    },
+    proofManifest: {
+      status: "Live Arc Testnet MVP / public repository",
+      capturedAt: "2026-07-11",
+      buildRef: "nimdalkr/ARCDU e559852",
+      environment: "Vercel / Arc Testnet / Ethereum event webhooks",
+      reproduction: "Open live app -> connect wallet -> mint or verify Genesis NFT -> inspect member utilities",
+      limitation: "Testnet only. Arc USDC has no real-world value, and member utilities require wallet verification.",
+      sourceHref: "https://github.com/nimdalkr/ARCDU"
+    },
+    proofMedia: [
+      {
+        label: "Live access surface",
+        kind: "capture",
+        src: "/media/projects/arcdu-nft.webp",
+        alt: "ARCDU NFT live production landing screen and wallet connection flow.",
+        caption: "The public deployment exposes the NFT intelligence navigation and Genesis NFT verification entry point.",
+        capturedAt: "2026-07-11",
+        source: "Live Vercel deployment",
+        claim: "The wallet intelligence interface and membership entry flow are publicly inspectable.",
+        limitation: "Member data requires a connected wallet and ARCDU Genesis NFT."
+      }
+    ],
+    evidence: [
+      { label: "Live product", type: "live", href: "https://arcdu.vercel.app/" },
+      { label: "Public repository", type: "repository", href: "https://github.com/nimdalkr/ARCDU" },
+      { label: "Verified settlement", type: "live", href: "https://testnet.arcscan.app/tx/0x556b3a9285d2cdf074772f00fde30fd7d83d07f905684c5729b8b891da7e138c" },
+      { label: "Testnet boundary", type: "caveat", caveat: "No real trading or real-value settlement is presented." }
+    ],
+    artifacts: [
+      { label: "Open live product", kind: "site", href: "https://arcdu.vercel.app/" },
+      { label: "Inspect GitHub repository", kind: "repo", href: "https://github.com/nimdalkr/ARCDU" }
+    ]
+  },
   {
     slug: "ethosalpha",
     client: "ethosalpha",
@@ -410,28 +483,77 @@ const workCaseStudies: readonly CaseStudy[] = [
     category: "Game",
     href: "https://cafe.naver.com/xavishowtime",
     media: {
-      src: "/media/projects/mylol.webp",
-      alt: "myLoL project visual.",
-      cue: "Simulation game"
+      src: "/media/projects/proof/mylol-draft.webp",
+      alt: "MyLoL champion draft interface with real LCK player portraits, champion grid, role filters, bans, and turn timer.",
+      cue: "Current Godot build"
     },
     title: "LCK team management simulation.",
-    oneLiner: "A Football Manager-style LCK team management simulation game using real player data.",
-    context: "Built for PC and Android as a sports management experience grounded in real LCK player data.",
-    strategy: ["Use real LCK player data to power a Football Manager-style team management simulation for PC and Android."],
-    stack: ["game", "LCK", "simulation", "PC", "Android"],
-    status: "archived",
-    proofLevel: "live-link",
+    oneLiner: "A Godot-based LCK management game spanning team selection, roster building, champion draft, match simulation, awards, transfers, and multi-season records.",
+    context: "The current Android-oriented build is documented through a 2026 QA set covering the complete management loop rather than a single concept screen.",
+    strategy: [
+      "Use real LCK teams and players as the foundation for roster, form, role, and career systems.",
+      "Connect champion draft decisions to match presentation, season schedules, awards, rankings, and transfers.",
+      "Verify the loop across multiple simulated seasons with repeatable Godot capture runs."
+    ],
+    stack: ["Godot", "LCK", "simulation", "Android", "QA automation"],
+    status: "prototype",
+    proofLevel: "screenshot",
     story: {
       problem: "LCK fandom has rich player data, but few fan-made management simulations turn that data into playable decision loops.",
       audience: "LCK fans who enjoy roster-building, scouting, and FM-style management games.",
       decision: "Use real player data as the simulation backbone instead of fictional teams.",
       system: "PC/Android team-management loop with data-driven player comparison.",
-      outcome: "An archived but credible proof of Nimdal's game-system design interest.",
-      next: "Add screenshots, playable clips, and a short postmortem for stronger public review."
+      outcome: "A broad playable management prototype with current QA proof across the complete LCK season loop.",
+      next: "Package a public demo build and publish a concise system postmortem."
     },
+    caseRoom: {
+      verdict: "Deepest current game-system build.",
+      judgeNote: "The contact sheet and focused captures show a connected product loop across team selection, roster management, draft, match presentation, records, strategy, awards, and transfers.",
+      checkpoints: [
+        { label: "Visible proof", value: "13-screen QA contact sheet" },
+        { label: "Core loop", value: "Draft -> match -> season systems" },
+        { label: "Current gap", value: "No public demo package" }
+      ]
+    },
+    proofMedia: [
+      {
+        label: "Full management loop",
+        kind: "workflow",
+        src: "/media/projects/mylol.webp",
+        alt: "MyLoL labeled QA sheet covering thirteen management screens.",
+        caption: "The QA sheet connects team selection, home, roster, schedule, front office, draft, match, rankings, awards, champion records, transfers, and strategy.",
+        capturedAt: "2026-07-10",
+        source: "Godot QA capture",
+        claim: "The current build contains a connected multi-screen management loop.",
+        limitation: "Static QA sheet; the public demo package is not available."
+      },
+      {
+        label: "Champion draft",
+        kind: "capture",
+        src: "/media/projects/proof/mylol-draft.webp",
+        alt: "MyLoL champion draft interface with player portraits, champion grid, roles, bans, and timer.",
+        caption: "The draft screen combines real LCK player presentation with champion role filters, recommendations, picks, bans, and turn state.",
+        capturedAt: "2026-07-10",
+        source: "Godot QA capture",
+        claim: "Champion drafting is represented as an interactive management decision surface.",
+        limitation: "Static capture; AI opponent behavior is not demonstrated here."
+      },
+      {
+        label: "Match presentation",
+        kind: "capture",
+        src: "/media/projects/proof/mylol-match.webp",
+        alt: "MyLoL match broadcast screen with both team rosters, score, timer, and playback speed controls.",
+        caption: "The match view carries the selected rosters into a broadcast-style simulation with speed controls and result state.",
+        capturedAt: "2026-07-10",
+        source: "Godot QA capture",
+        claim: "Drafted rosters feed into the match simulation presentation.",
+        limitation: "Static capture; simulation calculations are not exposed."
+      }
+    ],
     evidence: [
       { label: "Reference community", type: "live", href: "https://cafe.naver.com/xavishowtime" },
-      { label: "Archive caveat", type: "caveat", caveat: "Archived/reference surface; add direct media assets for award-level proof." }
+      { label: "Current QA captures", type: "screenshot", value: "Godot build captured across the complete management loop." },
+      { label: "Public build caveat", type: "caveat", caveat: "Current build proof is visual; a public demo package is still required." }
     ],
     artifacts: [
       { label: "Reference page", kind: "site", href: "https://cafe.naver.com/xavishowtime" }

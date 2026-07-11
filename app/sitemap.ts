@@ -1,17 +1,20 @@
 import type { MetadataRoute } from "next";
 
 import { absoluteMainUrl } from "@/lib/site";
-import { portfolioData } from "@/lib/data";
+import { featuredProjectSlugs, portfolioData } from "@/lib/data";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
 
-  const projectPages = portfolioData.caseStudies.map((project) => ({
-    url: absoluteMainUrl(`/projects/${project.slug}/proof`),
-    lastModified: now,
-    changeFrequency: "monthly" as const,
-    priority: 0.75
-  }));
+  const featuredProjectSet = new Set<string>(featuredProjectSlugs);
+  const projectPages = portfolioData.caseStudies
+    .filter((project) => featuredProjectSet.has(project.slug))
+    .map((project) => ({
+      url: absoluteMainUrl(`/projects/${project.slug}/proof`),
+      lastModified: now,
+      changeFrequency: "monthly" as const,
+      priority: 0.75
+    }));
 
   return [
     {
