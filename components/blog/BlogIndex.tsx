@@ -23,14 +23,14 @@ type BlogIndexProps = {
 
 const labels = {
   ko: {
-    personal: "개인 블로그",
-    tagged: "태그 글",
+    personal: "개인 기록",
+    tagged: "태그별 글",
     all: "전체",
     featured: "대표 글",
     latest: "최근 글",
-    read: "글 읽기",
-    emptyTitle: "아직 공개된 글이 없습니다.",
-    emptyBody: "이 태그에 해당하는 공개 글이 없습니다."
+    read: "본문 읽기",
+    emptyTitle: "아직 공개한 글이 없습니다.",
+    emptyBody: "이 태그로 쓴 글이 없습니다."
   },
   en: {
     personal: "Personal blog",
@@ -75,7 +75,7 @@ export function BlogIndex({
           <p>{copy.description}</p>
         </section>
 
-        <nav className="blog-tag-row" aria-label={locale === "ko" ? "글 태그" : "Blog tags"}>
+        <nav className="blog-tag-row" aria-label={locale === "ko" ? "태그" : "Blog tags"}>
           <Link className={!activeTag ? "is-active" : undefined} href={hubHref}>
             {ui.all}
           </Link>
@@ -86,7 +86,7 @@ export function BlogIndex({
               href={tag.canonicalUrl}
             >
               {tag.label}
-              <span aria-label={locale === "ko" ? `${tag.count}개 글` : `${tag.count} posts`}>
+              <span aria-label={locale === "ko" ? `글 ${tag.count}개` : `${tag.count} posts`}>
                 {tag.count}
               </span>
             </Link>
@@ -98,7 +98,7 @@ export function BlogIndex({
             <Link
               className="blog-featured-media"
               href={featured.canonicalUrl}
-              aria-label={locale === "ko" ? `${featured.title} 읽기` : `Read ${featured.title}`}
+              aria-label={locale === "ko" ? `${featured.title} 글 읽기` : `Read ${featured.title}`}
             >
               <Image
                 src={featured.cover}

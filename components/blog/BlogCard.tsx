@@ -5,7 +5,7 @@ import type { LocalizedBlogPost } from "@/content/blog/posts";
 import { formatPostDate } from "@/content/blog/posts";
 
 export function BlogCard({ post }: { post: LocalizedBlogPost }) {
-  const readLabel = post.locale === "ko" ? `${post.title} 읽기` : `Read ${post.title}`;
+  const readLabel = post.locale === "ko" ? `${post.title} 글 읽기` : `Read ${post.title}`;
 
   return (
     <article className="blog-card">
@@ -27,7 +27,7 @@ export function BlogCard({ post }: { post: LocalizedBlogPost }) {
           <Link href={post.canonicalUrl}>{post.title}</Link>
         </h2>
         <p>{post.description}</p>
-        <div className="blog-card-tags" aria-label={post.locale === "ko" ? "글 태그" : "Post tags"}>
+        <div className="blog-card-tags" aria-label={post.locale === "ko" ? "태그" : "Post tags"}>
           {post.tagLinks.map((tag) => (
             <Link key={tag.slug} href={tag.canonicalUrl}>
               {tag.label}

@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: LabPageProps): Promise<Metada
     title,
     description: copy.description,
     alternates: metadataAlternates(locale, "/lab"),
-    openGraph: { title, description: copy.description, url: absoluteCanonicalUrl(locale, "/lab"), locale: openGraphLocaleByLocale[locale], type: "website", images: [{ url: "/media/projects/alphaduo-proof.png", ...getMediaDimensions("/media/projects/alphaduo-proof.png"), alt: "AlphaDuo live product" }] }
+    openGraph: { title, description: copy.description, url: absoluteCanonicalUrl(locale, "/lab"), locale: openGraphLocaleByLocale[locale], type: "website", images: [{ url: "/media/projects/alphaduo-proof.png", ...getMediaDimensions("/media/projects/alphaduo-proof.png"), alt: locale === "ko" ? "AlphaDuo 실제 서비스 화면" : "AlphaDuo live product" }] }
   };
 }
 

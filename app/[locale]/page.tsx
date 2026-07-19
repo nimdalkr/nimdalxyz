@@ -127,7 +127,10 @@ export default async function HomePage({ params }: HomePageProps) {
               <figcaption><span>IDENTITY / 01</span><span>PIXEL OCTOPUS</span></figcaption>
             </figure>
           </div>
-          <div className="hero-meta" aria-label="Location and availability">
+          <div
+            className="hero-meta"
+            aria-label={locale === "ko" ? "지역과 현재 작업" : "Location and availability"}
+          >
             <span>{identity.location}</span>
             <span>{identity.availability}</span>
           </div>
@@ -135,7 +138,9 @@ export default async function HomePage({ params }: HomePageProps) {
         </section>
 
         <section className="signal-rail" aria-label={locale === "ko" ? "경력 수치" : "Career signals"}>
-        <div className="signal-label">PORTFOLIO CLAIM</div>
+        <div className="signal-label">
+          {locale === "ko" ? "포트폴리오 기재 수치" : "PORTFOLIO CLAIM"}
+        </div>
         {signals.map((signal) => (
           <article key={signal.value}>
             <strong>{signal.value}</strong>
@@ -170,7 +175,7 @@ export default async function HomePage({ params }: HomePageProps) {
                     <p className="eyebrow">{copy.category}</p>
                     <h3><Link href={`/${locale}/projects/${project.slug}`}>{copy.title}</Link></h3>
                     <p>{copy.summary}</p>
-                    <ul className="tag-list" aria-label="Project tags">
+                    <ul className="tag-list" aria-label={locale === "ko" ? "프로젝트 태그" : "Project tags"}>
                       {copy.tags.map((tag) => <li key={tag}>{tag}</li>)}
                     </ul>
                     <div className="proof-links">

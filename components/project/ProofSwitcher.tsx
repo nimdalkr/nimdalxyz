@@ -13,9 +13,10 @@ interface ProofItem {
 
 interface ProofSwitcherProps {
   items: readonly ProofItem[];
+  ariaLabel: string;
 }
 
-export function ProofSwitcher({ items }: ProofSwitcherProps) {
+export function ProofSwitcher({ items, ariaLabel }: ProofSwitcherProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const id = useId();
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
@@ -46,7 +47,7 @@ export function ProofSwitcher({ items }: ProofSwitcherProps) {
   return (
     <div className="proof-switcher">
       {items.length > 1 ? (
-        <div className="proof-switcher-tabs" role="tablist" aria-label="Project media">
+        <div className="proof-switcher-tabs" role="tablist" aria-label={ariaLabel}>
           {items.map((item, index) => (
             <button
               key={`${item.src}-${item.label}`}

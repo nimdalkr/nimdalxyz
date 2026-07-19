@@ -30,9 +30,9 @@ type BlogPostPageProps = {
 const labels = {
   ko: {
     back: "nimdalog로 돌아가기",
-    tags: "글 태그",
-    related: "다음으로 읽을 글",
-    updated: "수정"
+    tags: "태그",
+    related: "함께 읽을 글",
+    updated: "수정일"
   },
   en: {
     back: "Back to nimdalog",
@@ -57,7 +57,11 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
   const post = getLocalizedBlogPost(locale, slug);
 
   if (!post) {
-    return { title: `Post not found | ${siteConfig.blogName}` };
+    return {
+      title: locale === "ko"
+        ? `글을 찾을 수 없습니다 | ${siteConfig.blogName}`
+        : `Post not found | ${siteConfig.blogName}`
+    };
   }
 
   const image = new URL(post.cover, siteConfig.blogUrl).toString();

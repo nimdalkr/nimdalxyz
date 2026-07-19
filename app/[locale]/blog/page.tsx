@@ -51,7 +51,11 @@ export async function generateMetadata({ params }: BlogHubPageProps): Promise<Me
       siteName: siteConfig.blogName,
       locale: openGraphLocaleByLocale[locale],
       type: "website",
-      images: [{ url: image, ...imageDimensions, alt: "Nimdal pixel octopus identity" }]
+      images: [{
+        url: image,
+        ...imageDimensions,
+        alt: locale === "ko" ? "Nimdal의 픽셀 문어 아이덴티티" : "Nimdal pixel octopus identity"
+      }]
     },
     twitter: {
       card: "summary",

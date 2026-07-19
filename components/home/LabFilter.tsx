@@ -25,6 +25,7 @@ interface LabFilterProps {
     prototype: string;
     concept: string;
     inProgress: string;
+    filterLabel: string;
   };
 }
 
@@ -48,7 +49,7 @@ export function LabFilter({ items, labels }: LabFilterProps) {
 
   return (
     <div>
-      <div className="filter-row" role="toolbar" aria-label="Project status filter">
+      <div className="filter-row" role="toolbar" aria-label={labels.filterLabel}>
         {availableFilters.map((key) => (
           <button
             key={key}

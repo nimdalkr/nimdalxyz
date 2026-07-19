@@ -34,17 +34,17 @@ interface ProjectPageProps {
 
 const projectLabels = {
   ko: {
-    caseStudy: "Case study",
-    live: "실서비스",
-    repository: "공개 저장소",
-    article: "빌드 로그",
-    reference: "참고 자료",
-    media: "프로젝트 증빙",
-    evidenceLedger: "증빙 기록",
+    caseStudy: "프로젝트 기록",
+    live: "사이트 보기",
+    repository: "저장소 보기",
+    article: "제작 기록",
+    reference: "관련 자료",
+    media: "확인할 수 있는 결과",
+    evidenceLedger: "자료별 확인 범위",
     previous: "이전 프로젝트",
     next: "다음 프로젝트",
-    undated: "날짜 미상",
-    sections: "케이스 스터디 구성"
+    undated: "기록일 미상",
+    sections: "프로젝트 내용"
   },
   en: {
     caseStudy: "Case study",
@@ -81,7 +81,7 @@ export async function generateMetadata({ params }: ProjectPageProps): Promise<Me
   const project = getProject(slug);
 
   if (!project) {
-    return { title: "Project not found" };
+    return { title: locale === "ko" ? "프로젝트를 찾을 수 없습니다" : "Project not found" };
   }
 
   const copy = project.copy[locale];
@@ -130,7 +130,16 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   const ui = uiCopy[locale];
   const labels = projectLabels[locale];
   const copy = project.copy[locale];
-  const detailLabels = content.lab.detailLabels;
+  const detailLabels = locale === "ko"
+    ? {
+        problem: "무엇이 불편했나",
+        decision: "어떻게 풀었나",
+        system: "무엇을 만들었나",
+        proof: "확인할 수 있는 결과",
+        limitation: "아직 부족한 점",
+        next: "다음에 할 일"
+      }
+    : content.lab.detailLabels;
   const heroMedia = project.media.find((item) => item.role === "proof") ?? project.media[0];
   const canonical = projectCanonicalUrl(locale, project.slug);
   const currentIndex = projects.findIndex((item) => item.slug === project.slug);
@@ -287,7 +296,10 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           </div>
 
           <div className="proof-switcher-wrap">
-            <ProofSwitcher items={proofItems} />
+            <ProofSwitcher
+              items={proofItems}
+              ariaLabel={locale === "ko" ? "프로젝트 자료" : "Project media"}
+            />
           </div>
 
           <div className="evidence-ledger" aria-label={labels.evidenceLedger}>

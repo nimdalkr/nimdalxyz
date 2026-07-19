@@ -15,9 +15,9 @@ interface BlogHeaderProps {
 const labels = {
   ko: {
     home: "홈",
-    portfolio: "커리어",
+    portfolio: "경력",
     rss: "RSS",
-    nav: "블로그 탐색",
+    nav: "블로그 메뉴",
     language: "English"
   },
   en: {
@@ -40,7 +40,11 @@ export function BlogHeader({
 
   return (
     <header className="blog-header">
-      <Link className="blog-brand" href={hubHref} aria-label="nimdalog home">
+      <Link
+        className="blog-brand"
+        href={hubHref}
+        aria-label={locale === "ko" ? "nimdalog 홈" : "nimdalog home"}
+      >
         <Image
           src="/media/identity-octopus.jpg"
           alt=""

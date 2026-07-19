@@ -20,6 +20,10 @@ interface MobileMenuProps {
 
 export function MobileMenu({ locale, labels }: MobileMenuProps) {
   const [open, setOpen] = useState(false);
+  const menuLabels = locale === "ko"
+    ? { open: "메뉴 열기", close: "메뉴 닫기" }
+    : { open: "Open navigation", close: "Close navigation" };
+  const menuLabel = open ? menuLabels.close : menuLabels.open;
 
   function closeMenu() {
     setOpen(false);
@@ -33,13 +37,13 @@ export function MobileMenu({ locale, labels }: MobileMenuProps) {
         onClick={() => setOpen((current) => !current)}
         aria-expanded={open}
         aria-controls="mobile-navigation"
-        aria-label={open ? "Close navigation" : "Open navigation"}
+        aria-label={menuLabel}
       >
         {open ? <X aria-hidden weight="bold" /> : <List aria-hidden weight="bold" />}
       </button>
       {open ? (
         <div className="mobile-menu-panel" id="mobile-navigation">
-          <nav aria-label="Mobile navigation">
+          <nav aria-label={locale === "ko" ? "모바일 메뉴" : "Mobile navigation"}>
             <Link href={`/${locale}#work`} onClick={closeMenu}>{labels.work}</Link>
             <Link href={`/${locale}#lab`} onClick={closeMenu}>{labels.lab}</Link>
             <Link href={`/${locale}#about`} onClick={closeMenu}>{labels.about}</Link>

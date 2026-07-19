@@ -25,7 +25,10 @@ export function LocaleSwitch({ locale, compact = false }: LocaleSwitchProps) {
   const pathname = usePathname();
 
   return (
-    <nav className={compact ? "locale-switch is-compact" : "locale-switch"} aria-label="Language">
+    <nav
+      className={compact ? "locale-switch is-compact" : "locale-switch"}
+      aria-label={locale === "ko" ? "언어 선택" : "Language"}
+    >
       {(["ko", "en"] as const).map((item) => (
         <Link
           key={item}

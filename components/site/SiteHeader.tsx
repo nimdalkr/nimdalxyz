@@ -19,10 +19,14 @@ interface SiteHeaderProps {
 export function SiteHeader({ locale, labels, tone = "navy" }: SiteHeaderProps) {
   return (
     <header className={`site-header is-${tone}`}>
-      <Link href={`/${locale}`} className="site-wordmark" aria-label="Nimdal home">
+      <Link
+        href={`/${locale}`}
+        className="site-wordmark"
+        aria-label={locale === "ko" ? "Nimdal 홈" : "Nimdal home"}
+      >
         NIMDAL
       </Link>
-      <nav className="desktop-nav" aria-label="Primary navigation">
+      <nav className="desktop-nav" aria-label={locale === "ko" ? "주요 메뉴" : "Primary navigation"}>
         <Link href={`/${locale}#work`}>{labels.work}</Link>
         <Link href={`/${locale}#lab`}>{labels.lab}</Link>
         <Link href={`/${locale}#about`}>{labels.about}</Link>

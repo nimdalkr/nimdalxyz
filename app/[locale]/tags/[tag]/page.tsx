@@ -41,11 +41,15 @@ export async function generateMetadata({ params }: BlogTagPageProps): Promise<Me
   const label = getLocalizedTagLabel(locale, tag);
 
   if (!label) {
-    return { title: `Tag not found | ${siteConfig.blogName}` };
+    return {
+      title: locale === "ko"
+        ? `태그를 찾을 수 없습니다 | ${siteConfig.blogName}`
+        : `Tag not found | ${siteConfig.blogName}`
+    };
   }
 
   const description = locale === "ko"
-    ? `nimdalog의 ${label} 태그 글.`
+    ? `nimdalog의 ‘${label}’ 태그 글입니다.`
     : `nimdalog notes tagged ${label}.`;
   const canonicalUrl = blogCanonicalUrl(locale, `/tags/${tag}`);
 
@@ -63,7 +67,7 @@ export async function generateMetadata({ params }: BlogTagPageProps): Promise<Me
       images: [{
         url: new URL("/media/identity-octopus.jpg", siteConfig.blogUrl).toString(),
         ...getMediaDimensions("/media/identity-octopus.jpg"),
-        alt: "Nimdal pixel octopus identity"
+        alt: locale === "ko" ? "Nimdal의 픽셀 문어 아이덴티티" : "Nimdal pixel octopus identity"
       }]
     },
     twitter: {
