@@ -1,74 +1,111 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import type { BlogPost, BlogTag } from "@/content/blog/posts";
+import { BlogCard } from "@/components/blog/BlogCard";
+import { BlogHeader } from "@/components/blog/BlogHeader";
+import type {
+  LocalizedBlogPost,
+  LocalizedBlogTag
+} from "@/content/blog/posts";
 import { formatPostDate } from "@/content/blog/posts";
-import { siteConfig } from "@/lib/site";
+import { siteContent, type Locale } from "@/lib/content";
+import { blogCanonicalUrl } from "@/lib/seo";
 
 type BlogIndexProps = {
-  posts: readonly BlogPost[];
-  tags: readonly BlogTag[];
+  locale?: Locale;
+  posts: readonly LocalizedBlogPost[];
+  tags: readonly LocalizedBlogTag[];
   activeTag?: string;
+  hubHref?: string;
+  languagePath?: string;
+  languageHref?: string;
 };
 
-export function BlogHeader() {
-  return (
-    <header className="blog-header">
-      <Link className="blog-brand" href="/blog" aria-label="Open nimdalog">
-        <Image src="/media/identity-octopus.jpg" alt="" width={42} height={42} className="blog-brand-mark" />
-        <span>
-          <strong>nimdalog</strong>
-        </span>
-      </Link>
-      <nav className="blog-nav" aria-label="Blog navigation">
-        <Link href={siteConfig.mainUrl}>Home</Link>
-        <Link href={`${siteConfig.mainUrl}/portfolio`}>Portfolio</Link>
-        <Link href="/rss.xml">RSS</Link>
-      </nav>
-    </header>
-  );
-}
+const labels = {
+  ko: {
+    personal: "개인 블로그",
+    tagged: "태그 글",
+    all: "전체",
+    featured: "대표 글",
+    latest: "최근 글",
+    read: "글 읽기",
+    emptyTitle: "아직 공개된 글이 없습니다.",
+    emptyBody: "이 태그에 해당하는 공개 글이 없습니다."
+  },
+  en: {
+    personal: "Personal blog",
+    tagged: "Tagged notes",
+    all: "All",
+    featured: "Featured post",
+    latest: "Latest posts",
+    read: "Read note",
+    emptyTitle: "No published notes yet.",
+    emptyBody: "There are no published notes for this tag."
+  }
+} as const;
 
-export function BlogIndex({ posts, tags, activeTag }: BlogIndexProps) {
+export function BlogIndex({
+  locale = "en",
+  posts,
+  tags,
+  activeTag,
+  hubHref = blogCanonicalUrl(locale),
+  languagePath = "/",
+  languageHref
+}: BlogIndexProps) {
   const [featured, ...rest] = posts;
+  const copy = siteContent[locale].blog;
+  const ui = labels[locale];
 
   return (
     <div className="blog-shell">
-      <div className="blog-water" aria-hidden />
-      <BlogHeader />
+      <BlogHeader
+        locale={locale}
+        hubHref={hubHref}
+        languagePath={languagePath}
+        languageHref={languageHref}
+      />
 
-      <main className="blog-main">
+      <main className="blog-main" id="main-content">
         <section className="blog-hero" aria-labelledby="blog-title">
           <div>
-            <p className="blog-kicker">{activeTag ? "Tagged Notes" : "Personal Blog"}</p>
-            <h1 id="blog-title">{activeTag ? activeTag : siteConfig.blogName}</h1>
+            <p className="blog-kicker">{activeTag ? ui.tagged : copy.eyebrow}</p>
+            <h1 id="blog-title">{activeTag ?? copy.title}</h1>
           </div>
-          <p>
-            Notes from Tak Chanwoo / Nimdal on Web3 research, product systems, campaign operations,
-            automation, and the work behind personal builds.
-          </p>
+          <p>{copy.description}</p>
         </section>
 
-        <section className="blog-tag-row" aria-label="Blog tags">
-          <Link className={!activeTag ? "is-active" : undefined} href="/blog">
-            All
+        <nav className="blog-tag-row" aria-label={locale === "ko" ? "글 태그" : "Blog tags"}>
+          <Link className={!activeTag ? "is-active" : undefined} href={hubHref}>
+            {ui.all}
           </Link>
           {tags.map((tag) => (
-            <Link key={tag.slug} className={activeTag === tag.label ? "is-active" : undefined} href={tag.href}>
+            <Link
+              key={tag.slug}
+              className={activeTag === tag.label ? "is-active" : undefined}
+              href={tag.canonicalUrl}
+            >
               {tag.label}
-              <span>{tag.count}</span>
+              <span aria-label={locale === "ko" ? `${tag.count}개 글` : `${tag.count} posts`}>
+                {tag.count}
+              </span>
             </Link>
           ))}
-        </section>
+        </nav>
 
         {featured ? (
-          <section className="blog-featured" aria-label="Featured post">
-            <Link className="blog-featured-media" href={featured.href} aria-label={`Read ${featured.title}`}>
+          <section className="blog-featured" aria-label={ui.featured}>
+            <Link
+              className="blog-featured-media"
+              href={featured.canonicalUrl}
+              aria-label={locale === "ko" ? `${featured.title} 읽기` : `Read ${featured.title}`}
+            >
               <Image
                 src={featured.cover}
                 alt=""
                 fill
                 priority
+                loading="eager"
                 sizes="(max-width: 900px) calc(100vw - 40px), 47vw"
                 className="blog-card-image"
               />
@@ -76,27 +113,29 @@ export function BlogIndex({ posts, tags, activeTag }: BlogIndexProps) {
             <article className="blog-featured-copy">
               <p className="blog-kicker">{featured.category}</p>
               <h2>
-                <Link href={featured.href}>{featured.title}</Link>
+                <Link href={featured.canonicalUrl}>{featured.title}</Link>
               </h2>
               <p>{featured.description}</p>
               <div className="blog-meta">
-                <time dateTime={featured.publishedAt}>{formatPostDate(featured.publishedAt)}</time>
+                <time dateTime={featured.publishedAt}>
+                  {formatPostDate(featured.publishedAt, locale)}
+                </time>
                 <span>{featured.readingTime}</span>
               </div>
-              <Link className="blog-read-link" href={featured.href}>
-                Read note
+              <Link className="blog-read-link" href={featured.canonicalUrl}>
+                {ui.read}
               </Link>
             </article>
           </section>
         ) : (
-          <section className="blog-empty" aria-label="No posts">
-            <h2>No notes yet.</h2>
-            <p>nimdalog is ready, but this tag does not have any published posts yet.</p>
+          <section className="blog-empty" aria-label={locale === "ko" ? "글 없음" : "No posts"}>
+            <h2>{ui.emptyTitle}</h2>
+            <p>{ui.emptyBody}</p>
           </section>
         )}
 
         {rest.length ? (
-          <section className="blog-grid" aria-label="Latest posts">
+          <section className="blog-grid" aria-label={ui.latest}>
             {rest.map((post) => (
               <BlogCard key={post.slug} post={post} />
             ))}
@@ -107,29 +146,4 @@ export function BlogIndex({ posts, tags, activeTag }: BlogIndexProps) {
   );
 }
 
-export function BlogCard({ post }: { post: BlogPost }) {
-  return (
-    <article className="blog-card">
-      <Link className="blog-card-media" href={post.href} aria-label={`Read ${post.title}`}>
-        <Image src={post.cover} alt="" fill sizes="(max-width: 900px) calc(100vw - 40px), 360px" className="blog-card-image" />
-      </Link>
-      <div className="blog-card-body">
-        <div className="blog-card-topline">
-          <span>{post.category}</span>
-          <time dateTime={post.publishedAt}>{formatPostDate(post.publishedAt)}</time>
-        </div>
-        <h2>
-          <Link href={post.href}>{post.title}</Link>
-        </h2>
-        <p>{post.description}</p>
-        <div className="blog-card-tags" aria-label={`${post.title} tags`}>
-          {post.tagHrefs.map((tag) => (
-            <Link key={tag.slug} href={tag.href}>
-              {tag.tag}
-            </Link>
-          ))}
-        </div>
-      </div>
-    </article>
-  );
-}
+export { BlogCard, BlogHeader };
