@@ -126,7 +126,6 @@ function Intro({ locale, avatarAlt }: Pick<PersonalPortfolioHomeProps, "locale">
           style={reduceMotion ? undefined : { y: titleY, scale: titleScale }}
         >
           <h1 id="pp-intro-title">NIMDAL</h1>
-          <p className="pp-kicker">PERSONAL PORTFOLIO</p>
           <p className="pp-intro-meta">
             {locale === "ko" ? "탁찬우" : "TAK CHANWOO"} / SEOUL / {new Date().getFullYear()}
           </p>
@@ -360,7 +359,6 @@ function Career({
             <div key={`${signal.value}-${signal.label}`}>
               <strong>{signal.value}</strong>
               <span>{signal.label}</span>
-              <small>PORTFOLIO CLAIM</small>
             </div>
           ))}
         </aside>
@@ -405,11 +403,6 @@ function Career({
           ))}
         </div>
       </div>
-      <p className="pp-career-note">
-        {locale === "ko"
-          ? "회사, 고객사, 프로젝트는 관계가 다릅니다. 각 항목의 관계를 함께 표시했습니다."
-          : "Organizations, clients, and projects are different relationships. Each entry is labeled accordingly."}
-      </p>
     </section>
   );
 }
