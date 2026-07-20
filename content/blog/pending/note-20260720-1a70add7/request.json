@@ -1,0 +1,19 @@
+{
+  "slug": "note-20260720-1a70add7",
+  "queuedAt": "2026-07-20T16:19:17.390Z",
+  "publishedAt": "2026-07-20",
+  "updatedAt": "2026-07-20",
+  "cover": "/media/blog/note-20260720-1a70add7/body-5e20c97ee72646c297c8053e44821bd9.png",
+  "coverWidth": 3302,
+  "coverHeight": 970,
+  "titleKo": "테스트",
+  "bodyImages": [
+    {
+      "id": "5e20c97ee72646c297c8053e44821bd9",
+      "path": "/media/blog/note-20260720-1a70add7/body-5e20c97ee72646c297c8053e44821bd9.png",
+      "alt": "붙여넣은 이미지 1",
+      "width": 3302,
+      "height": 970
+    }
+  ]
+}
