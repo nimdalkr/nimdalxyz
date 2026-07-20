@@ -7,6 +7,11 @@ import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 
 import type { BlogEditorPostDocument } from "@/lib/blog-editor";
 import {
+  clipboardImageFiles,
+  insertAtSelection,
+  type TextSelection
+} from "@/lib/blog-editor/clipboard";
+import {
   MAX_BLOG_BODY_IMAGE_BYTES,
   MAX_BLOG_BODY_IMAGES,
   MAX_BLOG_BODY_IMAGES_TOTAL_BYTES,
@@ -32,11 +37,6 @@ type BodyAttachment = {
   alt: string;
   width: number;
   height: number;
-};
-
-type TextSelection = {
-  start: number;
-  end: number;
 };
 
 const initialEditorActionState: EditorActionState = {
@@ -75,20 +75,6 @@ function markdownSafeAlt(alt: string) {
 
 function attachmentMarkdown(attachment: Pick<BodyAttachment, "alt" | "id">) {
   return `![${markdownSafeAlt(attachment.alt)}](attachment:${attachment.id})`;
-}
-
-function insertAtSelection(value: string, selection: TextSelection, insertion: string) {
-  const position = Math.min(Math.max(selection.end, 0), value.length);
-  const before = value.slice(0, position);
-  const after = value.slice(position);
-  const prefix = before.length === 0 || before.endsWith("\n\n") ? "" : before.endsWith("\n") ? "\n" : "\n\n";
-  const suffix = after.length === 0 || after.startsWith("\n\n") ? "" : after.startsWith("\n") ? "\n" : "\n\n";
-  const inserted = `${prefix}${insertion}${suffix}`;
-
-  return {
-    value: `${before}${inserted}${after}`,
-    caret: before.length + inserted.length
-  };
 }
 
 function attachmentAltInBody(body: string, id: string) {
@@ -140,12 +126,14 @@ export function EditorForm({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const selectionRef = useRef<TextSelection>({ start: document.bodyKo.length, end: document.bodyKo.length });
   const previewUrlsRef = useRef(new Set<string>());
+  const readingImagesRef = useRef(false);
   const submittedRevisionRef = useRef(0);
   const [state, formAction, pending] = useActionState(savePostAction, initialEditorActionState);
   const [title, setTitle] = useState(document.ko.title);
   const [body, setBody] = useState(document.bodyKo);
   const [attachments, setAttachments] = useState<BodyAttachment[]>([]);
   const [attachmentError, setAttachmentError] = useState("");
+  const [imageAnnouncement, setImageAnnouncement] = useState("");
   const [readingImages, setReadingImages] = useState(false);
   const [editRevision, setEditRevision] = useState(0);
   const [resultRevision, setResultRevision] = useState<number | null>(null);
@@ -236,12 +224,15 @@ export function EditorForm({
     });
   }
 
-  async function handleImageChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(event.currentTarget.files ?? []);
-    event.currentTarget.value = "";
+  async function addBodyImages(files: File[], source: "clipboard" | "picker") {
     if (files.length === 0) return;
 
     setAttachmentError("");
+
+    if (readingImagesRef.current || pending) {
+      setAttachmentError("이미지를 처리 중입니다. 잠시 후 다시 시도해 주세요.");
+      return;
+    }
 
     if (attachments.length + files.length > MAX_BLOG_BODY_IMAGES) {
       setAttachmentError(`이미지는 최대 ${MAX_BLOG_BODY_IMAGES}장까지 첨부할 수 있습니다.`);
@@ -266,6 +257,9 @@ export function EditorForm({
       return;
     }
 
+    const insertionSelection = { ...selectionRef.current };
+    readingImagesRef.current = true;
+    setImageAnnouncement("이미지를 처리하는 중입니다.");
     setReadingImages(true);
     const createdUrls: string[] = [];
 
@@ -289,7 +283,9 @@ export function EditorForm({
             id: window.crypto.randomUUID().replaceAll("-", ""),
             file,
             previewUrl,
-            alt: imageAltFromFileName(file.name, attachments.length + index),
+            alt: source === "clipboard"
+              ? `붙여넣은 이미지 ${attachments.length + index + 1}`
+              : imageAltFromFileName(file.name, attachments.length + index),
             ...dimensions
           };
         })
@@ -300,17 +296,38 @@ export function EditorForm({
       const markdown = nextAttachments.map(attachmentMarkdown).join("\n\n");
 
       setBody((currentBody) => {
-        const inserted = insertAtSelection(currentBody, selectionRef.current, markdown);
+        const inserted = insertAtSelection(currentBody, insertionSelection, markdown);
         focusBodyAt(inserted.caret);
         return inserted.value;
       });
       markEdited();
+      setImageAnnouncement(`이미지 ${nextAttachments.length}장을 본문에 삽입했습니다.`);
     } catch (error) {
       createdUrls.forEach((url) => URL.revokeObjectURL(url));
+      setImageAnnouncement("");
       setAttachmentError(error instanceof Error ? error.message : "이미지를 읽을 수 없습니다.");
     } finally {
+      readingImagesRef.current = false;
       setReadingImages(false);
     }
+  }
+
+  function handleImageChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(event.currentTarget.files ?? []);
+    event.currentTarget.value = "";
+    void addBodyImages(files, "picker");
+  }
+
+  function handleBodyPaste(event: React.ClipboardEvent<HTMLTextAreaElement>) {
+    const files = clipboardImageFiles(Array.from(event.clipboardData.items));
+    if (files.length === 0) return;
+
+    event.preventDefault();
+    selectionRef.current = {
+      start: event.currentTarget.selectionStart,
+      end: event.currentTarget.selectionEnd
+    };
+    void addBodyImages(files, "clipboard");
   }
 
   function handleBodyChange(event: React.ChangeEvent<HTMLTextAreaElement>) {
@@ -440,10 +457,13 @@ export function EditorForm({
             </div>
 
             <p className={styles.imageHelp} id="body-image-help">
-              커서 위치에 삽입 · 최대 {MAX_BLOG_BODY_IMAGES}장 · 합계 {formatMegabytes(MAX_BLOG_BODY_IMAGES_TOTAL_BYTES)}
+              이미지 버튼 또는 본문에서 ⌘V / Ctrl+V · 최대 {MAX_BLOG_BODY_IMAGES}장 · 합계 {formatMegabytes(MAX_BLOG_BODY_IMAGES_TOTAL_BYTES)}
             </p>
             <p className={styles.imageError} id="body-image-error" role="alert">
               {attachmentError}
+            </p>
+            <p className={styles.srOnly} role="status" aria-live="polite">
+              {imageAnnouncement}
             </p>
 
             <label className={styles.srOnly} htmlFor="body-ko">한국어 본문</label>
@@ -455,12 +475,15 @@ export function EditorForm({
               value={body}
               placeholder="본문을 입력하세요"
               maxLength={MAX_BLOG_BODY_LENGTH}
+              readOnly={readingImages || pending}
               required
               spellCheck="true"
               onChange={handleBodyChange}
               onSelect={rememberSelection}
               onClick={rememberSelection}
               onKeyUp={rememberSelection}
+              onPaste={handleBodyPaste}
+              aria-describedby="body-image-help body-image-error"
               aria-invalid={hasEditorIssue("bodyKo")}
             />
           </div>
@@ -494,6 +517,7 @@ export function EditorForm({
                             onChange={(event) => handleAltChange(attachment.id, event.target.value)}
                             placeholder="이미지 설명"
                             maxLength={180}
+                            disabled={readingImages || pending}
                             required={placed}
                           />
                         </label>
@@ -504,6 +528,7 @@ export function EditorForm({
                       <button
                         className={styles.removeImageButton}
                         type="button"
+                        disabled={readingImages || pending}
                         onClick={() => removeAttachment(attachment)}
                         aria-label={`${attachment.file.name} 첨부 취소`}
                       >

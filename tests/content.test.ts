@@ -43,6 +43,7 @@ import {
   validateBlogPendingRequest,
   validateBlogPostDocument
 } from "../lib/blog-editor/validation";
+import { clipboardImageFiles, insertAtSelection } from "../lib/blog-editor/clipboard";
 import {
   isExpectedBlogEditorHead,
   resolveBlogEditorDeploymentHead,
@@ -379,6 +380,38 @@ test("BLOG body image uploads enforce both count and aggregate byte limits", () 
       )
     )
   ).toThrow(/최대 8개/);
+});
+
+test("BLOG clipboard paste extracts image files without intercepting text or other files", () => {
+  const png = { name: "image.png", type: "image/png" } as File;
+  const gif = { name: "image.gif", type: "image/gif" } as File;
+  const pdf = { name: "notes.pdf", type: "application/pdf" } as File;
+
+  const files = clipboardImageFiles([
+    { kind: "string", type: "text/plain", getAsFile: () => null },
+    { kind: "file", type: "application/pdf", getAsFile: () => pdf },
+    { kind: "file", type: "image/png", getAsFile: () => png },
+    { kind: "file", type: "image/gif", getAsFile: () => gif },
+    { kind: "file", type: "image/webp", getAsFile: () => null }
+  ]);
+
+  expect(files).toEqual([png, gif]);
+});
+
+test("BLOG image insertion replaces the selected text and returns the new caret", () => {
+  const selectedText = "교체할 문장";
+  const body = `앞 문단\n\n${selectedText}\n\n뒤 문단`;
+  const start = body.indexOf(selectedText);
+  const markdown = "![본문 이미지](attachment:image-id)";
+
+  const inserted = insertAtSelection(
+    body,
+    { start, end: start + selectedText.length },
+    markdown
+  );
+
+  expect(inserted.value).toBe(`앞 문단\n\n${markdown}\n\n뒤 문단`);
+  expect(inserted.caret).toBe(`앞 문단\n\n${markdown}`.length);
 });
 
 test("Gemini prompt and validated output preserve every Markdown image URL in order", () => {

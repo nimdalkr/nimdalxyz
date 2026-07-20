@@ -21,9 +21,10 @@ readable in GitHub.
 
 ## Body images
 
-The image button inserts Markdown at the current cursor position. JPEG, PNG, and WebP are
-accepted. Animated GIF uploads are excluded so published articles respect reduced-motion
-preferences. One save can include up to eight images and 2MB in total. Files are stored under
+The image button or pasting an image from the clipboard inserts Markdown at the current cursor
+position. Pasting text without an image remains unchanged. JPEG, PNG, and WebP are accepted.
+Animated GIF uploads are excluded so published articles respect reduced-motion preferences. One
+save can include up to eight images and 2MB in total. Files are stored under
 `public/media/blog/{slug}` and Gemini must preserve every image URL while translating the body.
 The first image becomes the cover for a new article; an article without an image uses the NFT PFP.
 Because the repository is public and these files live under `public/`, pending images are directly
