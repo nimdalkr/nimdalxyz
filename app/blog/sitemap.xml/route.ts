@@ -1,5 +1,10 @@
-import { getBlogPosts, getBlogTags } from "@/content/blog/posts";
-import { absoluteBlogUrl } from "@/lib/site";
+import { getLocalizedBlogPosts } from "@/content/blog/posts";
+import {
+  blogCanonicalUrl,
+  hreflangAlternates,
+  locales,
+  type Locale
+} from "@/lib/seo";
 
 function escapeXml(value: string) {
   return value
@@ -10,37 +15,72 @@ function escapeXml(value: string) {
     .replace(/'/g, "&apos;");
 }
 
-export function GET() {
-  const urls = [
+type SitemapUrl = {
+  locale: Locale;
+  pathname: string;
+  lastModified: string;
+};
+
+function urlElement({ locale, pathname, lastModified }: SitemapUrl) {
+  const alternates = hreflangAlternates(pathname, "blog");
+
+  return `<url>
+    <loc>${escapeXml(blogCanonicalUrl(locale, pathname))}</loc>
+    <lastmod>${escapeXml(new Date(lastModified).toISOString())}</lastmod>
+    ${Object.entries(alternates)
+      .map(
+        ([hreflang, href]) =>
+          `<xhtml:link rel="alternate" hreflang="${escapeXml(hreflang)}" href="${escapeXml(href)}" />`
+      )
+      .join("")}
+  </url>`;
+}
+
+export async function GET() {
+  const posts = await getLocalizedBlogPosts("en");
+  const latestPostUpdate = posts.reduce(
+    (latest, post) => (Date.parse(post.updatedAt) > Date.parse(latest) ? post.updatedAt : latest),
+    posts[0]?.updatedAt ?? "2026-07-02"
+  );
+  const tagUpdates = new Map<string, string>();
+
+  for (const post of posts) {
+    for (const { slug } of post.tagLinks) {
+      const currentUpdate = tagUpdates.get(slug);
+
+      if (!currentUpdate || Date.parse(post.updatedAt) > Date.parse(currentUpdate)) {
+        tagUpdates.set(slug, post.updatedAt);
+      }
+    }
+  }
+
+  const urls: SitemapUrl[] = locales.flatMap((locale) => [
     {
-      loc: absoluteBlogUrl("/"),
-      lastmod: new Date().toISOString()
+      locale,
+      pathname: "/",
+      lastModified: latestPostUpdate
     },
-    ...getBlogPosts().map((post) => ({
-      loc: post.canonicalUrl,
-      lastmod: new Date(post.updatedAt ?? post.publishedAt).toISOString()
+    ...posts.map((post) => ({
+      locale,
+      pathname: `/posts/${post.slug}`,
+      lastModified: post.updatedAt
     })),
-    ...getBlogTags().map((tag) => ({
-      loc: absoluteBlogUrl(`/tags/${tag.slug}`),
-      lastmod: new Date().toISOString()
+    ...[...tagUpdates].map(([slug, lastModified]) => ({
+      locale,
+      pathname: `/tags/${slug}`,
+      lastModified
     }))
-  ];
+  ]);
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
-    <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-      ${urls
-        .map(
-          (url) => `
-            <url>
-              <loc>${escapeXml(url.loc)}</loc>
-              <lastmod>${url.lastmod}</lastmod>
-            </url>`
-        )
-        .join("")}
-    </urlset>`;
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  ${urls.map(urlElement).join("")}
+</urlset>`;
 
   return new Response(xml, {
     headers: {
+      "Cache-Control": "public, max-age=0, s-maxage=3600, stale-while-revalidate=86400",
       "Content-Type": "application/xml; charset=utf-8"
     }
   });
