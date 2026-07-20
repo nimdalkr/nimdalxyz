@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+import { getLocalizedBlogPosts } from "../content/blog/posts";
 import {
-  blogPosts,
   careerCases,
   locales,
   projects,
@@ -69,7 +69,9 @@ function expectMediaMetadata(
   expectLocalizedEntry(media.limitation, `${path}.limitation`);
 }
 
-test("content inventory has the expected project, career, and post counts", () => {
+test("content inventory has the expected project, career, and post counts", async () => {
+  const blogPosts = await getLocalizedBlogPosts("en");
+
   expect(projects).toHaveLength(9);
   expect(careerCases).toHaveLength(6);
   expect(blogPosts).toHaveLength(3);
@@ -79,7 +81,12 @@ test("content inventory has the expected project, career, and post counts", () =
   expect(new Set(blogPosts.map(({ slug }) => slug)).size).toBe(blogPosts.length);
 });
 
-test("all public content has complete KO/EN entries", () => {
+test("all public content has complete KO/EN entries", async () => {
+  const [koPosts, enPosts] = await Promise.all([
+    getLocalizedBlogPosts("ko"),
+    getLocalizedBlogPosts("en")
+  ]);
+
   expect([...locales].sort()).toEqual([...expectedLocales]);
   expectLocalizedEntry(siteContent, "siteContent");
 
@@ -87,7 +94,38 @@ test("all public content has complete KO/EN entries", () => {
   careerCases.forEach((career) =>
     expectLocalizedEntry(career.copy, `careerCases.${career.id}.copy`)
   );
-  blogPosts.forEach((post) => expectLocalizedEntry(post.copy, `blogPosts.${post.slug}.copy`));
+  expect(koPosts.map(({ slug }) => slug).sort()).toEqual(enPosts.map(({ slug }) => slug).sort());
+
+  for (const enPost of enPosts) {
+    const koPost = koPosts.find(({ slug }) => slug === enPost.slug);
+    expect(koPost, `BLOG.${enPost.slug}.ko should exist`).toBeDefined();
+
+    expectCompleteValue(
+      {
+        title: enPost.title,
+        description: enPost.description,
+        category: enPost.category,
+        tags: enPost.tags,
+        readingTime: enPost.readingTime
+      },
+      `BLOG.${enPost.slug}.en`
+    );
+    expectCompleteValue(
+      {
+        title: koPost?.title,
+        description: koPost?.description,
+        category: koPost?.category,
+        tags: koPost?.tags,
+        readingTime: koPost?.readingTime
+      },
+      `BLOG.${enPost.slug}.ko`
+    );
+    expect(koPost?.tags).toHaveLength(enPost.tags.length);
+
+    const [koBody, enBody] = await Promise.all([koPost?.body(), enPost.body()]);
+    expect(koBody?.node, `BLOG.${enPost.slug}.bodyKo should load`).toBeTruthy();
+    expect(enBody.node, `BLOG.${enPost.slug}.bodyEn should load`).toBeTruthy();
+  }
 });
 
 test("project and career media include evidence metadata", () => {
@@ -105,12 +143,17 @@ test("project and career media include evidence metadata", () => {
   );
 });
 
-test("AlphaDuo is present and the retired ARCDU identity is absent", () => {
+test("AlphaDuo is present and the retired ARCDU identity is absent", async () => {
   const alphaDuo = projects.find(({ slug }) => slug === "alphaduo");
   expect(alphaDuo).toBeDefined();
   expect(alphaDuo?.copy.ko.title).toBe("AlphaDuo");
   expect(alphaDuo?.copy.en.title).toBe("AlphaDuo");
 
-  const serializedContent = JSON.stringify({ blogPosts, careerCases, projects, siteContent });
+  const serializedContent = JSON.stringify({
+    blogPosts: await getLocalizedBlogPosts("en"),
+    careerCases,
+    projects,
+    siteContent
+  });
   expect(serializedContent.toLowerCase()).not.toContain("arcdu");
 });

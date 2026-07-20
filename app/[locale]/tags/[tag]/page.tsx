@@ -24,9 +24,13 @@ type BlogTagPageProps = {
   }>;
 };
 
-export function generateStaticParams() {
-  return locales.flatMap((locale) =>
-    getLocalizedBlogTags(locale).map((tag) => ({ locale, tag: tag.slug }))
+export async function generateStaticParams() {
+  const localizedTags = await Promise.all(
+    locales.map(async (locale) => ({ locale, tags: await getLocalizedBlogTags(locale) }))
+  );
+
+  return localizedTags.flatMap(({ locale, tags }) =>
+    tags.map((tag) => ({ locale, tag: tag.slug }))
   );
 }
 
@@ -38,7 +42,7 @@ export async function generateMetadata({ params }: BlogTagPageProps): Promise<Me
   }
 
   const locale = localeParam;
-  const label = getLocalizedTagLabel(locale, tag);
+  const label = await getLocalizedTagLabel(locale, tag);
 
   if (!label) {
     return {
@@ -49,8 +53,8 @@ export async function generateMetadata({ params }: BlogTagPageProps): Promise<Me
   }
 
   const description = locale === "ko"
-    ? `nimdalog의 ‘${label}’ 태그 글입니다.`
-    : `nimdalog notes tagged ${label}.`;
+    ? `블로그의 ‘${label}’ 태그 글입니다.`
+    : `BLOG posts tagged ${label}.`;
   const canonicalUrl = blogCanonicalUrl(locale, `/tags/${tag}`);
 
   return {
@@ -87,14 +91,16 @@ export default async function BlogTagPage({ params }: BlogTagPageProps) {
   }
 
   const locale = localeParam;
-  const label = getLocalizedTagLabel(locale, tag);
+  const label = await getLocalizedTagLabel(locale, tag);
 
   if (!label) {
     notFound();
   }
 
-  const posts = getLocalizedPostsByTag(locale, tag);
-  const tags = getLocalizedBlogTags(locale);
+  const [posts, tags] = await Promise.all([
+    getLocalizedPostsByTag(locale, tag),
+    getLocalizedBlogTags(locale)
+  ]);
   const canonicalUrl = blogCanonicalUrl(locale, `/tags/${tag}`);
   const jsonLd = {
     "@context": "https://schema.org",

@@ -2,7 +2,7 @@ export const siteConfig = {
   mainUrl: "https://nimdal.xyz",
   blogUrl: "https://blog.nimdal.xyz",
   name: "Nimdal",
-  blogName: "nimdalog",
+  blogName: "Nimdal BLOG",
   author: "Tak Chanwoo / Nimdal",
   email: "0xnimdal@gmail.com",
   description:

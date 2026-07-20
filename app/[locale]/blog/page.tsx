@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: BlogHubPageProps): Promise<Me
   const { locale: localeParam } = await params;
 
   if (!isLocale(localeParam)) {
-    return { title: `nimdalog | ${siteConfig.name}` };
+    return { title: `BLOG | ${siteConfig.name}` };
   }
 
   const locale = localeParam;
@@ -75,8 +75,10 @@ export default async function BlogHubPage({ params }: BlogHubPageProps) {
 
   const locale = localeParam;
   const surface = canonicalSurfaceFromHeader((await headers()).get(canonicalSurfaceHeader));
-  const posts = getLocalizedBlogPosts(locale);
-  const tags = getLocalizedBlogTags(locale);
+  const [posts, tags] = await Promise.all([
+    getLocalizedBlogPosts(locale),
+    getLocalizedBlogTags(locale)
+  ]);
   const hubHref = surface === "blog"
     ? blogCanonicalUrl(locale)
     : absoluteCanonicalUrl(locale, "/blog", "main");

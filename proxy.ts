@@ -14,6 +14,7 @@ import { siteConfig } from "@/lib/site";
 
 const BLOG_HOST = new URL(siteConfig.blogUrl).hostname;
 const MAIN_HOST = new URL(siteConfig.mainUrl).hostname;
+const EDITOR_PATH = /^\/(?:keystatic|api\/keystatic)(?:\/|$)/;
 
 const BLOG_ROOT_FILES = new Map([
   ["/robots.txt", "/blog/robots.txt"],
@@ -189,6 +190,13 @@ function prefixedLegacyBlogPath(pathname: string) {
 
 function handleBlogHost(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // Keep the authenticated editor on the portfolio host. Exposing the same
+  // OAuth surface through the blog host would create a second callback origin.
+  if (EDITOR_PATH.test(pathname)) {
+    return new NextResponse(null, { status: 404 });
+  }
+
   const isInternalBlogHub =
     request.headers.get(canonicalSurfaceHeader) === "blog" &&
     /^\/(ko|en)\/blog\/?$/.test(pathname);
@@ -211,11 +219,17 @@ function handleBlogHost(request: NextRequest) {
 
   const oldBlogPath = unlocalizedBlogPath(pathname) ?? prefixedLegacyBlogPath(pathname);
   if (oldBlogPath) {
-    return redirect(request, oldBlogPath, { preserveSearch: true });
+    return redirect(request, oldBlogPath, {
+      host: BLOG_HOST,
+      preserveSearch: true
+    });
   }
 
   if (pathname === "/") {
-    return redirect(request, `/${defaultLocale}`, { preserveSearch: true });
+    return redirect(request, `/${defaultLocale}`, {
+      host: BLOG_HOST,
+      preserveSearch: true
+    });
   }
 
   const rootMatch = pathname.match(/^\/(ko|en)\/?$/);
@@ -229,7 +243,10 @@ function handleBlogHost(request: NextRequest) {
 
   const duplicateHubMatch = pathname.match(/^\/(ko|en)\/blog\/?$/);
   if (duplicateHubMatch) {
-    return redirect(request, `/${duplicateHubMatch[1]}`, { preserveSearch: true });
+    return redirect(request, `/${duplicateHubMatch[1]}`, {
+      host: BLOG_HOST,
+      preserveSearch: true
+    });
   }
 
   return NextResponse.next({
@@ -239,6 +256,11 @@ function handleBlogHost(request: NextRequest) {
 
 function handleMainHost(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  if (pathname === "/admin" || pathname === "/admin/blog") {
+    return redirect(request, "/keystatic", { preserveSearch: true });
+  }
+
   const oldBlogPath = unlocalizedBlogPath(pathname);
 
   if (oldBlogPath) {

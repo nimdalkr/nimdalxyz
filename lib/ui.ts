@@ -2,7 +2,7 @@ import type { Locale, ProjectMediaRole } from "@/lib/content";
 
 export const uiCopy = {
   ko: {
-    header: { work: "대표 작업", lab: "프로젝트", about: "소개", log: "글", contact: "연락" },
+    header: { work: "대표 작업", lab: "프로젝트", about: "소개", log: "블로그", contact: "연락" },
     selected: {
       eyebrow: "대표 작업",
       title: "완성해 공개한 작업부터 보여드립니다.",
@@ -37,7 +37,7 @@ export const uiCopy = {
     project: { back: "대표 작업으로 돌아가기", visit: "관련 링크", source: "자료 출처", captured: "캡처 날짜", claim: "이 자료로 확인되는 것", boundary: "이 자료만으로 알 수 없는 것", nextProject: "다음 프로젝트", status: "진행 상태" }
   },
   en: {
-    header: { work: "Work", lab: "Lab", about: "About", log: "Log", contact: "Contact" },
+    header: { work: "Work", lab: "Lab", about: "About", log: "BLOG", contact: "Contact" },
     selected: {
       eyebrow: "Selected proof",
       title: "Working evidence comes before the idea.",
@@ -65,7 +65,7 @@ export const uiCopy = {
       dossier: "View full career",
       download: "Download English PDF"
     },
-    log: { all: "View all nimdalog" },
+    log: { all: "View all BLOG" },
     contact: { x: "X", telegram: "Telegram", linkedin: "LinkedIn" },
     proof: { concept: "Concept visual", proof: "Live / Repository / QA proof", identity: "Identity asset", career: "Career context", document: "Document" },
     provenance: { "repository-count": "Repository count", "career-record": "Career record", "portfolio-claim": "Portfolio claim" },

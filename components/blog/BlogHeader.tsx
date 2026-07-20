@@ -43,7 +43,7 @@ export function BlogHeader({
       <Link
         className="blog-brand"
         href={hubHref}
-        aria-label={locale === "ko" ? "nimdalog 홈" : "nimdalog home"}
+        aria-label={locale === "ko" ? "블로그 홈" : "BLOG home"}
       >
         <Image
           src="/media/identity-octopus.jpg"
@@ -52,7 +52,7 @@ export function BlogHeader({
           height={42}
           className="blog-brand-mark"
         />
-        <strong>nimdalog</strong>
+        <strong>BLOG</strong>
       </Link>
 
       <nav className="blog-nav" aria-label={copy.nav}>

@@ -1,4 +1,5 @@
-import { blogPosts, isLocale, locales, siteContent } from "@/lib/content";
+import { getLocalizedBlogPosts } from "@/content/blog/posts";
+import { isLocale, locales, siteContent } from "@/lib/content";
 import { blogCanonicalUrl, type Locale } from "@/lib/seo";
 import { siteConfig } from "@/lib/site";
 
@@ -15,26 +16,26 @@ function escapeXml(value: string) {
     .replace(/'/g, "&apos;");
 }
 
-function rssDocument(locale: Locale) {
+async function rssDocument(locale: Locale) {
   const channelUrl = blogCanonicalUrl(locale);
   const feedUrl = blogCanonicalUrl(locale, "/rss.xml");
   const copy = siteContent[locale].blog;
-  const latestUpdate = blogPosts.reduce(
+  const posts = await getLocalizedBlogPosts(locale);
+  const latestUpdate = posts.reduce(
     (latest, post) => Math.max(latest, Date.parse(post.updatedAt)),
     0
   );
-  const items = blogPosts
+  const items = posts
     .map((post) => {
-      const postCopy = post.copy[locale];
       const canonicalUrl = blogCanonicalUrl(locale, `/posts/${post.slug}`);
 
       return `<item>
-        <title>${escapeXml(postCopy.title)}</title>
+        <title>${escapeXml(post.title)}</title>
         <link>${escapeXml(canonicalUrl)}</link>
         <guid isPermaLink="true">${escapeXml(canonicalUrl)}</guid>
         <pubDate>${new Date(post.publishedAt).toUTCString()}</pubDate>
-        <description>${escapeXml(postCopy.description)}</description>
-        ${postCopy.tags.map((tag) => `<category>${escapeXml(tag)}</category>`).join("")}
+        <description>${escapeXml(post.description)}</description>
+        ${post.tags.map((tag) => `<category>${escapeXml(tag)}</category>`).join("")}
       </item>`;
     })
     .join("");
@@ -65,7 +66,7 @@ export async function GET(_request: Request, { params }: RouteContext) {
     return new Response("Not found", { status: 404 });
   }
 
-  return new Response(rssDocument(locale), {
+  return new Response(await rssDocument(locale), {
     headers: {
       "Cache-Control": "public, max-age=0, s-maxage=3600, stale-while-revalidate=86400",
       "Content-Type": "application/rss+xml; charset=utf-8"

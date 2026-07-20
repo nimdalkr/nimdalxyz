@@ -101,13 +101,13 @@ test.describe("localized navigation and metadata", () => {
       await page.goto(pathname);
 
       const expectedPath = pathname.replace(/^\/ko/, "/en");
-      const languageNavigation = page.getByRole("navigation", { name: "Language" });
+      const languageNavigation = page.getByRole("navigation", { name: /Language|언어 선택/ });
       const englishLink = languageNavigation.getByRole("link", { name: "EN", exact: true });
 
       await expect(englishLink).toHaveAttribute("href", expectedPath);
       await englishLink.click();
       await expect(page).toHaveURL(new RegExp(`${expectedPath.replaceAll("/", "\\/")}/?$`));
-      await expect(page.locator('[data-locale="en"]')).toHaveAttribute("lang", "en");
+      await expect(page.locator("html")).toHaveAttribute("lang", "en");
     });
   }
 
@@ -146,6 +146,7 @@ test.describe("localized navigation and metadata", () => {
     expect(response.status()).toBe(200);
 
     await page.setContent(await response.text(), { waitUntil: "domcontentloaded" });
+    await expect(page.locator(".blog-brand strong")).toHaveText("BLOG");
     await expectAlternates(page, {
       canonical: `https://${BLOG_HOST}/ko/posts/${POST_SLUG}`,
       ko: `https://${BLOG_HOST}/ko/posts/${POST_SLUG}`,
@@ -240,7 +241,7 @@ test.describe("legacy routing and host surfaces", () => {
     expect(response.status()).toBe(200);
 
     await page.setContent(await response.text(), { waitUntil: "domcontentloaded" });
-    await expect(page.getByRole("heading", { level: 1, name: "nimdalog" })).toBeVisible();
+    await expect(page.locator("main h1")).toHaveText("만들고 운영하며 남긴 기록");
     await expectAlternates(page, {
       canonical: `https://${BLOG_HOST}/ko`,
       ko: `https://${BLOG_HOST}/ko`,
@@ -323,12 +324,34 @@ test.describe("legacy routing and host surfaces", () => {
 });
 
 test.describe("public links and not-found behavior", () => {
+  test("the BLOG editor is mounted in local development", async ({ page }) => {
+    const response = await page.goto("/keystatic");
+
+    expect(response?.status()).toBe(200);
+    await expect(page).toHaveTitle(/Nimdal BLOG Editor/);
+    await expect(page.getByText("Nimdal BLOG", { exact: true }).first()).toBeVisible();
+
+    await page.goto("/keystatic/collection/posts");
+    for (const slug of [
+      "nimdal-logbook",
+      "research-tools-should-make-markets-readable",
+      "campaign-operations-to-product-systems"
+    ]) {
+      await expect(page.getByText(slug, { exact: true }).first()).toBeVisible();
+    }
+
+    await page.goto("/keystatic/collection/posts/item/nimdal-logbook");
+    await expect(page.locator('input[value="Nimdal이 블로그를 만든 이유"]')).toBeVisible();
+    await expect(page.getByText("한국어 본문", { exact: true })).toBeVisible();
+    await expect(page.getByText("English body", { exact: true })).toBeVisible();
+  });
+
   test("home and dossier retain the intended external contact links without a phone number", async ({
     page
   }) => {
     await page.goto("/ko");
 
-    await expect(page.locator('a[href="https://alphaduo.pro"]')).toBeVisible();
+    await expect(page.locator('a[href="/ko/projects/alphaduo"]')).toBeVisible();
     await expect(page.locator('a[href="mailto:0xnimdal@gmail.com"]')).toBeVisible();
     await expect(page.locator('a[href="https://x.com/0xnimdal"]')).toBeVisible();
     await expect(page.locator('a[href="https://t.me/nimdal"]')).toBeVisible();
@@ -360,7 +383,7 @@ test.describe("public links and not-found behavior", () => {
   test("invalid project and post slugs return 404", async ({ page, request, baseURL }) => {
     const projectResponse = await page.goto("/ko/projects/not-a-real-project");
     expect(projectResponse?.status()).toBe(404);
-    await expect(page.getByRole("heading", { name: "Nothing surfaced here." })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "페이지를 찾을 수 없습니다." })).toBeVisible();
 
     const postResponse = await blogHostGet(
       request,
@@ -378,16 +401,14 @@ test.describe("responsive and accessible interaction", () => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/ko");
 
-    await expect(page.locator(".desktop-nav")).toBeHidden();
-    const menuButton = page.getByRole("button", { name: "Open navigation" });
-    await expect(menuButton).toBeVisible();
-    await menuButton.click();
+    const navigation = page.getByRole("navigation", { name: "주요 메뉴" });
+    await expect(navigation.getByRole("link", { name: "WORK" })).toBeVisible();
+    await expect(navigation.getByRole("link", { name: "BLOG" })).toBeVisible();
+    await expect(navigation.getByRole("link", { name: "ABOUT" })).toBeHidden();
+    await expect(navigation.getByRole("link", { name: "CAREER" })).toBeHidden();
+    await expect(navigation.getByRole("link", { name: "CONTACT" })).toBeHidden();
 
-    const panel = page.locator("#mobile-navigation");
-    await expect(panel).toBeVisible();
-    await expect(menuButton).toHaveAttribute("aria-expanded", "true");
-
-    const targets = panel.locator("a").or(menuButton);
+    const targets = navigation.locator("a");
     const count = await targets.count();
 
     for (let index = 0; index < count; index += 1) {
@@ -400,7 +421,7 @@ test.describe("responsive and accessible interaction", () => {
       expect(box?.height ?? 0, `touch target ${index} should be at least 44px high`).toBeGreaterThanOrEqual(44);
     }
 
-    await panel.getByRole("link", { name: "EN", exact: true }).click();
+    await navigation.getByRole("link", { name: "EN", exact: true }).click();
     await expect(page).toHaveURL(/\/en$/);
   });
 
@@ -435,19 +456,18 @@ test.describe("responsive and accessible interaction", () => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/ko");
 
-    await expect(page.locator(".scroll-progress")).toHaveCount(0);
-    const proofMotionContainer = page.locator(".proof-row").first().locator("..");
+    await expect(page.locator(".scroll-progress")).toBeHidden();
+    await expect(page.locator(".cinema-track")).toHaveCount(0);
+    await expect(page.locator(".pp-intro-track")).toBeVisible();
+    await expect(page.locator(".pp-about")).toBeVisible();
+    const staticStory = page.locator(".cinema-static-story");
+    await expect(staticStory).toBeVisible();
+    await expect(staticStory.locator(".cinema-static-scene")).toHaveCount(3);
+    await expect(page.locator(".pp-career")).toBeVisible();
+    await expect(page.locator(".pp-blog")).toBeVisible();
+    await expect(page.locator(".pp-contact")).toBeVisible();
 
-    await expect
-      .poll(() =>
-        proofMotionContainer.evaluate((element) => {
-          const style = getComputedStyle(element);
-          return { opacity: style.opacity, transform: style.transform };
-        })
-      )
-      .toEqual({ opacity: "1", transform: "none" });
-
-    const motionStyles = await proofMotionContainer.evaluate((element) => {
+    const motionStyles = await staticStory.evaluate((element) => {
       const style = getComputedStyle(element);
       return {
         animationDuration: style.animationDuration,
@@ -457,8 +477,15 @@ test.describe("responsive and accessible interaction", () => {
     });
 
     expect(motionStyles.scrollBehavior).toBe("auto");
-    expect(motionStyles.animationDuration).toMatch(/^(0s|0\.00001s)$/);
-    expect(motionStyles.transitionDuration).toMatch(/^(0s|0\.00001s)$/);
+    const durationInSeconds = (value: string) => {
+      const firstDuration = value.split(",")[0]?.trim() ?? "0s";
+      return firstDuration.endsWith("ms")
+        ? Number.parseFloat(firstDuration) / 1000
+        : Number.parseFloat(firstDuration);
+    };
+
+    expect(durationInSeconds(motionStyles.animationDuration)).toBeLessThanOrEqual(0.00001);
+    expect(durationInSeconds(motionStyles.transitionDuration)).toBeLessThanOrEqual(0.00001);
   });
 
   test("200% text-zoom reflow heuristic does not introduce horizontal scrolling", async ({
@@ -508,8 +535,9 @@ test.describe("responsive and accessible interaction", () => {
   }
 
   test("axe finds no serious or critical issues on the blog host", async ({ page }) => {
-    await page.setExtraHTTPHeaders(BLOG_HEADERS);
-    await page.goto("/ko");
+    const response = await page.request.get("/ko", { headers: BLOG_HEADERS });
+    expect(response.status()).toBe(200);
+    await page.setContent(await response.text(), { waitUntil: "domcontentloaded" });
 
     const results = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])

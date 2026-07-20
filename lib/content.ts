@@ -82,23 +82,6 @@ export type CareerCase = {
   copy: Localized<CareerCaseCopy>;
 };
 
-export type BlogPostCopy = {
-  title: string;
-  description: string;
-  category: string;
-  tags: readonly string[];
-  readingTime: string;
-};
-
-export type BlogPost = {
-  slug: string;
-  publishedAt: string;
-  updatedAt: string;
-  cover: string;
-  sourcePath: string;
-  copy: Localized<BlogPostCopy>;
-};
-
 export type SiteMetricCopy = {
   value: string;
   label: string;
@@ -1257,84 +1240,6 @@ export const careerCases = [
   }
 ] as const satisfies readonly CareerCase[];
 
-export const postSlugs = [
-  "nimdal-logbook",
-  "research-tools-should-make-markets-readable",
-  "campaign-operations-to-product-systems"
-] as const;
-
-export const blogPosts = [
-  {
-    slug: "nimdal-logbook",
-    publishedAt: "2026-07-02",
-    updatedAt: "2026-07-02",
-    cover: "/media/identity-octopus.jpg",
-    sourcePath: "content/blog/nimdal-logbook.mdx",
-    copy: {
-      ko: {
-        title: "Nimdal이 nimdalog를 만든 이유",
-        description: "리서치와 제작 과정, 캠페인에서 배운 점, 개인 실험을 꾸준히 기록하기 위해 블로그를 시작했습니다.",
-        category: "제작 기록",
-        tags: ["Nimdal", "제작 기록", "포트폴리오"],
-        readingTime: "3분"
-      },
-      en: {
-        title: "Why Nimdal Needs nimdalog",
-        description: "A first note on keeping research, builds, campaign thinking, and personal experiments in one durable place.",
-        category: "Build Log",
-        tags: ["Nimdal", "Build Log", "Portfolio"],
-        readingTime: "3 min read"
-      }
-    }
-  },
-  {
-    slug: "research-tools-should-make-markets-readable",
-    publishedAt: "2026-07-02",
-    updatedAt: "2026-07-02",
-    cover: "/media/projects/hyperalphaduo.webp",
-    sourcePath: "content/blog/research-tools-should-make-markets-readable.mdx",
-    copy: {
-      ko: {
-        title: "좋은 리서치 도구는 시장을 읽기 쉽게 만든다",
-        description: "웹3 시장의 잡음을 줄이고 필요한 근거를 빠르게 찾게 돕는 리서치 화면에 대한 짧은 글입니다.",
-        category: "리서치",
-        tags: ["웹3", "리서치", "제품 만들기"],
-        readingTime: "4분"
-      },
-      en: {
-        title: "Research Tools Should Make Markets Easier to Read",
-        description: "A short operating note on Web3 research tools, market noise, and interfaces that reduce decision friction.",
-        category: "Research",
-        tags: ["Web3", "Research", "Product Systems"],
-        readingTime: "4 min read"
-      }
-    }
-  },
-  {
-    slug: "campaign-operations-to-product-systems",
-    publishedAt: "2026-07-02",
-    updatedAt: "2026-07-02",
-    cover: "/media/career/mkr-logo.jpg",
-    sourcePath: "content/blog/campaign-operations-to-product-systems.mdx",
-    copy: {
-      ko: {
-        title: "캠페인 운영 경험을 제품 만들기에 활용하는 법",
-        description: "캠페인 기획, SEO, 리포팅, 파트너 조율 경험이 제품을 만드는 데 어떻게 이어지는지 정리했습니다.",
-        category: "경력 기록",
-        tags: ["경력", "마케팅", "운영"],
-        readingTime: "4분"
-      },
-      en: {
-        title: "From Campaign Operations to Product Systems",
-        description: "How campaign planning, SEO, reporting, and partner coordination can form a useful foundation for product thinking.",
-        category: "Career Notes",
-        tags: ["Career", "Marketing", "Operations"],
-        readingTime: "4 min read"
-      }
-    }
-  }
-] as const satisfies readonly BlogPost[];
-
 export const siteContent = {
   ko: {
     seo: {
@@ -1350,7 +1255,7 @@ export const siteContent = {
       { label: "홈", href: "/ko" },
       { label: "프로젝트", href: "/ko/lab" },
       { label: "경력", href: "/ko/portfolio" },
-      { label: "글", href: "/ko/blog" },
+      { label: "블로그", href: "/ko/blog" },
       { label: "연락", href: "/ko#contact" }
     ],
     home: {
@@ -1388,7 +1293,7 @@ export const siteContent = {
         {
           value: "3",
           label: "공개 글",
-          context: "현재 nimdalog에 공개한 글의 수입니다.",
+          context: "현재 블로그에 공개한 글의 수입니다.",
           source: "현재 저장소의 블로그 글",
           limitation: "세 글 모두 2026-07-02에 처음 공개했습니다.",
           provenance: "repository-count"
@@ -1529,9 +1434,9 @@ export const siteContent = {
       ]
     },
     blog: {
-      eyebrow: "nimdalog",
+      eyebrow: "BLOG",
       title: "만들고 운영하며 남긴 기록",
-      description: "포트폴리오에는 결과를, nimdalog에는 그 결과를 만들며 고민하고 시도한 과정을 적습니다.",
+      description: "포트폴리오에는 결과를, 블로그에는 그 결과를 만들며 고민하고 시도한 과정을 적습니다.",
       readMore: "글 읽기"
     },
     footer: {
@@ -1552,7 +1457,7 @@ export const siteContent = {
       { label: "Home", href: "/en" },
       { label: "Lab", href: "/en/lab" },
       { label: "Career", href: "/en/portfolio" },
-      { label: "Notes", href: "/en/blog" },
+      { label: "BLOG", href: "/en/blog" },
       { label: "Contact", href: "/en#contact" }
     ],
     home: {
@@ -1590,8 +1495,8 @@ export const siteContent = {
         {
           value: "3",
           label: "Published notes",
-          context: "nimdalog MDX posts currently present in the repository.",
-          source: "MDX files in content/blog",
+          context: "BLOG posts currently present in the repository.",
+          source: "Keystatic content in content/blog/posts",
           limitation: "All three are initial notes published on 2026-07-02.",
           provenance: "repository-count"
         },
@@ -1731,9 +1636,9 @@ export const siteContent = {
       ]
     },
     blog: {
-      eyebrow: "nimdalog",
+      eyebrow: "BLOG",
       title: "Notes left behind by research, builds, and operations",
-      description: "If the portfolio shows outcomes, nimdalog preserves the judgment and production process behind them.",
+      description: "If the portfolio shows outcomes, the BLOG preserves the judgment and production process behind them.",
       readMore: "Read note"
     },
     footer: {
@@ -1744,10 +1649,6 @@ export const siteContent = {
 
 export function getProject(slug: string): Project | undefined {
   return projects.find((project) => project.slug === slug);
-}
-
-export function getPost(slug: string): BlogPost | undefined {
-  return blogPosts.find((post) => post.slug === slug);
 }
 
 export function getAlternateLocalePath(pathname: string, locale: Locale): string {

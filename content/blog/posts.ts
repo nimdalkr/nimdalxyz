@@ -1,35 +1,14 @@
-import type { ComponentType } from "react";
+import type { Node as MarkdocNode } from "@markdoc/markdoc";
+import { createReader, type Entry } from "@keystatic/core/reader";
 
-import CampaignOperationsEn from "./campaign-operations-to-product-systems.mdx";
-import CampaignOperationsKo from "./ko/campaign-operations-to-product-systems.mdx";
-import NimdalLogbookEn from "./nimdal-logbook.mdx";
-import NimdalLogbookKo from "./ko/nimdal-logbook.mdx";
-import ResearchToolsEn from "./research-tools-should-make-markets-readable.mdx";
-import ResearchToolsKo from "./ko/research-tools-should-make-markets-readable.mdx";
-import {
-  blogPosts,
-  type Locale
-} from "@/lib/content";
+import keystaticConfig from "@/keystatic.config";
+import type { Locale } from "@/lib/content";
 import { blogCanonicalUrl, tagSlug } from "@/lib/seo";
 
-type BlogContent = ComponentType<Record<string, never>>;
-type SourceBlogPost = (typeof blogPosts)[number];
-type BlogSlug = SourceBlogPost["slug"];
+const reader = createReader(process.cwd(), keystaticConfig);
 
-const localizedContent = {
-  "nimdal-logbook": {
-    ko: NimdalLogbookKo,
-    en: NimdalLogbookEn
-  },
-  "research-tools-should-make-markets-readable": {
-    ko: ResearchToolsKo,
-    en: ResearchToolsEn
-  },
-  "campaign-operations-to-product-systems": {
-    ko: CampaignOperationsKo,
-    en: CampaignOperationsEn
-  }
-} as const satisfies Record<BlogSlug, Record<Locale, BlogContent>>;
+type CMSBlogPost = Entry<(typeof keystaticConfig.collections)["posts"]>;
+export type BlogContentLoader = () => Promise<{ node: MarkdocNode }>;
 
 export type LocalizedBlogTagLink = {
   label: string;
@@ -38,14 +17,20 @@ export type LocalizedBlogTagLink = {
   canonicalUrl: string;
 };
 
-export type LocalizedBlogPost = Omit<SourceBlogPost, "copy"> & {
+export type LocalizedBlogPost = {
+  slug: string;
   locale: Locale;
+  publishedAt: string;
+  updatedAt: string;
+  cover: string;
+  coverWidth: number;
+  coverHeight: number;
   title: string;
   description: string;
   category: string;
   tags: readonly string[];
   readingTime: string;
-  Content: BlogContent;
+  body: BlogContentLoader;
   href: string;
   canonicalUrl: string;
   tagLinks: readonly LocalizedBlogTagLink[];
@@ -66,11 +51,23 @@ export type LocalizedBlogTag = {
   canonicalUrl: string;
 };
 
+type SourceBlogPost = {
+  slug: string;
+  entry: CMSBlogPost;
+};
+
+async function getSourceBlogPosts(): Promise<SourceBlogPost[]> {
+  return reader.collections.posts.all();
+}
+
 /** Tag URLs are deliberately derived from the English source tags. */
-function localizedTagLinks(post: SourceBlogPost, locale: Locale): LocalizedBlogTagLink[] {
-  return post.copy.en.tags.map((englishTag, index) => {
+function localizedTagLinks(
+  post: SourceBlogPost,
+  locale: Locale
+): LocalizedBlogTagLink[] {
+  return post.entry.en.tags.map((englishTag, index) => {
     const slug = tagSlug(englishTag);
-    const label = post.copy[locale].tags[index] ?? englishTag;
+    const label = post.entry[locale].tags[index] ?? englishTag;
     const href = `/${locale}/tags/${slug}`;
 
     return {
@@ -83,15 +80,20 @@ function localizedTagLinks(post: SourceBlogPost, locale: Locale): LocalizedBlogT
 }
 
 function localizePost(post: SourceBlogPost, locale: Locale): LocalizedBlogPost {
-  const copy = post.copy[locale];
+  const copy = post.entry[locale];
   const href = `/${locale}/posts/${post.slug}`;
   const tagLinks = localizedTagLinks(post, locale);
 
   return {
-    ...post,
+    slug: post.slug,
     locale,
+    publishedAt: post.entry.publishedAt,
+    updatedAt: post.entry.updatedAt,
+    cover: post.entry.cover,
+    coverWidth: post.entry.coverWidth,
+    coverHeight: post.entry.coverHeight,
     ...copy,
-    Content: localizedContent[post.slug][locale],
+    body: locale === "ko" ? post.entry.bodyKo : post.entry.bodyEn,
     href,
     canonicalUrl: blogCanonicalUrl(locale, `/posts/${post.slug}`),
     tagLinks,
@@ -103,20 +105,28 @@ function localizePost(post: SourceBlogPost, locale: Locale): LocalizedBlogPost {
   };
 }
 
-export function getLocalizedBlogPosts(locale: Locale) {
-  return blogPosts
+export async function getBlogPostSlugs() {
+  return reader.collections.posts.list();
+}
+
+export async function getLocalizedBlogPosts(locale: Locale) {
+  const posts = await getSourceBlogPosts();
+
+  return posts
     .map((post) => localizePost(post, locale))
     .sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt));
 }
 
-export function getLocalizedBlogPost(locale: Locale, slug: string) {
-  return getLocalizedBlogPosts(locale).find((post) => post.slug === slug);
+export async function getLocalizedBlogPost(locale: Locale, slug: string) {
+  const entry = await reader.collections.posts.read(slug);
+
+  return entry ? localizePost({ slug, entry }, locale) : undefined;
 }
 
-export function getLocalizedBlogTags(locale: Locale): LocalizedBlogTag[] {
+export async function getLocalizedBlogTags(locale: Locale): Promise<LocalizedBlogTag[]> {
   const tags = new Map<string, LocalizedBlogTag>();
 
-  for (const post of getLocalizedBlogPosts(locale)) {
+  for (const post of await getLocalizedBlogPosts(locale)) {
     for (const tag of post.tagLinks) {
       const current = tags.get(tag.slug);
 
@@ -134,14 +144,14 @@ export function getLocalizedBlogTags(locale: Locale): LocalizedBlogTag[] {
   return [...tags.values()].sort((a, b) => a.label.localeCompare(b.label, locale));
 }
 
-export function getLocalizedPostsByTag(locale: Locale, slug: string) {
-  return getLocalizedBlogPosts(locale).filter((post) =>
+export async function getLocalizedPostsByTag(locale: Locale, slug: string) {
+  return (await getLocalizedBlogPosts(locale)).filter((post) =>
     post.tagLinks.some((tag) => tag.slug === slug)
   );
 }
 
-export function getLocalizedTagLabel(locale: Locale, slug: string) {
-  return getLocalizedBlogTags(locale).find((tag) => tag.slug === slug)?.label;
+export async function getLocalizedTagLabel(locale: Locale, slug: string) {
+  return (await getLocalizedBlogTags(locale)).find((tag) => tag.slug === slug)?.label;
 }
 
 export function formatPostDate(value: string, locale: Locale = "en") {
@@ -152,7 +162,7 @@ export function formatPostDate(value: string, locale: Locale = "en") {
   }).format(new Date(value));
 }
 
-// Temporary compatibility for redirected legacy routes and components.
+// Compatibility aliases for existing imports while the canonical functions remain locale-aware.
 export type BlogPost = LocalizedBlogPost;
 export type BlogTag = LocalizedBlogTag;
 

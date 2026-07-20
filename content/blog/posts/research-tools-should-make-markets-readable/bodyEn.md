@@ -1,16 +1,3 @@
-export const metadata = {
-  slug: "research-tools-should-make-markets-readable",
-  title: "Research Tools Should Make Markets Easier to Read",
-  description:
-    "A short operating note on Web3 research tools, market noise, and why good interfaces should reduce decision friction.",
-  publishedAt: "2026-07-02",
-  updatedAt: "2026-07-02",
-  category: "Research",
-  tags: ["Web3", "Research", "Product Systems"],
-  readingTime: "4 min read",
-  cover: "/media/projects/hyperalphaduo.webp"
-};
-
 Crypto research often fails because the information is not scarce. The problem is that the useful signal is surrounded by noisy price action, social pressure, fragmented liquidity, and inconsistent public data.
 
 The best research tools do not simply add another dashboard. They help the operator answer a sharper question.

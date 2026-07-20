@@ -1,45 +1,46 @@
-# Design QA — Nimdal Option 2
+# Design QA — Nimdal personal portfolio
 
-Final result: **passed**
+## Source and implementation
 
-## Comparison setup
+- Selected reference: `/Users/nimdal/.codex/generated_images/019f78ec-95fd-7bc0-8fd7-2d219b35bacb/exec-1dacad9e-5348-4f28-b080-319409921452.png`
+- Reference/implementation board: `/Users/nimdal/.codex/visualizations/2026/07/20/nimdal-personal-home-qa/reference-vs-personal-home.png`
+- Desktop captures: `/Users/nimdal/.codex/visualizations/2026/07/20/nimdal-personal-qa/home-intro-1440.png`, `home-about-1440.png`, `home-work-1440.png`, `home-career-1440.png`
+- Editor captures: `/Users/nimdal/.codex/visualizations/2026/07/20/nimdal-personal-qa/blog-editor-home.png`, `blog-editor-list.png`, `blog-editor-item.png`
+- Primary viewport: 1440 px. Responsive checks include 390 px, reduced motion, keyboard navigation, and 200% text zoom.
 
-- Reference: `/Users/nimdal/.codex/generated_images/019f78ec-95fd-7bc0-8fd7-2d219b35bacb/exec-118a50c5-3c3d-41af-83fe-b32f7d7e82d1.png`
-- Desktop implementation: `artifacts/qa-home-release-1440.png`
-- Combined comparison input: `artifacts/design-qa-comparison-release.png`
-- Full revealed page: `artifacts/qa-home-release-full-1440.png`
-- Mobile implementation: `artifacts/qa-home-release-390.png`
-- Primary viewport: 1440 × 1024; responsive checks: 360, 390, 768, 1024, 1440 px.
+## Fidelity result
 
-## Pass 1 findings
+- Information architecture: the home is a personal portfolio, ordered as `Intro → About → Selected Work → Career → BLOG → Contact`; it is not a project-only showcase.
+- Intro: the real pixel-octopus PFP and oversized `NIMDAL` lockup open the page before any project content.
+- Selected Work: AlphaDuo, HyperAlphaDuo, and myLoL use repository proof/QA captures and are labeled `NFT / RESEARCH / GAME`.
+- Career: `1six.tech Inc. / NEVADA`, `071Labs / AlphaDuo`, and `MKR` appear as the primary organization/engagement timeline. Leica, H Animal Medical Center, and Joya / Swiss J are separated as client/brand work.
+- BLOG: all user-facing `NIMDALOG` labels are replaced with `BLOG`. The existing three bilingual posts are editable from `/keystatic`.
+- Motion: desktop uses a native-scroll title sequence and crossfading sticky project reel. Mobile, coarse-pointer, short-viewport, and reduced-motion environments receive a static vertical edit.
+- Imagery: the home uses only the repository PFP, real portrait, and actual project captures. No generated decorative image, stock image, or fake product UI is used.
 
-| Severity | Surface | Finding | Resolution |
-| --- | --- | --- | --- |
-| P1 | Color fidelity | The implemented cyan was visibly less saturated than the selected mock. | Matched the reference sample with `--cyan: #06a4ee` and re-captured the comparison. |
-| P1 | Responsive layout | A long project name forced the 390 px document width to 410 px. | Added zero-min-width grid constraints and safe title wrapping; 360 and 390 px now report no horizontal overflow. |
-| P2 | Accessibility | Header and footer wordmarks had visual boxes shorter than the 44 px touch target. | Made wordmarks 44 px minimum-height inline-flex targets. |
-| P2 | Runtime quality | Next surfaced an LCP image hint and smooth-scroll route hint. | Added eager loading to above-fold priority images, removed below-fold preloading, and declared `data-scroll-behavior="smooth"`. |
+## QA findings resolved
 
-## Release review findings
+1. P1 — fading the whole About section to 45% opacity reduced text contrast while it waited to enter the viewport. Replaced the opacity reveal with a transform-only entrance so WCAG contrast remains valid in every animation state.
+2. P1 — the reduced-motion browser serialized the near-zero Motion duration as `1e-08s`, while the test accepted only three string formats. The assertion now parses the duration and verifies the numeric upper bound.
+3. P1 — Keystatic 0.5.x surfaced React 19 `href=""` warnings from its breadcrumb dependency. Upgraded `@keystatic/core` to 0.6.0 (`@keystar/ui` 0.8.0), which omits empty breadcrumb href values.
+4. P1 — organizations and customer brands were visually mixed. Added an explicit organization/engagement timeline and a subordinate client/brand rail with relationship labels.
+5. P2 — career metrics repeated their units. Values and labels are now separated as `10+ / YEARS`, `100+ / CLIENTS`, `200+ / CAMPAIGNS`, and `3K+ / KOL NETWORK`.
+6. P1 — Motion's reduced-motion media-query value differed between server render and first hydration. Replaced the render-time branch with a hydration-safe preference hook and CSS-hidden progress rail; normal, reduced-motion, and editor console checks now report zero warnings or errors.
 
-| Severity | Surface | Finding | Resolution |
-| --- | --- | --- | --- |
-| P1 | Language semantics | English pages inherited a Korean document language. | Moved the root layout under `[locale]` so emitted documents use the route locale on `<html lang>`. |
-| P1 | Canonical separation | The main host exposed a duplicate, self-canonical blog hub. | Main-host blog hubs now 308 to `blog.nimdal.xyz/{locale}` and were removed from the main sitemap. |
-| P1 | Legacy links | Room-less `#project-{slug}` links did not enter a project. | Restored the compatibility bridge with `signal` as the default anchor. |
-| P1 | Keyboard visibility | A coral-only focus ring disappeared on cyan, coral, and foam surfaces. | Replaced it with a two-tone foam/navy focus treatment that remains visible across every palette surface. |
-| P1 | Landmarks | Skip links missed several main regions and the home landmark ended after the hero. | Every page now exposes `#main-content`, and the homepage has one main landmark containing all core sections. |
-| P1 | Touch targets | Short navigation and contact labels were narrower than 44 px. | Added 44 px minimum width and height to standalone navigation, language, brand, and contact targets. |
-| P1 | Language control contrast | Inactive language labels used low-contrast opacity. | Removed transparency and retained state through the active underline. |
-| P2 | Evidence tabs | The proof switcher lacked complete keyboard tab semantics. | Added controlled IDs, tabpanel relationships, roving focus, and Arrow/Home/End navigation. |
+## Verification
 
-## Final comparison
+- TypeScript: passed.
+- ESLint: passed.
+- Next.js 16.2.10 Turbopack production build: passed; 59 static pages generated.
+- Content inventory: 9 projects, 6 career cases, 3 KO/EN blog posts; 4 / 4 tests passed.
+- Playwright routing, language, BLOG editor, responsive, keyboard, reduced-motion, 200% zoom, links, and 404 behavior: passed.
+- Axe WCAG A/AA serious or critical violations on the tested public surfaces: 0.
+- Keystatic article editor after the dependency update: HTTP 200, console warnings/errors 0, page errors 0.
+- `npm audit --omit=dev`: 0 vulnerabilities.
 
-- Typography preserves the mock's oversized white NIMDAL lockup, tight editorial headings, mono evidence labels, and strong hierarchy in both scripts.
-- The hero uses the real square pixel-octopus asset, flat cyan surface, hard dividers, and no generated or decorative substitute assets.
-- The white claim rail and navy Selected Proof rows preserve the mock's cyan/white/navy sequence while accommodating the required bilingual evidence copy.
-- AlphaDuo, HyperAlphaDuo, and myLoL use actual repository/live/QA media with explicit proof roles.
-- All controls required for the primary journey work: navigation, locale switching on the same project, mobile menu, Lab filters, project evidence tabs, case links, and contact links.
-- 360–1440 px layouts have no document-level horizontal overflow; visible focus uses a two-tone 3 px foam / navy ring; navigation and standalone mobile targets are at least 44 px.
-- Reduced-motion rules remove transitions and Motion islands use `useReducedMotion`; native vertical scrolling and the system cursor remain intact.
-- No P0, P1, or unresolved P2 findings remain.
+## Open findings
+
+- Production editing requires the four GitHub App environment variables documented in `docs/blog-editor.md`. Until they are configured, production intentionally returns 404 for `/keystatic` and `/api/keystatic/*`.
+- No unresolved P0 or P1 visual/accessibility findings remain.
+
+Final result: passed.

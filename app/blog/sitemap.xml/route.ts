@@ -1,9 +1,8 @@
-import { blogPosts } from "@/lib/content";
+import { getLocalizedBlogPosts } from "@/content/blog/posts";
 import {
   blogCanonicalUrl,
   hreflangAlternates,
   locales,
-  tagSlug,
   type Locale
 } from "@/lib/seo";
 
@@ -37,16 +36,16 @@ function urlElement({ locale, pathname, lastModified }: SitemapUrl) {
   </url>`;
 }
 
-export function GET() {
-  const latestPostUpdate = blogPosts.reduce(
+export async function GET() {
+  const posts = await getLocalizedBlogPosts("en");
+  const latestPostUpdate = posts.reduce(
     (latest, post) => (Date.parse(post.updatedAt) > Date.parse(latest) ? post.updatedAt : latest),
-    blogPosts[0]?.updatedAt ?? "2026-07-02"
+    posts[0]?.updatedAt ?? "2026-07-02"
   );
   const tagUpdates = new Map<string, string>();
 
-  for (const post of blogPosts) {
-    for (const tag of post.copy.en.tags) {
-      const slug = tagSlug(tag);
+  for (const post of posts) {
+    for (const { slug } of post.tagLinks) {
       const currentUpdate = tagUpdates.get(slug);
 
       if (!currentUpdate || Date.parse(post.updatedAt) > Date.parse(currentUpdate)) {
@@ -61,7 +60,7 @@ export function GET() {
       pathname: "/",
       lastModified: latestPostUpdate
     },
-    ...blogPosts.map((post) => ({
+    ...posts.map((post) => ({
       locale,
       pathname: `/posts/${post.slug}`,
       lastModified: post.updatedAt

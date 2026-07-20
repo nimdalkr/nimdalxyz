@@ -5,19 +5,20 @@ import type { Metadata } from "next";
 
 import { BlogCard } from "@/components/blog/BlogCard";
 import { BlogHeader } from "@/components/blog/BlogHeader";
+import { BlogPostBody } from "@/components/blog/BlogPostBody";
 import { StructuredData } from "@/components/seo/StructuredData";
 import {
   formatPostDate,
+  getBlogPostSlugs,
   getLocalizedBlogPost,
   getLocalizedBlogPosts
 } from "@/content/blog/posts";
-import { isLocale, locales, postSlugs } from "@/lib/content";
+import { isLocale, locales } from "@/lib/content";
 import {
   blogCanonicalUrl,
   metadataAlternates,
   openGraphLocaleByLocale
 } from "@/lib/seo";
-import { getMediaDimensions } from "@/lib/media";
 import { siteConfig } from "@/lib/site";
 
 type BlogPostPageProps = {
@@ -29,20 +30,22 @@ type BlogPostPageProps = {
 
 const labels = {
   ko: {
-    back: "nimdalog로 돌아가기",
+    back: "블로그로 돌아가기",
     tags: "태그",
     related: "함께 읽을 글",
     updated: "수정일"
   },
   en: {
-    back: "Back to nimdalog",
+    back: "Back to BLOG",
     tags: "Post tags",
     related: "Read next",
     updated: "Updated"
   }
 } as const;
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const postSlugs = await getBlogPostSlugs();
+
   return locales.flatMap((locale) => postSlugs.map((slug) => ({ locale, slug })));
 }
 
@@ -54,7 +57,7 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
   }
 
   const locale = localeParam;
-  const post = getLocalizedBlogPost(locale, slug);
+  const post = await getLocalizedBlogPost(locale, slug);
 
   if (!post) {
     return {
@@ -65,7 +68,6 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
   }
 
   const image = new URL(post.cover, siteConfig.blogUrl).toString();
-  const imageDimensions = getMediaDimensions(post.cover);
 
   return {
     title: `${post.title} | ${siteConfig.blogName}`,
@@ -82,7 +84,12 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
       modifiedTime: post.updatedAt,
       authors: [siteConfig.author],
       tags: [...post.tags],
-      images: [{ url: image, ...imageDimensions, alt: post.title }]
+      images: [{
+        url: image,
+        width: post.coverWidth,
+        height: post.coverHeight,
+        alt: post.title
+      }]
     },
     twitter: {
       card: "summary_large_image",
@@ -101,14 +108,13 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   }
 
   const locale = localeParam;
-  const post = getLocalizedBlogPost(locale, slug);
+  const post = await getLocalizedBlogPost(locale, slug);
 
   if (!post) {
     notFound();
   }
 
-  const Content = post.Content;
-  const relatedPosts = getLocalizedBlogPosts(locale)
+  const relatedPosts = (await getLocalizedBlogPosts(locale))
     .filter((item) => item.slug !== post.slug)
     .slice(0, 2);
   const ui = labels[locale];
@@ -184,7 +190,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           </figure>
 
           <div className="blog-prose" style={{ maxWidth: "65ch" }}>
-            <Content />
+            <BlogPostBody load={post.body} />
           </div>
         </article>
 

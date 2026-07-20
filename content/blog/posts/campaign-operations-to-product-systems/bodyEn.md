@@ -1,16 +1,3 @@
-export const metadata = {
-  slug: "campaign-operations-to-product-systems",
-  title: "From Campaign Operations to Product Systems",
-  description:
-    "How campaign planning, SEO, reporting, and partner coordination can become a useful foundation for product thinking.",
-  publishedAt: "2026-07-02",
-  updatedAt: "2026-07-02",
-  category: "Career Notes",
-  tags: ["Career", "Marketing", "Operations"],
-  readingTime: "4 min read",
-  cover: "/media/career/mkr-logo.jpg"
-};
-
 Campaign operations and product systems look different from the outside. One is usually described through clients, channels, reports, and deliverables. The other is described through interfaces, data, workflows, and users.
 
 But the useful muscle is surprisingly similar.

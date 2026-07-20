@@ -1,0 +1,24 @@
+slug: nimdal-logbook
+publishedAt: 2026-07-02
+updatedAt: 2026-07-02
+cover: /media/blog/nimdal-logbook/cover.jpg
+coverWidth: 400
+coverHeight: 400
+ko:
+  title: Nimdal이 블로그를 만든 이유
+  description: 리서치와 제작 과정, 캠페인에서 배운 점, 개인 실험을 꾸준히 기록하기 위해 블로그를 시작했습니다.
+  category: 제작 기록
+  tags:
+    - Nimdal
+    - 제작 기록
+    - 포트폴리오
+  readingTime: 3분
+en:
+  title: Why Nimdal Needs a Blog
+  description: A first note on keeping research, builds, campaign thinking, and personal experiments in one durable place.
+  category: Build Log
+  tags:
+    - Nimdal
+    - Build Log
+    - Portfolio
+  readingTime: 3 min read
