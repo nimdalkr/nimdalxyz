@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: BlogTagPageProps): Promise<Me
   const { locale: localeParam, tag } = await params;
 
   if (!isLocale(localeParam)) {
-    return { title: `Tag not found | ${siteConfig.blogName}` };
+    return { title: "Tag not found" };
   }
 
   const locale = localeParam;
@@ -47,8 +47,8 @@ export async function generateMetadata({ params }: BlogTagPageProps): Promise<Me
   if (!label) {
     return {
       title: locale === "ko"
-        ? `태그를 찾을 수 없습니다 | ${siteConfig.blogName}`
-        : `Tag not found | ${siteConfig.blogName}`
+        ? "태그를 찾을 수 없습니다"
+        : "Tag not found"
     };
   }
 
@@ -58,7 +58,7 @@ export async function generateMetadata({ params }: BlogTagPageProps): Promise<Me
   const canonicalUrl = blogCanonicalUrl(locale, `/tags/${tag}`);
 
   return {
-    title: `${label} | ${siteConfig.blogName}`,
+    title: label,
     description,
     alternates: metadataAlternates(locale, `/tags/${tag}`, "blog"),
     openGraph: {

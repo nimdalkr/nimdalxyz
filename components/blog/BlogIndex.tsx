@@ -1,3 +1,4 @@
+import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -7,9 +8,10 @@ import type {
   LocalizedBlogPost,
   LocalizedBlogTag
 } from "@/content/blog/posts";
-import { formatPostDate } from "@/content/blog/posts";
 import { siteContent, type Locale } from "@/lib/content";
 import { blogCanonicalUrl } from "@/lib/seo";
+
+import styles from "./BlogSurface.module.css";
 
 type BlogIndexProps = {
   locale?: Locale;
@@ -23,26 +25,39 @@ type BlogIndexProps = {
 
 const labels = {
   ko: {
-    personal: "개인 기록",
-    tagged: "태그별 글",
     all: "전체",
     featured: "대표 글",
-    latest: "최근 글",
-    read: "본문 읽기",
-    emptyTitle: "아직 공개한 글이 없습니다.",
-    emptyBody: "이 태그로 쓴 글이 없습니다."
+    latest: "최신 글",
+    read: "글 읽기",
+    emptyTitle: "아직 공개한 글이 없습니다",
+    emptyBody: "선택한 분류에는 공개된 글이 없습니다."
   },
   en: {
-    personal: "Personal blog",
-    tagged: "Tagged notes",
     all: "All",
-    featured: "Featured post",
-    latest: "Latest posts",
-    read: "Read note",
-    emptyTitle: "No published notes yet.",
-    emptyBody: "There are no published notes for this tag."
+    featured: "Featured",
+    latest: "Latest",
+    read: "Read article",
+    emptyTitle: "No published articles yet",
+    emptyBody: "There are no published articles in this category."
   }
 } as const;
+
+const categoryFilters = {
+  ko: [
+    { label: "경력 기록", tagLabels: ["경력", "경력 기록"] },
+    { label: "제작 기록", tagLabels: ["제작 기록"] },
+    { label: "리서치", tagLabels: ["리서치"] }
+  ],
+  en: [
+    { label: "Career Notes", tagLabels: ["Career", "Career Notes"] },
+    { label: "Build Log", tagLabels: ["Build Log"] },
+    { label: "Research", tagLabels: ["Research"] }
+  ]
+} as const;
+
+function archiveDate(value: string) {
+  return value.replaceAll("-", ".");
+}
 
 export function BlogIndex({
   locale = "en",
@@ -53,12 +68,16 @@ export function BlogIndex({
   languagePath = "/",
   languageHref
 }: BlogIndexProps) {
-  const [featured, ...rest] = posts;
+  const featured = posts.find((post) => post.slug === "research-tools-should-make-markets-readable") ?? posts[0];
   const copy = siteContent[locale].blog;
   const ui = labels[locale];
+  const filters = categoryFilters[locale].flatMap((filter) => {
+    const tag = tags.find((item) => filter.tagLabels.some((label) => item.label === label));
+    return tag ? [{ ...filter, href: tag.canonicalUrl }] : [];
+  });
 
   return (
-    <div className="blog-shell">
+    <div className={`${styles.shell} blog-surface`}>
       <BlogHeader
         locale={locale}
         hubHref={hubHref}
@@ -66,79 +85,86 @@ export function BlogIndex({
         languageHref={languageHref}
       />
 
-      <main className="blog-main" id="main-content">
-        <section className="blog-hero" aria-labelledby="blog-title">
-          <div>
-            <p className="blog-kicker">{activeTag ? ui.tagged : copy.eyebrow}</p>
-            <h1 id="blog-title">{activeTag ?? copy.title}</h1>
-          </div>
-          <p>{copy.description}</p>
-        </section>
+      <main className={styles.main} id="main-content">
+        <h1 className={styles.pageTitle} id="blog-title">{copy.title}</h1>
 
-        <nav className="blog-tag-row" aria-label={locale === "ko" ? "태그" : "Blog tags"}>
-          <Link className={!activeTag ? "is-active" : undefined} href={hubHref}>
+        <nav className={styles.filters} aria-label={locale === "ko" ? "글 분류" : "Article categories"}>
+          <Link
+            className={`${styles.filterLink} ${!activeTag ? styles.filterLinkActive : ""}`}
+            href={hubHref}
+            aria-current={!activeTag ? "page" : undefined}
+          >
             {ui.all}
           </Link>
-          {tags.map((tag) => (
-            <Link
-              key={tag.slug}
-              className={activeTag === tag.label ? "is-active" : undefined}
-              href={tag.canonicalUrl}
-            >
-              {tag.label}
-              <span aria-label={locale === "ko" ? `글 ${tag.count}개` : `${tag.count} posts`}>
-                {tag.count}
-              </span>
-            </Link>
-          ))}
+          {filters.map((filter) => {
+            const isActive = activeTag ? filter.tagLabels.some((label) => label === activeTag) : false;
+            return (
+              <Link
+                key={filter.label}
+                className={`${styles.filterLink} ${isActive ? styles.filterLinkActive : ""}`}
+                href={filter.href}
+                aria-current={isActive ? "page" : undefined}
+              >
+                {filter.label}
+              </Link>
+            );
+          })}
         </nav>
 
         {featured ? (
-          <section className="blog-featured" aria-label={ui.featured}>
-            <Link
-              className="blog-featured-media"
-              href={featured.canonicalUrl}
-              aria-label={locale === "ko" ? `${featured.title} 글 읽기` : `Read ${featured.title}`}
-            >
-              <Image
-                src={featured.cover}
-                alt=""
-                fill
-                priority
-                loading="eager"
-                sizes="(max-width: 900px) calc(100vw - 40px), 47vw"
-                className="blog-card-image"
-              />
-            </Link>
-            <article className="blog-featured-copy">
-              <p className="blog-kicker">{featured.category}</p>
-              <h2>
-                <Link href={featured.canonicalUrl}>{featured.title}</Link>
-              </h2>
-              <p>{featured.description}</p>
-              <div className="blog-meta">
-                <time dateTime={featured.publishedAt}>
-                  {formatPostDate(featured.publishedAt, locale)}
-                </time>
-                <span>{featured.readingTime}</span>
-              </div>
-              <Link className="blog-read-link" href={featured.canonicalUrl}>
-                {ui.read}
+          <section className={styles.section} aria-labelledby="featured-title">
+            <h2 className={styles.sectionLabel} id="featured-title">{ui.featured}</h2>
+            <article className={styles.featured}>
+              <Link
+                className={styles.featuredMedia}
+                href={featured.canonicalUrl}
+                aria-label={locale === "ko" ? `${featured.title} 글 읽기` : `Read ${featured.title}`}
+              >
+                <Image
+                  src={featured.cover}
+                  alt=""
+                  fill
+                  priority
+                  loading="eager"
+                  sizes="(max-width: 720px) calc(100vw - 40px), (max-width: 900px) 52vw, 520px"
+                  className={styles.image}
+                />
               </Link>
+              <div className={styles.featuredCopy}>
+                <div className={styles.featuredMeta}>
+                  <time dateTime={featured.publishedAt}>{archiveDate(featured.publishedAt)}</time>
+                  <span>{featured.category}</span>
+                </div>
+                <h3 className={styles.featuredTitle}>
+                  <Link href={featured.canonicalUrl}>{featured.title}</Link>
+                </h3>
+                <Link className={styles.readLink} href={featured.canonicalUrl}>
+                  {ui.read}
+                  <ArrowRight size={22} weight="regular" aria-hidden="true" />
+                </Link>
+              </div>
             </article>
           </section>
         ) : (
-          <section className="blog-empty" aria-label={locale === "ko" ? "글 없음" : "No posts"}>
+          <section className={`${styles.section} ${styles.empty}`} aria-label={locale === "ko" ? "글 없음" : "No posts"}>
             <h2>{ui.emptyTitle}</h2>
             <p>{ui.emptyBody}</p>
           </section>
         )}
 
-        {rest.length ? (
-          <section className="blog-grid" aria-label={ui.latest}>
-            {rest.map((post) => (
-              <BlogCard key={post.slug} post={post} />
-            ))}
+        {posts.length ? (
+          <section className={styles.section} aria-labelledby="latest-title">
+            <h2 className={styles.sectionLabel} id="latest-title">{ui.latest}</h2>
+            <div className={styles.archiveList}>
+              {posts.map((post, index) => (
+                <BlogCard
+                  key={post.slug}
+                  post={post}
+                  highlighted={index === 0}
+                  eager={post.slug === featured?.slug}
+                />
+              ))}
+            </div>
           </section>
         ) : null}
       </main>

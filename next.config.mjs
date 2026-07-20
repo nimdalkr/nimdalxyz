@@ -8,10 +8,14 @@ const withMDX = createMDX({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  allowedDevOrigins: ["127.0.0.1", "localhost", "blog.localhost"],
   pageExtensions: ["js", "jsx", "ts", "tsx", "md", "mdx"],
   devIndicators: false,
   experimental: {
-    globalNotFound: true
+    globalNotFound: true,
+    serverActions: {
+      bodySizeLimit: "4mb"
+    }
   },
   outputFileTracingRoot: path.join(process.cwd())
 };

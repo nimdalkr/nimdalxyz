@@ -1,3 +1,4 @@
+import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -20,6 +21,8 @@ import {
   openGraphLocaleByLocale
 } from "@/lib/seo";
 import { siteConfig } from "@/lib/site";
+
+import styles from "@/components/blog/BlogSurface.module.css";
 
 type BlogPostPageProps = {
   params: Promise<{
@@ -53,7 +56,7 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
   const { locale: localeParam, slug } = await params;
 
   if (!isLocale(localeParam)) {
-    return { title: `Post not found | ${siteConfig.blogName}` };
+    return { title: "Post not found" };
   }
 
   const locale = localeParam;
@@ -62,15 +65,15 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
   if (!post) {
     return {
       title: locale === "ko"
-        ? `글을 찾을 수 없습니다 | ${siteConfig.blogName}`
-        : `Post not found | ${siteConfig.blogName}`
+        ? "글을 찾을 수 없습니다"
+        : "Post not found"
     };
   }
 
   const image = new URL(post.cover, siteConfig.blogUrl).toString();
 
   return {
-    title: `${post.title} | ${siteConfig.blogName}`,
+    title: post.title,
     description: post.description,
     alternates: metadataAlternates(locale, `/posts/${post.slug}`, "blog"),
     openGraph: {
@@ -142,7 +145,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   };
 
   return (
-    <div className="blog-shell">
+    <div className={`${styles.shell} blog-surface`}>
       <StructuredData data={jsonLd} />
       <BlogHeader
         locale={locale}
@@ -150,16 +153,17 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         languagePath={`/posts/${post.slug}`}
       />
 
-      <main className="blog-post-main" id="main-content">
-        <article className="blog-article">
-          <header className="blog-article-header">
-            <Link href={blogCanonicalUrl(locale)} className="blog-back-link">
+      <main className={styles.articleMain} id="main-content">
+        <article className={styles.article}>
+          <header className={styles.articleHeader}>
+            <Link href={blogCanonicalUrl(locale)} className={styles.backLink}>
+              <ArrowRight size={18} weight="regular" aria-hidden="true" />
               {ui.back}
             </Link>
-            <p className="blog-kicker">{post.category}</p>
-            <h1>{post.title}</h1>
-            <p>{post.description}</p>
-            <div className="blog-meta">
+            <p className={styles.articleKicker}>{post.category}</p>
+            <h1 className={styles.articleTitle}>{post.title}</h1>
+            <p className={styles.articleDescription}>{post.description}</p>
+            <div className={styles.articleMeta}>
               <time dateTime={post.publishedAt}>{formatPostDate(post.publishedAt, locale)}</time>
               <span>{post.readingTime}</span>
               {post.updatedAt !== post.publishedAt ? (
@@ -168,7 +172,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                 </span>
               ) : null}
             </div>
-            <div className="blog-card-tags" aria-label={ui.tags}>
+            <div className={styles.tagList} aria-label={ui.tags}>
               {post.tagLinks.map((tag) => (
                 <Link key={tag.slug} href={tag.canonicalUrl}>
                   {tag.label}
@@ -177,7 +181,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             </div>
           </header>
 
-          <figure className="blog-article-cover">
+          <figure className={styles.articleCover}>
             <Image
               src={post.cover}
               alt=""
@@ -185,21 +189,23 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
               priority
               loading="eager"
               sizes="(max-width: 900px) calc(100vw - 40px), 980px"
-              className="blog-card-image"
+              className={styles.image}
             />
           </figure>
 
-          <div className="blog-prose" style={{ maxWidth: "65ch" }}>
+          <div className={styles.prose}>
             <BlogPostBody load={post.body} />
           </div>
         </article>
 
         {relatedPosts.length ? (
-          <aside className="blog-related" aria-label={ui.related}>
-            <p className="blog-kicker">{ui.related}</p>
-            {relatedPosts.map((item) => (
-              <BlogCard key={item.slug} post={item} />
-            ))}
+          <aside className={styles.related} aria-labelledby="related-title">
+            <h2 className={styles.relatedTitle} id="related-title">{ui.related}</h2>
+            <div className={styles.relatedList}>
+              {relatedPosts.map((item) => (
+                <BlogCard key={item.slug} post={item} />
+              ))}
+            </div>
           </aside>
         ) : null}
       </main>

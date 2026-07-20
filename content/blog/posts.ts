@@ -57,7 +57,8 @@ type SourceBlogPost = {
 };
 
 async function getSourceBlogPosts(): Promise<SourceBlogPost[]> {
-  return reader.collections.posts.all();
+  const posts = await reader.collections.posts.all();
+  return posts.filter((post) => post.entry.status === "published");
 }
 
 /** Tag URLs are deliberately derived from the English source tags. */
@@ -106,7 +107,7 @@ function localizePost(post: SourceBlogPost, locale: Locale): LocalizedBlogPost {
 }
 
 export async function getBlogPostSlugs() {
-  return reader.collections.posts.list();
+  return (await getSourceBlogPosts()).map((post) => post.slug);
 }
 
 export async function getLocalizedBlogPosts(locale: Locale) {
@@ -120,7 +121,7 @@ export async function getLocalizedBlogPosts(locale: Locale) {
 export async function getLocalizedBlogPost(locale: Locale, slug: string) {
   const entry = await reader.collections.posts.read(slug);
 
-  return entry ? localizePost({ slug, entry }, locale) : undefined;
+  return entry?.status === "published" ? localizePost({ slug, entry }, locale) : undefined;
 }
 
 export async function getLocalizedBlogTags(locale: Locale): Promise<LocalizedBlogTag[]> {

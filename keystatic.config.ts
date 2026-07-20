@@ -60,7 +60,7 @@ export default config({
       slugField: "slug",
       path: "content/blog/posts/*/",
       entryLayout: "form",
-      columns: ["slug", "publishedAt", "updatedAt"],
+      columns: ["slug", "status", "publishedAt", "updatedAt"],
       schema: {
         slug: fields.slug({
           name: {
@@ -78,6 +78,15 @@ export default config({
             label: "URL slug",
             description: "blog.nimdal.xyz/{언어}/posts/{slug}에 사용됩니다."
           }
+        }),
+        status: fields.select({
+          label: "사이트 노출 상태",
+          description: "초안은 사이트에서 숨겨지지만 공개 GitHub 저장소에서는 보입니다.",
+          options: [
+            { label: "사이트 비노출 · 저장소 공개", value: "draft" },
+            { label: "공개", value: "published" }
+          ],
+          defaultValue: "published"
         }),
         publishedAt: fields.date({
           label: "발행일",
