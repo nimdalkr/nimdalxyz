@@ -13,8 +13,8 @@ import {
 
 import {
   deletePostAction,
-  initialEditorActionState,
-  savePostAction
+  savePostAction,
+  type EditorActionState
 } from "../actions";
 import styles from "../write.module.css";
 
@@ -26,6 +26,11 @@ type EditorFormProps = {
 };
 
 type LocaleKey = "ko" | "en";
+
+const initialEditorActionState: EditorActionState = {
+  status: "idle",
+  message: ""
+};
 
 const editorIssueFieldNames: Record<string, string> = {
   slug: "slug",
