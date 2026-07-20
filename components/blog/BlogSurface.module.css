@@ -539,6 +539,17 @@
   border-left: 3px solid var(--blog-coral);
 }
 
+.prose img {
+  display: block;
+  width: min(88vw, 980px);
+  max-width: none;
+  height: auto;
+  margin: 3rem 50%;
+  transform: translateX(-50%);
+  border: 1px solid var(--blog-line);
+  background: #dfe3df;
+}
+
 .related {
   width: min(100%, 980px);
   margin: 100px auto 0;

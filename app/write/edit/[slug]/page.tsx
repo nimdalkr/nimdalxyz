@@ -8,7 +8,7 @@ import { EditorShell } from "../../_components/EditorShell";
 
 interface EditPostPageProps {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ saved?: string }>;
+  searchParams: Promise<{ deleteError?: string; saved?: string }>;
 }
 
 export default async function EditPostPage({ params, searchParams }: EditPostPageProps) {
@@ -22,7 +22,7 @@ export default async function EditPostPage({ params, searchParams }: EditPostPag
     redirect("/write/forbidden");
   }
 
-  const [{ slug }, { saved }] = await Promise.all([params, searchParams]);
+  const [{ slug }, { deleteError, saved }] = await Promise.all([params, searchParams]);
 
   if (!BLOG_SLUG_PATTERN.test(slug)) {
     notFound();
@@ -40,7 +40,9 @@ export default async function EditPostPage({ params, searchParams }: EditPostPag
         document={snapshot.document}
         expectedHeadOid={snapshot.expectedHeadOid}
         mode="edit"
+        queued={snapshot.queued}
         saved={saved === "1"}
+        deleteError={deleteError === "conflict" ? "conflict" : deleteError === "failed" ? "failed" : undefined}
       />
     </EditorShell>
   );

@@ -8,7 +8,11 @@ import { getBlogEditorPosts } from "@/lib/blog-editor";
 import { EditorShell } from "./_components/EditorShell";
 import styles from "./write.module.css";
 
-export default async function WriteIndexPage() {
+export default async function WriteIndexPage({
+  searchParams
+}: {
+  searchParams: Promise<{ deleted?: string }>;
+}) {
   const access = await getWriterAccess();
 
   if (access.status === "configuration-required" || access.status === "signed-out") {
@@ -19,7 +23,9 @@ export default async function WriteIndexPage() {
     redirect("/write/forbidden");
   }
 
-  const { posts } = await getBlogEditorPosts();
+  const { pendingSlugs, posts } = await getBlogEditorPosts();
+  const { deleted } = await searchParams;
+  const pending = new Set(pendingSlugs);
   const sortedPosts = posts.toSorted((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 
   return (
@@ -35,6 +41,12 @@ export default async function WriteIndexPage() {
         </Link>
       </header>
 
+      {deleted === "1" ? (
+        <p className={styles.pageNotice} role="status">
+          삭제 요청을 저장했습니다. 새 배포가 끝나면 목록에서도 사라집니다.
+        </p>
+      ) : null}
+
       <div className={styles.postList}>
         {sortedPosts.length > 0 ? (
           sortedPosts.map((post, index) => (
@@ -45,8 +57,8 @@ export default async function WriteIndexPage() {
                 <span className={styles.listMeta}>{post.slug}</span>
               </span>
               <span>
-                <span className={styles.status} data-status={post.status}>
-                  {post.status === "published" ? "공개" : "비노출 · 소스 공개"}
+                <span className={styles.status} data-status={pending.has(post.slug) ? "draft" : post.status}>
+                  {pending.has(post.slug) ? "자동 처리 대기" : post.status === "published" ? "공개" : "비공개"}
                 </span>
                 <br />
                 <span className={styles.listMeta}>{post.updatedAt}</span>

@@ -1,23 +1,38 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
+
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { getWriterAccess } from "@/lib/auth";
 import {
   assertValidBlogSlug,
+  BLOG_ATTACHMENT_ID_PATTERN,
   BlogEditorConflictError,
   BlogEditorValidationError,
   deleteBlogPostFromGitHub,
+  MAX_BLOG_BODY_IMAGES,
+  readBlogPendingRequest,
   readBlogPostDocument,
-  saveBlogPostToGitHub,
-  type BlogEditorPostDocument
+  saveBlogPendingRequest,
+  validateBlogBodyImageUploads,
+  type BlogEditorCoverImage,
+  type BlogPendingBodyImage,
+  type BlogPendingRequest
 } from "@/lib/blog-editor";
 
 export type EditorActionState = {
   status: "idle" | "error" | "success";
   message: string;
   field?: string;
+};
+
+type AttachmentManifestEntry = {
+  id: string;
+  alt: string;
+  width: number;
+  height: number;
 };
 
 function formString(formData: FormData, name: string) {
@@ -28,18 +43,6 @@ function formString(formData: FormData, name: string) {
 function formMarkdown(formData: FormData, name: string) {
   const value = formData.get(name);
   return typeof value === "string" ? value.replace(/\r\n?/g, "\n") : "";
-}
-
-function formInteger(formData: FormData, name: string) {
-  const value = Number.parseInt(formString(formData, name), 10);
-  return Number.isSafeInteger(value) ? value : 0;
-}
-
-function formTags(formData: FormData, name: string) {
-  return formString(formData, name)
-    .split(",")
-    .map((tag) => tag.trim())
-    .filter(Boolean);
 }
 
 async function requireWriterMutation() {
@@ -56,64 +59,172 @@ async function requireWriterMutation() {
   return access.session;
 }
 
-function editorDocumentFromForm(formData: FormData): BlogEditorPostDocument {
-  const statusValue = formString(formData, "status");
-
-  if (statusValue !== "published") {
+function parseAttachmentManifest(formData: FormData) {
+  const source = formString(formData, "attachmentsManifest");
+  if (!source) return [];
+  if (source.length > 12_000) {
     throw new BlogEditorValidationError([
-      { field: "status", message: "사이트 편집기에서는 공개 글만 저장할 수 있습니다." }
+      { field: "bodyImages", message: "이미지 정보가 너무 큽니다." }
     ]);
   }
 
-  return {
-    slug: formString(formData, "slug"),
-    status: "published",
-    publishedAt: formString(formData, "publishedAt"),
-    updatedAt: formString(formData, "updatedAt"),
-    cover: formString(formData, "cover"),
-    coverWidth: formInteger(formData, "coverWidth"),
-    coverHeight: formInteger(formData, "coverHeight"),
-    ko: {
-      title: formString(formData, "koTitle"),
-      description: formString(formData, "koDescription"),
-      category: formString(formData, "koCategory"),
-      tags: formTags(formData, "koTags"),
-      readingTime: formString(formData, "koReadingTime")
-    },
-    en: {
-      title: formString(formData, "enTitle"),
-      description: formString(formData, "enDescription"),
-      category: formString(formData, "enCategory"),
-      tags: formTags(formData, "enTags"),
-      readingTime: formString(formData, "enReadingTime")
-    },
-    bodyKo: formMarkdown(formData, "bodyKo"),
-    bodyEn: formMarkdown(formData, "bodyEn")
-  };
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(source);
+  } catch {
+    throw new BlogEditorValidationError([
+      { field: "bodyImages", message: "이미지 정보를 읽지 못했습니다." }
+    ]);
+  }
+
+  if (!Array.isArray(parsed)) {
+    throw new BlogEditorValidationError([
+      { field: "bodyImages", message: "이미지 목록이 올바르지 않습니다." }
+    ]);
+  }
+
+  if (parsed.length > MAX_BLOG_BODY_IMAGES) {
+    throw new BlogEditorValidationError([
+      {
+        field: "bodyImages",
+        message: `본문 이미지는 최대 ${MAX_BLOG_BODY_IMAGES}개까지 올릴 수 있습니다.`
+      }
+    ]);
+  }
+
+  const seen = new Set<string>();
+  return parsed.map((value, index) => {
+    const candidate = value as Partial<AttachmentManifestEntry>;
+    const field = `bodyImages.${index}`;
+    if (
+      !candidate ||
+      typeof candidate !== "object" ||
+      typeof candidate.id !== "string" ||
+      !BLOG_ATTACHMENT_ID_PATTERN.test(candidate.id) ||
+      seen.has(candidate.id) ||
+      typeof candidate.alt !== "string" ||
+      candidate.alt.trim().length === 0 ||
+      candidate.alt.length > 180 ||
+      /[\]\r\n]/.test(candidate.alt) ||
+      !Number.isSafeInteger(candidate.width) ||
+      !Number.isSafeInteger(candidate.height) ||
+      (candidate.width ?? 0) < 1 ||
+      (candidate.width ?? 0) > 20_000 ||
+      (candidate.height ?? 0) < 1 ||
+      (candidate.height ?? 0) > 20_000
+    ) {
+      throw new BlogEditorValidationError([
+        { field, message: "이미지 정보가 올바르지 않습니다." }
+      ]);
+    }
+    seen.add(candidate.id);
+    return {
+      id: candidate.id,
+      alt: candidate.alt.trim(),
+      width: candidate.width,
+      height: candidate.height
+    } as AttachmentManifestEntry;
+  });
+}
+
+async function prepareNewBodyImages(formData: FormData, bodyKo: string, slug: string) {
+  const manifest = parseAttachmentManifest(formData);
+  const files = formData
+    .getAll("bodyImages")
+    .filter((value): value is File => value instanceof File && value.size > 0);
+  const filesById = new Map<string, File>();
+
+  for (const file of files) {
+    const id = file.name.split("--", 1)[0] ?? "";
+    if (!BLOG_ATTACHMENT_ID_PATTERN.test(id) || filesById.has(id)) {
+      throw new BlogEditorValidationError([
+        { field: "bodyImages", message: "이미지 파일 이름이 올바르지 않습니다." }
+      ]);
+    }
+    filesById.set(id, file);
+  }
+
+  const manifestById = new Map(manifest.map((entry) => [entry.id, entry]));
+  for (const id of filesById.keys()) {
+    if (!manifestById.has(id)) {
+      throw new BlogEditorValidationError([
+        { field: "bodyImages", message: "선택한 이미지 정보가 누락되었습니다." }
+      ]);
+    }
+  }
+
+  const placeholderIds = [...bodyKo.matchAll(/\]\(attachment:([a-z0-9]{8,64})\)/g)].map(
+    (match) => match[1] ?? ""
+  );
+  const usedIds = [...new Set(placeholderIds)];
+  const images: BlogEditorCoverImage[] = [];
+  const usedManifest: AttachmentManifestEntry[] = [];
+
+  for (const id of usedIds) {
+    const file = filesById.get(id);
+    const entry = manifestById.get(id);
+    if (!file || !entry) {
+      throw new BlogEditorValidationError([
+        { field: "bodyImages", message: "본문 이미지 파일을 다시 선택해 주세요." }
+      ]);
+    }
+    images.push({
+      bytes: new Uint8Array(await file.arrayBuffer()),
+      fileName: file.name,
+      mimeType: file.type
+    });
+    usedManifest.push(entry);
+  }
+
+  const validated = validateBlogBodyImageUploads(images);
+  const pendingImages: BlogPendingBodyImage[] = [];
+  const uploads: { path: string; upload: BlogEditorCoverImage }[] = [];
+  let resolvedBody = bodyKo;
+
+  validated.forEach((image, index) => {
+    const entry = usedManifest[index];
+    if (!entry) return;
+    const imagePath = `/media/blog/${slug}/body-${entry.id}.${image.extension}`;
+    resolvedBody = resolvedBody.replaceAll(`attachment:${entry.id}`, imagePath);
+    pendingImages.push({
+      id: entry.id,
+      path: imagePath,
+      alt: entry.alt,
+      width: entry.width,
+      height: entry.height
+    });
+    uploads.push({ path: imagePath, upload: image });
+  });
+
+  if (/\]\(attachment:[^)]+\)/.test(resolvedBody)) {
+    throw new BlogEditorValidationError([
+      { field: "bodyImages", message: "본문 이미지 파일을 다시 선택해 주세요." }
+    ]);
+  }
+
+  return { bodyKo: resolvedBody, pendingImages, uploads };
+}
+
+async function createAvailableSlug() {
+  const date = new Date().toISOString().slice(0, 10).replaceAll("-", "");
+
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    const slug = `note-${date}-${randomUUID().replaceAll("-", "").slice(0, 8)}`;
+    const [post, pending] = await Promise.all([
+      readBlogPostDocument(slug),
+      readBlogPendingRequest(slug)
+    ]);
+    if (!post && !pending) return slug;
+  }
+
+  throw new Error("새 글 주소를 만들지 못했습니다. 다시 저장해 주세요.");
 }
 
 const editorFieldLabels: Record<string, string> = {
-  slug: "URL 주소",
-  status: "공개 상태",
-  publishedAt: "발행일",
-  updatedAt: "수정일",
-  coverImage: "대표 이미지 파일",
-  cover: "대표 이미지 경로",
-  coverWidth: "대표 이미지 너비",
-  coverHeight: "대표 이미지 높이",
-  "ko.title": "한국어 제목",
-  "ko.description": "한국어 요약",
-  "ko.category": "한국어 카테고리",
-  "ko.readingTime": "한국어 읽는 시간",
-  "ko.tags": "한국어 태그",
-  "en.title": "영문 제목",
-  "en.description": "영문 요약",
-  "en.category": "영문 카테고리",
-  "en.readingTime": "영문 읽는 시간",
-  "en.tags": "영문 태그",
-  tags: "태그",
-  bodyKo: "한국어 본문",
-  bodyEn: "영문 본문"
+  titleKo: "제목",
+  bodyKo: "본문",
+  bodyImages: "본문 이미지",
+  slug: "글 주소"
 };
 
 function editorFieldLabel(field: string) {
@@ -128,11 +239,7 @@ function humanizeEditorError(error: unknown): Pick<EditorActionState, "message" 
 
   if (error instanceof BlogEditorValidationError) {
     const issue = error.issues[0];
-
-    if (!issue) {
-      return { message: error.message };
-    }
-
+    if (!issue) return { message: error.message };
     const remaining = error.issues.length - 1;
     return {
       field: issue.field,
@@ -156,37 +263,70 @@ export async function savePostAction(
   try {
     const mode = formString(formData, "mode");
     const originalSlug = formString(formData, "originalSlug");
-    const document = editorDocumentFromForm(formData);
     const expectedHeadOid = formString(formData, "expectedHeadOid");
+    const slug = mode === "edit" ? assertValidBlogSlug(originalSlug) : await createAvailableSlug();
+    const [publishedDocument, pendingRequest] = await Promise.all([
+      readBlogPostDocument(slug),
+      readBlogPendingRequest(slug)
+    ]);
 
-    if (mode === "edit") {
-      assertValidBlogSlug(originalSlug);
-      document.slug = originalSlug;
-
-      if (!(await readBlogPostDocument(originalSlug))) {
-        return { status: "error", message: "수정할 글을 찾을 수 없습니다." };
-      }
-    } else if (await readBlogPostDocument(document.slug)) {
-      return { status: "error", message: "같은 주소를 사용 중인 글이 있습니다." };
+    if (mode === "edit" && !publishedDocument && !pendingRequest) {
+      return { status: "error", message: "수정할 글을 찾을 수 없습니다." };
     }
 
-    const file = formData.get("coverImage");
-    const coverImage = file instanceof File && file.size > 0 ? file : undefined;
+    const titleKo = formString(formData, "koTitle");
+    const rawBodyKo = formMarkdown(formData, "bodyKo");
+    const prepared = await prepareNewBodyImages(formData, rawBodyKo, slug);
+    const retainedImages = (pendingRequest?.bodyImages ?? []).filter((image) =>
+      prepared.bodyKo.includes(`](${image.path})`)
+    );
+    const bodyImages = [...retainedImages, ...prepared.pendingImages];
+    const today = new Date().toISOString().slice(0, 10);
+    let cover = pendingRequest?.cover ?? publishedDocument?.cover ?? "/media/identity-octopus.jpg";
+    let coverWidth = pendingRequest?.coverWidth ?? publishedDocument?.coverWidth ?? 400;
+    let coverHeight = pendingRequest?.coverHeight ?? publishedDocument?.coverHeight ?? 400;
 
-    await saveBlogPostToGitHub({ document, expectedHeadOid, coverImage });
+    if (!publishedDocument && bodyImages[0]) {
+      cover = bodyImages[0].path;
+      coverWidth = bodyImages[0].width;
+      coverHeight = bodyImages[0].height;
+    } else if (
+      cover.startsWith(`/media/blog/${slug}/body-`) &&
+      !bodyImages.some((image) => image.path === cover)
+    ) {
+      const fallback = bodyImages[0];
+      cover = publishedDocument?.cover ?? fallback?.path ?? "/media/identity-octopus.jpg";
+      coverWidth = publishedDocument?.coverWidth ?? fallback?.width ?? 400;
+      coverHeight = publishedDocument?.coverHeight ?? fallback?.height ?? 400;
+    }
+
+    const request: BlogPendingRequest = {
+      slug,
+      queuedAt: new Date().toISOString(),
+      publishedAt: pendingRequest?.publishedAt ?? publishedDocument?.publishedAt ?? today,
+      updatedAt: today,
+      cover,
+      coverWidth,
+      coverHeight,
+      titleKo,
+      bodyKo: prepared.bodyKo,
+      bodyImages
+    };
+
+    await saveBlogPendingRequest({
+      request,
+      expectedHeadOid,
+      bodyImages: prepared.uploads
+    });
 
     revalidatePath("/write");
-    revalidatePath("/ko/blog");
-    revalidatePath("/en/blog");
-    revalidatePath(`/ko/posts/${document.slug}`);
-    revalidatePath(`/en/posts/${document.slug}`);
     if (process.env.NODE_ENV !== "production") {
-      redirect(`/write/edit/${document.slug}?saved=1`);
+      redirect(`/write/edit/${slug}?saved=1`);
     }
 
     return {
       status: "success",
-      message: "발행 커밋을 저장했습니다. 새 배포가 끝나면 공개 글에 반영됩니다."
+      message: "저장했습니다. 다음 자동 처리 후 한국어·영어 글이 함께 공개됩니다."
     };
   } catch (error) {
     if (
@@ -210,7 +350,13 @@ export async function deletePostAction(formData: FormData) {
   const expectedHeadOid = formString(formData, "expectedHeadOid");
   assertValidBlogSlug(slug);
 
-  await deleteBlogPostFromGitHub({ slug, expectedHeadOid });
+  try {
+    await deleteBlogPostFromGitHub({ slug, expectedHeadOid });
+  } catch (error) {
+    const reason = error instanceof BlogEditorConflictError ? "conflict" : "failed";
+    redirect(`/write/edit/${slug}?deleteError=${reason}`);
+  }
+
   revalidatePath("/write");
   revalidatePath("/ko/blog");
   revalidatePath("/en/blog");

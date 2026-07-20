@@ -24,6 +24,27 @@ export type BlogEditorPostDocument = {
   bodyEn: string;
 };
 
+export type BlogPendingBodyImage = {
+  id: string;
+  path: string;
+  alt: string;
+  width: number;
+  height: number;
+};
+
+export type BlogPendingRequest = {
+  slug: string;
+  queuedAt: string;
+  publishedAt: string;
+  updatedAt: string;
+  cover: string;
+  coverWidth: number;
+  coverHeight: number;
+  titleKo: string;
+  bodyKo: string;
+  bodyImages: BlogPendingBodyImage[];
+};
+
 export type BlogEditorTextFile = {
   path: string;
   contents: string;
@@ -36,6 +57,11 @@ export type BlogEditorCoverImage = {
 };
 
 export type BlogEditorCoverUpload = BlogEditorCoverImage | File;
+
+export type BlogEditorBodyImageUpload = {
+  id: string;
+  upload: BlogEditorCoverUpload;
+};
 
 export type ValidatedBlogCoverImage = BlogEditorCoverImage & {
   extension: "gif" | "jpg" | "png" | "webp";
@@ -50,9 +76,11 @@ export type BlogEditorCommitResult = {
 export type BlogEditorPostSnapshot = {
   document: BlogEditorPostDocument;
   expectedHeadOid: string;
+  queued: boolean;
 };
 
 export type BlogEditorPostsSnapshot = {
   posts: BlogEditorPostDocument[];
   expectedHeadOid: string;
+  pendingSlugs: string[];
 };

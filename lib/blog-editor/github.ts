@@ -8,6 +8,7 @@ import path from "node:path";
 import type {
   BlogEditorCommitResult,
   BlogEditorCoverUpload,
+  BlogPendingRequest,
   BlogEditorPostDocument,
   BlogEditorPostsSnapshot,
   BlogEditorPostSnapshot
@@ -15,8 +16,13 @@ import type {
 import {
   deleteLocalBlogPost,
   getLocalBlogContentOid,
+  listLocalBlogMediaPaths,
+  publishLocalBlogPendingResults,
+  readLocalBlogPendingRequest,
+  readLocalBlogPendingRequests,
   readLocalBlogPostDocument,
   readLocalBlogPostDocuments,
+  saveLocalBlogPendingRequest,
   saveLocalBlogPost
 } from "@/lib/blog-editor/local";
 import {
@@ -25,12 +31,17 @@ import {
   resolveBlogEditorDeploymentHead,
   resolveBlogEditorPersistenceMode
 } from "@/lib/blog-editor/persistence-policy";
-import { serializeBlogPostFiles } from "@/lib/blog-editor/serialization";
+import {
+  serializeBlogPendingRequestFiles,
+  serializeBlogPostFiles
+} from "@/lib/blog-editor/serialization";
 import {
   assertValidBlogSlug,
   BlogEditorValidationError,
   blogOwnedCoverPath,
   toBlogEditorCoverImage,
+  validateBlogBodyImageUploads,
+  validateBlogPendingRequest,
   validateBlogCoverImage,
   validateBlogPostDocument
 } from "@/lib/blog-editor/validation";
@@ -498,6 +509,175 @@ export async function saveBlogPostToGitHub(
   });
 }
 
+type SaveBlogPendingRequestInput = {
+  request: BlogPendingRequest;
+  expectedHeadOid: string;
+  bodyImages?: readonly { path: string; upload: BlogEditorCoverUpload }[];
+};
+
+export async function saveBlogPendingRequest(input: SaveBlogPendingRequestInput) {
+  const request: BlogPendingRequest = {
+    ...input.request,
+    bodyImages: input.request.bodyImages.map((image) => ({ ...image }))
+  };
+  validateBlogPendingRequest(request);
+  const convertedImages = await Promise.all(
+    (input.bodyImages ?? []).map(async ({ path: imagePath, upload }) => ({
+      path: imagePath,
+      image: await toBlogEditorCoverImage(upload)
+    }))
+  );
+  const validatedImages = validateBlogBodyImageUploads(
+    convertedImages.map(({ image }) => image)
+  );
+  const uploadedPaths = new Set<string>();
+
+  convertedImages.forEach(({ path: imagePath }, index) => {
+    const image = validatedImages[index];
+    if (!image || !request.bodyImages.some((candidate) => candidate.path === imagePath)) {
+      throw new BlogEditorValidationError([
+        { field: "bodyImages", message: "본문에서 사용하지 않는 이미지 파일은 저장할 수 없습니다." }
+      ]);
+    }
+    if (!imagePath.endsWith(`.${image.extension}`) || uploadedPaths.has(imagePath)) {
+      throw new BlogEditorValidationError([
+        { field: "bodyImages", message: "본문 이미지 경로와 파일 형식이 일치하지 않습니다." }
+      ]);
+    }
+    uploadedPaths.add(imagePath);
+  });
+
+  for (const image of request.bodyImages) {
+    if (!uploadedPaths.has(image.path)) {
+      await assertExistingCoverAsset(image.path);
+    }
+  }
+
+  const useGitHubPersistence = shouldUseGitHubPersistence();
+
+  if (!useGitHubPersistence) {
+    try {
+      const oid = await saveLocalBlogPendingRequest({
+        request,
+        expectedHeadOid: input.expectedHeadOid,
+        bodyImages: convertedImages
+      });
+      return {
+        oid,
+        url: `file://${process.cwd()}/content/blog/pending/${request.slug}`,
+        committedDate: new Date().toISOString()
+      } satisfies BlogEditorCommitResult;
+    } catch (error) {
+      if (error instanceof Error && error.name === "BlogEditorLocalConflictError") {
+        throw new BlogEditorConflictError(error.message);
+      }
+      throw error;
+    }
+  }
+
+  await assertExpectedEditorHead(input.expectedHeadOid);
+  const existingRequest = await readLocalBlogPendingRequest(request.slug);
+  const retainedPaths = new Set(request.bodyImages.map((image) => image.path));
+  const additions: CommitFileChange[] = [
+    ...serializeBlogPendingRequestFiles(request),
+    ...convertedImages.map(({ path: imagePath, image }) => ({
+      path: `public${imagePath}`,
+      contents: image.bytes
+    }))
+  ];
+  const deletions = (existingRequest?.bodyImages ?? [])
+    .filter((image) => !retainedPaths.has(image.path))
+    .map((image) => `public${image.path}`);
+
+  return createCommit({
+    message: `Queue blog post: ${request.slug}`,
+    expectedHeadOid: input.expectedHeadOid,
+    additions,
+    deletions: deletions.length > 0 ? deletions : undefined
+  });
+}
+
+export async function publishPendingBlogEnrichments(input: {
+  documents: readonly BlogEditorPostDocument[];
+  expectedHeadOid: string;
+}) {
+  if (input.documents.length === 0) {
+    throw new BlogEditorValidationError([
+      { field: "documents", message: "공개할 자동 처리 결과가 없습니다." }
+    ]);
+  }
+
+  const pendingRequests = new Map(
+    (await readLocalBlogPendingRequests()).map((request) => [request.slug, request])
+  );
+  const seenSlugs = new Set<string>();
+
+  for (const document of input.documents) {
+    validateBlogPostDocument(document);
+    if (document.status !== "published") {
+      throw new BlogEditorValidationError([
+        { field: "status", message: "자동 처리 결과는 공개 상태여야 합니다." }
+      ]);
+    }
+    if (seenSlugs.has(document.slug)) {
+      throw new BlogEditorValidationError([
+        { field: "slug", message: "같은 글을 한 번에 두 번 공개할 수 없습니다." }
+      ]);
+    }
+    seenSlugs.add(document.slug);
+
+    const request = pendingRequests.get(document.slug);
+    if (!request || request.titleKo !== document.ko.title || request.bodyKo !== document.bodyKo) {
+      throw new BlogEditorConflictError(
+        `자동 처리 원문이 현재 대기 글과 일치하지 않습니다: ${document.slug}`
+      );
+    }
+    await assertExistingCoverAsset(document.cover);
+    await Promise.all(request.bodyImages.map((image) => assertExistingCoverAsset(image.path)));
+  }
+
+  const useGitHubPersistence = shouldUseGitHubPersistence();
+  if (!useGitHubPersistence) {
+    try {
+      const oid = await publishLocalBlogPendingResults(input);
+      return {
+        oid,
+        url: `file://${process.cwd()}/content/blog/posts`,
+        committedDate: new Date().toISOString()
+      } satisfies BlogEditorCommitResult;
+    } catch (error) {
+      if (error instanceof Error && error.name === "BlogEditorLocalConflictError") {
+        throw new BlogEditorConflictError(error.message);
+      }
+      throw error;
+    }
+  }
+
+  await assertExpectedEditorHead(input.expectedHeadOid);
+  const additions = input.documents.flatMap((document) => serializeBlogPostFiles(document));
+  const deletions: string[] = [];
+
+  for (const document of input.documents) {
+    const directory = `content/blog/pending/${document.slug}`;
+    deletions.push(`${directory}/request.json`, `${directory}/bodyKo.md`);
+    const existingDocument = await readLocalBlogPostDocument(document.slug);
+    const oldCover = existingDocument
+      ? blogOwnedCoverPath(document.slug, existingDocument.cover)
+      : undefined;
+    const newCover = blogOwnedCoverPath(document.slug, document.cover);
+    if (oldCover && oldCover !== newCover) {
+      deletions.push(`public${oldCover}`);
+    }
+  }
+
+  return createCommit({
+    message: `Publish ${input.documents.length} translated blog post${input.documents.length > 1 ? "s" : ""}`,
+    expectedHeadOid: input.expectedHeadOid,
+    additions,
+    deletions
+  });
+}
+
 type DeleteBlogPostInput = {
   slug: string;
   expectedHeadOid: string;
@@ -539,21 +719,36 @@ export async function deleteBlogPostFromGitHub(
   }
 
   await assertExpectedEditorHead(input.expectedHeadOid);
-  const directory = `content/blog/posts/${input.slug}`;
-  const existingDocument = await readLocalBlogPostDocument(input.slug);
-  const cover = existingDocument
-    ? blogOwnedCoverPath(input.slug, existingDocument.cover)
-    : undefined;
+  const [existingDocument, pendingRequest, mediaPaths] = await Promise.all([
+    readLocalBlogPostDocument(input.slug),
+    readLocalBlogPendingRequest(input.slug),
+    listLocalBlogMediaPaths(input.slug)
+  ]);
+
+  if (!existingDocument && !pendingRequest) {
+    throw new BlogEditorGitHubError("삭제할 글을 찾을 수 없습니다.", 404);
+  }
+
+  const postDirectory = `content/blog/posts/${input.slug}`;
+  const pendingDirectory = `content/blog/pending/${input.slug}`;
+  const deletions = [
+    ...(existingDocument
+      ? [
+          `${postDirectory}/index.yaml`,
+          `${postDirectory}/bodyKo.md`,
+          `${postDirectory}/bodyEn.md`
+        ]
+      : []),
+    ...(pendingRequest
+      ? [`${pendingDirectory}/request.json`, `${pendingDirectory}/bodyKo.md`]
+      : []),
+    ...mediaPaths.map((mediaPath) => `public${mediaPath}`)
+  ];
 
   return createCommit({
     message: `Delete post: ${input.slug}`,
     expectedHeadOid: input.expectedHeadOid,
-    deletions: [
-      `${directory}/index.yaml`,
-      `${directory}/bodyKo.md`,
-      `${directory}/bodyEn.md`,
-      ...(cover ? [`public${cover}`] : [])
-    ]
+    deletions
   });
 }
 
@@ -561,22 +756,78 @@ export async function readBlogPostDocument(slug: string) {
   return readLocalBlogPostDocument(slug);
 }
 
-export async function getBlogEditorPosts(): Promise<BlogEditorPostsSnapshot> {
-  const [posts, expectedHeadOid] = await Promise.all([
-    readLocalBlogPostDocuments(),
+export async function readBlogPendingRequest(slug: string) {
+  return readLocalBlogPendingRequest(slug);
+}
+
+function pendingRequestToEditorDocument(request: BlogPendingRequest): BlogEditorPostDocument {
+  return {
+    slug: request.slug,
+    status: "draft",
+    publishedAt: request.publishedAt,
+    updatedAt: request.updatedAt,
+    cover: request.cover,
+    coverWidth: request.coverWidth,
+    coverHeight: request.coverHeight,
+    ko: {
+      title: request.titleKo,
+      description: "",
+      category: "",
+      tags: [],
+      readingTime: ""
+    },
+    en: {
+      title: "",
+      description: "",
+      category: "",
+      tags: [],
+      readingTime: ""
+    },
+    bodyKo: request.bodyKo,
+    bodyEn: ""
+  };
+}
+
+export async function getPendingBlogRequests() {
+  const [requests, expectedHeadOid] = await Promise.all([
+    readLocalBlogPendingRequests(),
     getBlogEditorHeadOid()
   ]);
+  return { requests, expectedHeadOid };
+}
 
-  return { posts, expectedHeadOid };
+export async function getBlogEditorPosts(): Promise<BlogEditorPostsSnapshot> {
+  const [publishedPosts, pendingRequests, expectedHeadOid] = await Promise.all([
+    readLocalBlogPostDocuments(),
+    readLocalBlogPendingRequests(),
+    getBlogEditorHeadOid()
+  ]);
+  const postsBySlug = new Map(publishedPosts.map((post) => [post.slug, post]));
+  for (const request of pendingRequests) {
+    postsBySlug.set(request.slug, pendingRequestToEditorDocument(request));
+  }
+  const posts = [...postsBySlug.values()].sort((a, b) =>
+    b.updatedAt.localeCompare(a.updatedAt)
+  );
+
+  return {
+    posts,
+    expectedHeadOid,
+    pendingSlugs: pendingRequests.map((request) => request.slug)
+  };
 }
 
 export async function getBlogEditorPost(slug: string): Promise<BlogEditorPostSnapshot | undefined> {
-  const [document, expectedHeadOid] = await Promise.all([
+  const [publishedDocument, pendingRequest, expectedHeadOid] = await Promise.all([
     readLocalBlogPostDocument(slug),
+    readLocalBlogPendingRequest(slug),
     getBlogEditorHeadOid()
   ]);
+  const document = pendingRequest
+    ? pendingRequestToEditorDocument(pendingRequest)
+    : publishedDocument;
 
-  return document ? { document, expectedHeadOid } : undefined;
+  return document ? { document, expectedHeadOid, queued: Boolean(pendingRequest) } : undefined;
 }
 
 export function isBlogEditorConflictError(error: unknown): error is BlogEditorConflictError {

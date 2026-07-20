@@ -1,24 +1,45 @@
 # Nimdal BLOG editor
 
-The private editor is available at `https://blog.nimdal.xyz/write`. It can create, edit,
-publish, and delete the Korean and English versions of a post together.
+The private editor is available at `https://blog.nimdal.xyz/write`.
 
-The repository is public, so `/write` does not offer a private draft mode. Saving creates a
-publish commit. The local Keystatic recovery screen can hide a post from the site, but its
-files remain readable in the public repository.
+The writer enters only a Korean title and Markdown body. A daily job translates the complete
+article into English and creates both languages' summary, category, tags, and reading time. The
+Korean and English versions are published together in one Git commit.
+
+## Publishing flow
+
+1. `/write` saves the Korean source under `content/blog/pending/{slug}`.
+2. The current public article remains unchanged while that request is pending. A new article is
+   not added to public routes, RSS, or the sitemap yet.
+3. Vercel calls `/api/cron/blog-enrichment` once a day at `18:00 UTC` (`03:00 KST`).
+4. Gemini translates and classifies up to four pending articles per run.
+5. Valid results are written to `content/blog/posts/{slug}` and the matching pending files are
+   removed atomically. Invalid or failed results stay pending for the next run.
+
+This repository is public. Pending Korean source files are hidden from the website but remain
+readable in GitHub.
+
+## Body images
+
+The image button inserts Markdown at the current cursor position. JPEG, PNG, and WebP are
+accepted. Animated GIF uploads are excluded so published articles respect reduced-motion
+preferences. One save can include up to eight images and 2MB in total. Files are stored under
+`public/media/blog/{slug}` and Gemini must preserve every image URL while translating the body.
+The first image becomes the cover for a new article; an article without an image uses the NFT PFP.
+Because the repository is public and these files live under `public/`, pending images are directly
+reachable from both GitHub and `/media/blog/{slug}/...` after the queue commit is deployed. Do not
+upload private media that must remain inaccessible before publication.
 
 ## Google sign-in
 
-Create a Google OAuth 2.0 Web application and register these values:
+Create a Google OAuth 2.0 Web application and register:
 
 - Authorized JavaScript origin: `https://blog.nimdal.xyz`
 - Authorized redirect URI: `https://blog.nimdal.xyz/api/auth/callback/google`
 - Local redirect URI when needed: `http://localhost:3000/api/auth/callback/google`
 
-If the OAuth consent screen is still in Google's Testing status, add
-`trialhero41@gmail.com` and `0xnimdal@gmail.com` as test users.
-
-Configure the following server-only environment variables:
+If the OAuth consent screen is in Testing, add `trialhero41@gmail.com` and
+`0xnimdal@gmail.com` as test users.
 
 ```dotenv
 NEXTAUTH_URL=https://blog.nimdal.xyz
@@ -28,19 +49,14 @@ GOOGLE_CLIENT_SECRET=<Google OAuth client secret>
 BLOG_WRITER_EMAILS=trialhero41@gmail.com,0xnimdal@gmail.com
 ```
 
-The application checks Google's `email_verified` claim and the server-side email allowlist
-at sign-in and again before every read or write. Missing configuration denies access. Do not
-prefix any of these values with `NEXT_PUBLIC_`.
+The application checks Google's `email_verified` claim and the server-side allowlist at sign-in
+and before every editor read or write. Missing configuration denies access. Never prefix these
+values with `NEXT_PUBLIC_`.
 
 ## GitHub persistence
 
-Production saves create commits in `nimdalkr/nimdalxyz`. Create and install a GitHub App only
-for that repository with these repository permissions:
-
-- Contents: read and write
-- Metadata: read
-
-Then configure:
+Production saves create commits in `nimdalkr/nimdalxyz`. Install a GitHub App only for that
+repository with Contents read/write and Metadata read access, then configure:
 
 ```dotenv
 BLOG_GITHUB_APP_ID=<GitHub App ID>
@@ -50,24 +66,30 @@ BLOG_GITHUB_REPOSITORY=nimdalkr/nimdalxyz
 BLOG_GITHUB_BRANCH=main
 ```
 
-All three `BLOG_GITHUB_APP_*` values are required together in production. Saving fails closed
-when the configuration is incomplete. The branch head is checked before each mutation to
-avoid overwriting a newer edit. A successful commit triggers the normal deployment workflow;
-the public post updates after that deployment completes.
+All three `BLOG_GITHUB_APP_*` values are required together in production. Each mutation is bound
+to the exact `VERCEL_GIT_COMMIT_SHA`; a stale deployment cannot overwrite a newer commit.
 
-Keep the Vercel project connected to the same repository and production branch. Vercel supplies
-`VERCEL_GIT_COMMIT_SHA`; the editor refuses production writes when that deployment SHA is absent
-or invalid. If branch protection blocks direct GitHub App commits, explicitly allow the app to
-write to the configured branch or use a dedicated publishing branch with an equivalent deploy
-workflow.
+## Gemini and the daily job
+
+Create a Gemini API key in Google AI Studio and configure these server-only values in Vercel:
+
+```dotenv
+GEMINI_API_KEY=<Google AI Studio API key>
+GEMINI_BLOG_MODEL=gemini-3.5-flash
+CRON_SECRET=<long random value>
+```
+
+Vercel sends `CRON_SECRET` as a Bearer token when invoking the configured cron route. The route
+fails closed when either secret is absent. Gemini responses are accepted only when they match the
+expected JSON shape, preserve Markdown image URLs, and pass the same public-post validation used
+by the site.
+
+Gemini's free tier may use submitted prompts and responses to improve Google products. Use a paid
+tier instead if that data policy is not acceptable for unpublished source text.
 
 ## Local editing
 
-Copy the non-secret names from `.env.example` to `.env.local`, set
-`NEXTAUTH_URL=http://localhost:3000`, add development Google OAuth credentials, and run
-`npm run dev`. Open `http://localhost:3000/write`. Outside production, post changes are written
-directly to `content/blog/posts` and uploaded covers to `public/media/blog`.
-
-Cover uploads are limited to 2MB and each localized Markdown body to 200,000
-characters so the complete Server Action request remains below the production
-function payload limit.
+Copy the names from `.env.example` to `.env.local`, set
+`NEXTAUTH_URL=http://localhost:3000`, add development OAuth credentials, and run `npm run dev`.
+Outside production, pending requests, published posts, and images are written directly to the
+working tree.

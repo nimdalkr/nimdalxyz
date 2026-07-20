@@ -3,6 +3,7 @@ import {
   type BlogEditorCoverImage,
   type BlogEditorCoverUpload,
   type BlogEditorLocalizedContent,
+  type BlogPendingRequest,
   type BlogEditorPostDocument,
   type ValidatedBlogCoverImage
 } from "@/lib/blog-editor/types";
@@ -12,6 +13,10 @@ export const BLOG_SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 export const MAX_BLOG_SLUG_LENGTH = 120;
 export const MAX_BLOG_BODY_LENGTH = 200_000;
 export const MAX_BLOG_COVER_BYTES = 2 * 1024 * 1024;
+export const MAX_BLOG_BODY_IMAGES = 8;
+export const MAX_BLOG_BODY_IMAGE_BYTES = 2 * 1024 * 1024;
+export const MAX_BLOG_BODY_IMAGES_TOTAL_BYTES = 2 * 1024 * 1024;
+export const BLOG_ATTACHMENT_ID_PATTERN = /^[a-z0-9]{8,64}$/;
 
 type ValidationIssue = {
   field: string;
@@ -64,6 +69,15 @@ function isExactIsoDate(value: string) {
 
   const date = new Date(`${value}T00:00:00.000Z`);
   return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
+}
+
+function isIsoTimestamp(value: string) {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}T/.test(value)) {
+    return false;
+  }
+
+  const timestamp = Date.parse(value);
+  return Number.isFinite(timestamp) && new Date(timestamp).toISOString() === value;
 }
 
 function hasControlCharacters(value: string) {
@@ -269,6 +283,126 @@ export function validateBlogPostDocument(document: BlogEditorPostDocument) {
   return document;
 }
 
+export function validateBlogPendingRequest(request: BlogPendingRequest) {
+  const issues: ValidationIssue[] = [];
+
+  try {
+    assertValidBlogSlug(request.slug);
+  } catch (error) {
+    if (error instanceof BlogEditorValidationError) {
+      issues.push(...error.issues);
+    } else {
+      throw error;
+    }
+  }
+
+  if (!isIsoTimestamp(request.queuedAt)) {
+    issues.push({ field: "queuedAt", message: "유효한 ISO 시각이어야 합니다." });
+  }
+
+  for (const field of ["publishedAt", "updatedAt"] as const) {
+    if (!isExactIsoDate(request[field])) {
+      issues.push({ field, message: "YYYY-MM-DD 형식의 유효한 날짜여야 합니다." });
+    }
+  }
+
+  if (
+    isExactIsoDate(request.publishedAt) &&
+    isExactIsoDate(request.updatedAt) &&
+    request.updatedAt < request.publishedAt
+  ) {
+    issues.push({ field: "updatedAt", message: "발행일보다 빠를 수 없습니다." });
+  }
+
+  if (
+    typeof request.cover !== "string" ||
+    request.cover.length > 240 ||
+    !/^\/media\/[A-Za-z0-9][A-Za-z0-9._/-]*\.(?:gif|jpe?g|png|webp)$/i.test(request.cover) ||
+    request.cover.includes("..") ||
+    request.cover.includes("//")
+  ) {
+    issues.push({ field: "cover", message: "public/media 아래의 안전한 이미지 경로여야 합니다." });
+  }
+
+  for (const field of ["coverWidth", "coverHeight"] as const) {
+    if (!Number.isSafeInteger(request[field]) || request[field] < 1 || request[field] > 20_000) {
+      issues.push({ field, message: "1~20,000 사이의 정수여야 합니다." });
+    }
+  }
+
+  validateText(issues, "titleKo", request.titleKo, { max: 140, required: true });
+  validateText(issues, "bodyKo", request.bodyKo, {
+    max: MAX_BLOG_BODY_LENGTH,
+    required: true
+  });
+
+  if (!Array.isArray(request.bodyImages)) {
+    issues.push({ field: "bodyImages", message: "본문 이미지 목록이 필요합니다." });
+  } else {
+    if (request.bodyImages.length > MAX_BLOG_BODY_IMAGES) {
+      issues.push({
+        field: "bodyImages",
+        message: `본문 이미지는 최대 ${MAX_BLOG_BODY_IMAGES}개까지 올릴 수 있습니다.`
+      });
+    }
+
+    const ids = new Set<string>();
+    const paths = new Set<string>();
+    for (const [index, image] of request.bodyImages.entries()) {
+      const field = `bodyImages.${index}`;
+      if (!image || typeof image !== "object") {
+        issues.push({ field, message: "이미지 정보가 올바르지 않습니다." });
+        continue;
+      }
+
+      if (!BLOG_ATTACHMENT_ID_PATTERN.test(image.id)) {
+        issues.push({ field: `${field}.id`, message: "이미지 ID가 올바르지 않습니다." });
+      } else if (ids.has(image.id)) {
+        issues.push({ field: `${field}.id`, message: "중복 이미지 ID입니다." });
+      }
+      ids.add(image.id);
+
+      const expectedPrefix = `/media/blog/${request.slug}/body-${image.id}.`;
+      if (
+        typeof image.path !== "string" ||
+        !image.path.startsWith(expectedPrefix) ||
+        !/\.(?:gif|jpe?g|png|webp)$/i.test(image.path) ||
+        image.path.includes("..") ||
+        image.path.includes("//")
+      ) {
+        issues.push({ field: `${field}.path`, message: "본문 이미지 경로가 올바르지 않습니다." });
+      } else if (paths.has(image.path)) {
+        issues.push({ field: `${field}.path`, message: "중복 이미지 경로입니다." });
+      }
+      paths.add(image.path);
+
+      validateText(issues, `${field}.alt`, image.alt, { max: 180, required: true });
+      if (typeof image.alt === "string" && /[\]\r\n]/.test(image.alt)) {
+        issues.push({ field: `${field}.alt`, message: "이미지 설명에 줄바꿈이나 ]를 넣을 수 없습니다." });
+      }
+      for (const dimension of ["width", "height"] as const) {
+        if (!Number.isSafeInteger(image[dimension]) || image[dimension] < 1 || image[dimension] > 20_000) {
+          issues.push({ field: `${field}.${dimension}`, message: "1~20,000 사이의 정수여야 합니다." });
+        }
+      }
+
+      if (typeof image.path === "string" && !request.bodyKo.includes(`](${image.path})`)) {
+        issues.push({ field: `${field}.path`, message: "본문에서 사용 중인 이미지만 저장할 수 있습니다." });
+      }
+    }
+  }
+
+  if (/\]\(attachment:[^)]+\)/.test(request.bodyKo)) {
+    issues.push({ field: "bodyKo", message: "업로드되지 않은 이미지가 본문에 남아 있습니다." });
+  }
+
+  if (issues.length > 0) {
+    throw new BlogEditorValidationError(issues);
+  }
+
+  return request;
+}
+
 export function validateBlogCoverImage(image: BlogEditorCoverImage): ValidatedBlogCoverImage {
   const mimeType = image.mimeType.toLowerCase() as keyof typeof imageExtensions;
   const extension = imageExtensions[mimeType];
@@ -300,6 +434,73 @@ export function validateBlogCoverImage(image: BlogEditorCoverImage): ValidatedBl
   }
 
   return { ...image, mimeType, extension };
+}
+
+export function validateBlogBodyImage(image: BlogEditorCoverImage): ValidatedBlogCoverImage {
+  if (image.mimeType.toLowerCase() === "image/gif") {
+    throw new BlogEditorValidationError([
+      {
+        field: "bodyImages",
+        message: "움직이는 GIF는 본문에 올릴 수 없습니다. JPG, PNG, WebP를 사용해 주세요."
+      }
+    ]);
+  }
+
+  try {
+    return validateBlogCoverImage(image);
+  } catch (error) {
+    if (error instanceof BlogEditorValidationError) {
+      throw new BlogEditorValidationError(
+        error.issues.map((issue) => ({
+          ...issue,
+          field: issue.field === "coverImage" ? "bodyImages" : issue.field,
+          message: issue.message.replace("이미지는 2MB", "본문 이미지는 2MB")
+        }))
+      );
+    }
+
+    throw error;
+  }
+}
+
+export function validateBlogBodyImageUploads(
+  images: readonly BlogEditorCoverImage[]
+): ValidatedBlogCoverImage[] {
+  const issues: ValidationIssue[] = [];
+
+  if (images.length > MAX_BLOG_BODY_IMAGES) {
+    issues.push({
+      field: "bodyImages",
+      message: `본문 이미지는 최대 ${MAX_BLOG_BODY_IMAGES}개까지 올릴 수 있습니다.`
+    });
+  }
+
+  const totalBytes = images.reduce((total, image) => total + image.bytes.length, 0);
+  if (totalBytes > MAX_BLOG_BODY_IMAGES_TOTAL_BYTES) {
+    issues.push({
+      field: "bodyImages",
+      message: "본문 이미지 전체 용량은 2MB 이하여야 합니다."
+    });
+  }
+
+  const validated: ValidatedBlogCoverImage[] = [];
+  for (const image of images) {
+    try {
+      validated.push(validateBlogBodyImage(image));
+    } catch (error) {
+      if (error instanceof BlogEditorValidationError) {
+        issues.push(...error.issues);
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  if (issues.length > 0) {
+    throw new BlogEditorValidationError(issues);
+  }
+
+  return validated;
 }
 
 export async function toBlogEditorCoverImage(

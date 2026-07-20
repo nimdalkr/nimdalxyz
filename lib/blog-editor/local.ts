@@ -7,7 +7,6 @@ import {
   readdir,
   rename,
   rm,
-  stat,
   writeFile
 } from "node:fs/promises";
 import path from "node:path";
@@ -15,24 +14,36 @@ import path from "node:path";
 import { createReader } from "@keystatic/core/reader";
 
 import keystaticConfig from "@/keystatic.config";
-import { serializeBlogPostFiles } from "@/lib/blog-editor/serialization";
+import {
+  serializeBlogPendingRequestFiles,
+  serializeBlogPostFiles
+} from "@/lib/blog-editor/serialization";
 import type {
   BlogEditorCoverImage,
+  BlogPendingRequest,
   BlogEditorPostDocument,
   ValidatedBlogCoverImage
 } from "@/lib/blog-editor/types";
 import {
   assertValidBlogSlug,
   blogOwnedCoverPath,
+  validateBlogBodyImage,
+  validateBlogPendingRequest,
   validateBlogCoverImage,
   validateBlogPostDocument
 } from "@/lib/blog-editor/validation";
 
 const BLOG_CONTENT_DIRECTORY = path.join(process.cwd(), "content/blog/posts");
+const BLOG_PENDING_DIRECTORY = path.join(process.cwd(), "content/blog/pending");
 
 function postDirectory(slug: string) {
   assertValidBlogSlug(slug);
   return path.join(BLOG_CONTENT_DIRECTORY, slug);
+}
+
+function pendingDirectory(slug: string) {
+  assertValidBlogSlug(slug);
+  return path.join(BLOG_PENDING_DIRECTORY, slug);
 }
 
 function isMissingFile(error: unknown): error is NodeJS.ErrnoException {
@@ -85,40 +96,108 @@ export async function readLocalBlogPostDocuments() {
     .sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt));
 }
 
-export async function getLocalBlogContentOid() {
-  const hash = createHash("sha256");
-  const entries = await readdir(BLOG_CONTENT_DIRECTORY, {
+export async function readLocalBlogPendingRequest(slug: string) {
+  assertValidBlogSlug(slug);
+  const directory = pendingDirectory(slug);
+
+  try {
+    const [metadataSource, bodyKo] = await Promise.all([
+      readFile(path.join(directory, "request.json"), "utf8"),
+      readFile(path.join(directory, "bodyKo.md"), "utf8")
+    ]);
+    const metadata = JSON.parse(metadataSource) as Omit<BlogPendingRequest, "bodyKo">;
+    const request = { ...metadata, bodyKo } satisfies BlogPendingRequest;
+    return validateBlogPendingRequest(request);
+  } catch (error) {
+    if (isMissingFile(error)) {
+      return undefined;
+    }
+
+    if (error instanceof SyntaxError) {
+      throw new Error(`대기 중인 글 ${slug}의 요청 파일이 올바른 JSON이 아닙니다.`);
+    }
+
+    throw error;
+  }
+}
+
+export async function readLocalBlogPendingRequests() {
+  const entries = await readdir(BLOG_PENDING_DIRECTORY, {
     withFileTypes: true,
     encoding: "utf8"
   }).catch((error: unknown) => {
     if (isMissingFile(error)) {
       return [];
     }
-
     throw error;
   });
+  const requests = await Promise.all(
+    entries
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name)
+      .filter((slug) => {
+        try {
+          assertValidBlogSlug(slug);
+          return true;
+        } catch {
+          return false;
+        }
+      })
+      .map((slug) => readLocalBlogPendingRequest(slug))
+  );
 
-  const slugs = entries
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => entry.name)
-    .filter((slug) => {
-      try {
-        assertValidBlogSlug(slug);
-        return true;
-      } catch {
-        return false;
+  return requests
+    .filter((request): request is BlogPendingRequest => Boolean(request))
+    .sort((a, b) => b.queuedAt.localeCompare(a.queuedAt));
+}
+
+export async function getLocalBlogContentOid() {
+  const hash = createHash("sha256");
+  const collections = [
+    {
+      directory: BLOG_CONTENT_DIRECTORY,
+      prefix: "posts",
+      fileNames: ["index.yaml", "bodyKo.md", "bodyEn.md"]
+    },
+    {
+      directory: BLOG_PENDING_DIRECTORY,
+      prefix: "pending",
+      fileNames: ["request.json", "bodyKo.md"]
+    }
+  ] as const;
+
+  for (const collection of collections) {
+    const entries = await readdir(collection.directory, {
+      withFileTypes: true,
+      encoding: "utf8"
+    }).catch((error: unknown) => {
+      if (isMissingFile(error)) {
+        return [];
       }
-    })
-    .sort();
+      throw error;
+    });
+    const slugs = entries
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name)
+      .filter((slug) => {
+        try {
+          assertValidBlogSlug(slug);
+          return true;
+        } catch {
+          return false;
+        }
+      })
+      .sort();
 
-  for (const slug of slugs) {
-    for (const fileName of ["index.yaml", "bodyKo.md", "bodyEn.md"] as const) {
-      const relativePath = `${slug}/${fileName}`;
-      const contents = await readFile(path.join(BLOG_CONTENT_DIRECTORY, relativePath));
-      hash.update(relativePath);
-      hash.update("\0");
-      hash.update(contents);
-      hash.update("\0");
+    for (const slug of slugs) {
+      for (const fileName of collection.fileNames) {
+        const relativePath = `${collection.prefix}/${slug}/${fileName}`;
+        const contents = await readFile(path.join(collection.directory, slug, fileName));
+        hash.update(relativePath);
+        hash.update("\0");
+        hash.update(contents);
+        hash.update("\0");
+      }
     }
   }
 
@@ -210,33 +289,132 @@ export async function saveLocalBlogPost(input: {
   return getLocalBlogContentOid();
 }
 
+export async function saveLocalBlogPendingRequest(input: {
+  request: BlogPendingRequest;
+  expectedHeadOid: string;
+  bodyImages: readonly { path: string; image: BlogEditorCoverImage }[];
+}) {
+  await assertExpectedLocalHead(input.expectedHeadOid);
+  validateBlogPendingRequest(input.request);
+  const existingRequest = await readLocalBlogPendingRequest(input.request.slug);
+  const uploadedPaths = new Set<string>();
+
+  for (const upload of input.bodyImages) {
+    const image = validateBlogBodyImage(upload.image);
+    if (!input.request.bodyImages.some((candidate) => candidate.path === upload.path)) {
+      throw new Error("본문에서 사용하지 않는 이미지 파일은 저장할 수 없습니다.");
+    }
+    if (!upload.path.endsWith(`.${image.extension}`)) {
+      throw new Error("본문 이미지 경로와 파일 형식이 일치하지 않습니다.");
+    }
+    uploadedPaths.add(upload.path);
+  }
+
+  await writeFilesAtomically(
+    pendingDirectory(input.request.slug),
+    serializeBlogPendingRequestFiles(input.request).map((file) => ({
+      path: path.basename(file.path),
+      contents: file.contents
+    }))
+  );
+
+  if (input.bodyImages.length > 0) {
+    await writeFilesAtomically(
+      path.join(process.cwd(), "public"),
+      input.bodyImages.map(({ path: imagePath, image }) => ({
+        path: imagePath.replace(/^\//, ""),
+        contents: image.bytes
+      }))
+    );
+  }
+
+  const retainedPaths = new Set(input.request.bodyImages.map((image) => image.path));
+  for (const image of existingRequest?.bodyImages ?? []) {
+    if (!retainedPaths.has(image.path) && !uploadedPaths.has(image.path)) {
+      await rm(path.join(process.cwd(), "public", image.path.replace(/^\//, "")), {
+        force: true
+      });
+    }
+  }
+
+  return getLocalBlogContentOid();
+}
+
+export async function publishLocalBlogPendingResults(input: {
+  documents: readonly BlogEditorPostDocument[];
+  expectedHeadOid: string;
+}) {
+  await assertExpectedLocalHead(input.expectedHeadOid);
+
+  for (const document of input.documents) {
+    validateBlogPostDocument(document);
+    if (document.status !== "published") {
+      throw new Error("자동 처리 결과는 공개 상태여야 합니다.");
+    }
+    if (!(await readLocalBlogPendingRequest(document.slug))) {
+      throw new Error(`처리할 대기 글을 찾을 수 없습니다: ${document.slug}`);
+    }
+  }
+
+  for (const document of input.documents) {
+    await writeFilesAtomically(
+      postDirectory(document.slug),
+      serializeBlogPostFiles(document).map((file) => ({
+        path: path.basename(file.path),
+        contents: file.contents
+      }))
+    );
+  }
+
+  await Promise.all(
+    input.documents.map((document) =>
+      rm(pendingDirectory(document.slug), { force: true, recursive: true })
+    )
+  );
+
+  return getLocalBlogContentOid();
+}
+
+export async function listLocalBlogMediaPaths(slug: string) {
+  assertValidBlogSlug(slug);
+  const directory = path.join(process.cwd(), "public/media/blog", slug);
+  const entries = await readdir(directory, { withFileTypes: true, encoding: "utf8" }).catch(
+    (error: unknown) => {
+      if (isMissingFile(error)) {
+        return [];
+      }
+      throw error;
+    }
+  );
+
+  return entries
+    .filter((entry) => entry.isFile() && /^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(entry.name))
+    .map((entry) => `/media/blog/${slug}/${entry.name}`)
+    .sort();
+}
+
 export async function deleteLocalBlogPost(input: {
   slug: string;
   expectedHeadOid: string;
 }) {
   assertValidBlogSlug(input.slug);
   await assertExpectedLocalHead(input.expectedHeadOid);
-  const existingDocument = await readLocalBlogPostDocument(input.slug);
-  const directory = postDirectory(input.slug);
+  const [existingDocument, pendingRequest, mediaPaths] = await Promise.all([
+    readLocalBlogPostDocument(input.slug),
+    readLocalBlogPendingRequest(input.slug),
+    listLocalBlogMediaPaths(input.slug)
+  ]);
 
-  try {
-    const directoryStat = await stat(directory);
-    if (!directoryStat.isDirectory()) {
-      throw new Error("글 경로가 디렉터리가 아닙니다.");
-    }
-  } catch (error) {
-    if (isMissingFile(error)) {
-      throw new Error("삭제할 글을 찾을 수 없습니다.");
-    }
-    throw error;
+  if (!existingDocument && !pendingRequest) {
+    throw new Error("삭제할 글을 찾을 수 없습니다.");
   }
 
-  await rm(directory, { recursive: true });
-  const cover = existingDocument
-    ? blogOwnedCoverPath(input.slug, existingDocument.cover)
-    : undefined;
-  if (cover) {
-    await rm(path.join(process.cwd(), "public", cover.replace(/^\//, "")), { force: true });
-  }
+  await Promise.all([
+    rm(postDirectory(input.slug), { force: true, recursive: true }),
+    rm(pendingDirectory(input.slug), { force: true, recursive: true }),
+    ...mediaPaths.map((mediaPath) =>
+      rm(path.join(process.cwd(), "public", mediaPath.replace(/^\//, "")), { force: true })
+    )
+  ]);
   return getLocalBlogContentOid();
 }

@@ -1,17 +1,46 @@
 import { expect, test } from "@playwright/test";
+import { mkdir, rm, writeFile } from "node:fs/promises";
 import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 
 import { serializeStructuredData } from "../components/seo/StructuredData";
-import { getLocalizedBlogPosts } from "../content/blog/posts";
+import {
+  getLocalizedBlogPost,
+  getLocalizedBlogPosts
+} from "../content/blog/posts";
+import { buildPublishedBlogDocument } from "../lib/blog-automation/document";
+import { buildGeminiBlogEnrichmentPrompt } from "../lib/blog-automation/prompt";
+import {
+  BLOG_ENRICHMENT_MS_PER_DAY,
+  selectDailyBlogEnrichmentBatch,
+  shouldStopBlogEnrichmentBatch
+} from "../lib/blog-automation/scheduling";
+import type { BlogEnrichmentOutput } from "../lib/blog-automation/types";
+import {
+  extractOwnedBlogBodyImagePaths,
+  validateGeminiBlogEnrichmentOutput
+} from "../lib/blog-automation/validation";
 import {
   isConfiguredWriterEmail,
   isVerifiedConfiguredWriter
 } from "../lib/blog-writer-policy";
 import {
+  serializeBlogPendingRequestFiles,
+  serializeBlogPostFiles
+} from "../lib/blog-editor/serialization";
+import type {
+  BlogEditorCoverImage,
+  BlogEditorPostDocument,
+  BlogPendingRequest
+} from "../lib/blog-editor/types";
+import {
   MAX_BLOG_BODY_LENGTH,
+  MAX_BLOG_BODY_IMAGES,
+  MAX_BLOG_BODY_IMAGES_TOTAL_BYTES,
   MAX_BLOG_COVER_BYTES,
+  validateBlogBodyImageUploads,
   validateBlogCoverImage,
+  validateBlogPendingRequest,
   validateBlogPostDocument
 } from "../lib/blog-editor/validation";
 import {
@@ -28,6 +57,67 @@ import {
 
 const expectedLocales = ["en", "ko"] as const;
 const mediaRoles = ["career", "concept", "document", "identity", "proof"] as const;
+
+function pendingBlogRequest(slug: string, imageCount = 0): BlogPendingRequest {
+  const bodyImages = Array.from({ length: imageCount }, (_, index) => {
+    const id = `image${String(index).padStart(3, "0")}`;
+
+    return {
+      id,
+      path: `/media/blog/${slug}/body-${id}.png`,
+      alt: `본문 이미지 ${index + 1}`,
+      width: 1280,
+      height: 720
+    };
+  });
+  const markdownImages = bodyImages
+    .map((image) => `![${image.alt}](${image.path})`)
+    .join("\n\n");
+
+  return {
+    slug,
+    queuedAt: "2026-07-20T09:00:00.000Z",
+    publishedAt: "2026-07-20",
+    updatedAt: "2026-07-20",
+    cover: "/media/identity-octopus.jpg",
+    coverWidth: 400,
+    coverHeight: 400,
+    titleKo: "대기 중인 글",
+    bodyKo: `# 대기 중인 글\n\n한국어 원문${markdownImages ? `\n\n${markdownImages}` : ""}`,
+    bodyImages
+  };
+}
+
+function pngImage(id: string, byteLength: number): BlogEditorCoverImage {
+  const bytes = new Uint8Array(byteLength);
+  bytes.set([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+
+  return {
+    bytes,
+    fileName: `${id}.png`,
+    mimeType: "image/png"
+  };
+}
+
+function blogEnrichmentOutput(request: BlogPendingRequest): BlogEnrichmentOutput {
+  const translatedImages = request.bodyImages
+    .map((image) => `![Translated image](${image.path})`)
+    .join("\n\n");
+
+  return {
+    titleEn: "A pending article",
+    bodyEn: `# A pending article\n\nEnglish body${translatedImages ? `\n\n${translatedImages}` : ""}`,
+    summaryKo: "한국어 원문을 바탕으로 만든 요약입니다.",
+    summaryEn: "A summary grounded in the Korean source.",
+    categoryKo: "제작 기록",
+    categoryEn: "Build Notes",
+    tags: [
+      { ko: "자동화", en: "Automation" },
+      { ko: "블로그", en: "Blog" },
+      { ko: "번역", en: "Translation" }
+    ]
+  };
+}
 
 function expectCompleteValue(value: unknown, path: string): void {
   if (typeof value === "string") {
@@ -144,6 +234,283 @@ test("all public content has complete KO/EN entries", async () => {
     expect(koBody?.node, `BLOG.${enPost.slug}.bodyKo should load`).toBeTruthy();
     expect(enBody.node, `BLOG.${enPost.slug}.bodyEn should load`).toBeTruthy();
   }
+});
+
+test("pending BLOG requests stay outside every public content loader", async () => {
+  const slug = `pending-contract-${process.pid}`;
+  const request = pendingBlogRequest(slug, 1);
+  const files = serializeBlogPendingRequestFiles(request);
+  const pendingDirectory = join(process.cwd(), "content/blog/pending", slug);
+
+  expect(files.map(({ path }) => path)).toEqual([
+    `content/blog/pending/${slug}/request.json`,
+    `content/blog/pending/${slug}/bodyKo.md`
+  ]);
+
+  try {
+    for (const file of files) {
+      const absolutePath = join(process.cwd(), file.path);
+      await mkdir(dirname(absolutePath), { recursive: true });
+      await writeFile(absolutePath, file.contents, "utf8");
+    }
+
+    const [koPosts, enPosts, koPost, enPost] = await Promise.all([
+      getLocalizedBlogPosts("ko"),
+      getLocalizedBlogPosts("en"),
+      getLocalizedBlogPost("ko", slug),
+      getLocalizedBlogPost("en", slug)
+    ]);
+
+    expect(koPosts.map((post) => post.slug)).not.toContain(slug);
+    expect(enPosts.map((post) => post.slug)).not.toContain(slug);
+    expect(koPost).toBeUndefined();
+    expect(enPost).toBeUndefined();
+  } finally {
+    await rm(pendingDirectory, { force: true, recursive: true });
+  }
+});
+
+test("a queued edit keeps the existing published version public until enrichment", async () => {
+  const slug = `published-queue-contract-${process.pid}`;
+  const publishedDocument: BlogEditorPostDocument = {
+    slug,
+    status: "published",
+    publishedAt: "2026-07-20",
+    updatedAt: "2026-07-20",
+    cover: "/media/identity-octopus.jpg",
+    coverWidth: 400,
+    coverHeight: 400,
+    ko: {
+      title: "현재 공개 중인 제목",
+      description: "현재 공개 중인 한국어 요약입니다.",
+      category: "테스트",
+      tags: ["공개"],
+      readingTime: "1분"
+    },
+    en: {
+      title: "Currently published title",
+      description: "The currently published English summary.",
+      category: "Test",
+      tags: ["Published"],
+      readingTime: "1 min read"
+    },
+    bodyKo: "# 현재 공개 중인 본문",
+    bodyEn: "# Currently published body"
+  };
+  const queuedRequest = {
+    ...pendingBlogRequest(slug),
+    titleKo: "아직 공개되면 안 되는 수정 제목",
+    bodyKo: "# 아직 공개되면 안 되는 수정 본문"
+  };
+  const files = [
+    ...serializeBlogPostFiles(publishedDocument),
+    ...serializeBlogPendingRequestFiles(queuedRequest)
+  ];
+  const postDirectory = join(process.cwd(), "content/blog/posts", slug);
+  const pendingDirectory = join(process.cwd(), "content/blog/pending", slug);
+
+  try {
+    for (const file of files) {
+      const absolutePath = join(process.cwd(), file.path);
+      await mkdir(dirname(absolutePath), { recursive: true });
+      await writeFile(absolutePath, file.contents, "utf8");
+    }
+
+    const [koPost, enPost] = await Promise.all([
+      getLocalizedBlogPost("ko", slug),
+      getLocalizedBlogPost("en", slug)
+    ]);
+
+    expect(koPost?.title).toBe(publishedDocument.ko.title);
+    expect(enPost?.title).toBe(publishedDocument.en.title);
+    expect(koPost?.title).not.toBe(queuedRequest.titleKo);
+    expect((await koPost?.body())?.node).toBeTruthy();
+    expect((await enPost?.body())?.node).toBeTruthy();
+  } finally {
+    await Promise.all([
+      rm(postDirectory, { force: true, recursive: true }),
+      rm(pendingDirectory, { force: true, recursive: true })
+    ]);
+  }
+});
+
+test("pending BLOG requests allow eight resolved Markdown images and reject placeholders", () => {
+  const maximumRequest = pendingBlogRequest("pending-eight-images", MAX_BLOG_BODY_IMAGES);
+  const bodyFile = serializeBlogPendingRequestFiles(maximumRequest).find(({ path }) =>
+    path.endsWith("/bodyKo.md")
+  );
+
+  expect(() => validateBlogPendingRequest(maximumRequest)).not.toThrow();
+  expect(bodyFile?.contents).toBe(`${maximumRequest.bodyKo}\n`);
+  maximumRequest.bodyImages.forEach(({ path }) => {
+    expect(bodyFile?.contents).toContain(`](${path})`);
+  });
+
+  expect(() =>
+    validateBlogPendingRequest(pendingBlogRequest("pending-nine-images", MAX_BLOG_BODY_IMAGES + 1))
+  ).toThrow(/최대 8개/);
+  expect(() =>
+    validateBlogPendingRequest({
+      ...pendingBlogRequest("pending-placeholder"),
+      bodyKo: "![아직 업로드되지 않은 이미지](attachment:image000)"
+    })
+  ).toThrow(/업로드되지 않은 이미지/);
+});
+
+test("BLOG body image uploads enforce both count and aggregate byte limits", () => {
+  const exactLimitUploads = Array.from({ length: MAX_BLOG_BODY_IMAGES }, (_, index) =>
+    pngImage(
+      `upload${String(index).padStart(3, "0")}`,
+      MAX_BLOG_BODY_IMAGES_TOTAL_BYTES / MAX_BLOG_BODY_IMAGES
+    )
+  );
+
+  expect(validateBlogBodyImageUploads(exactLimitUploads)).toHaveLength(MAX_BLOG_BODY_IMAGES);
+  expect(() =>
+    validateBlogBodyImageUploads([
+      pngImage("uploadtotal0", MAX_BLOG_BODY_IMAGES_TOTAL_BYTES / 2),
+      pngImage("uploadtotal1", MAX_BLOG_BODY_IMAGES_TOTAL_BYTES / 2 + 1)
+    ])
+  ).toThrow(/전체 용량은 2MB/);
+  expect(() =>
+    validateBlogBodyImageUploads(
+      Array.from({ length: MAX_BLOG_BODY_IMAGES + 1 }, (_, index) =>
+        pngImage(`overflow${String(index).padStart(3, "0")}`, 8)
+      )
+    )
+  ).toThrow(/최대 8개/);
+});
+
+test("Gemini prompt and validated output preserve every Markdown image URL in order", () => {
+  const request = pendingBlogRequest("gemini-image-contract", 2);
+  const prompt = buildGeminiBlogEnrichmentPrompt(request);
+  const output = blogEnrichmentOutput(request);
+
+  expect(prompt).toContain("immutableBodyImagePaths");
+  request.bodyImages.forEach(({ path }) => {
+    expect(prompt).toContain(path);
+    expect(output.bodyEn).toContain(`](${path})`);
+  });
+
+  expect(validateGeminiBlogEnrichmentOutput(output, request)).toEqual(output);
+
+  const document = buildPublishedBlogDocument(request, output);
+  expect(document.status).toBe("published");
+  expect(document.bodyKo).toBe(request.bodyKo);
+  expect(document.bodyEn).toBe(output.bodyEn);
+  expect(document.ko.tags).toEqual(output.tags.map(({ ko }) => ko));
+  expect(document.en.tags).toEqual(output.tags.map(({ en }) => en));
+
+  expect(() =>
+    validateGeminiBlogEnrichmentOutput(
+      {
+        ...output,
+        bodyEn: output.bodyEn.replace(
+          request.bodyImages[0]?.path ?? "",
+          "/media/blog/gemini-image-contract/body-changed000.png"
+        )
+      },
+      request
+    )
+  ).toThrow(/image paths changed/i);
+
+  expect(() =>
+    validateGeminiBlogEnrichmentOutput(
+      {
+        ...output,
+        unexpected: "field"
+      },
+      request
+    )
+  ).toThrow(/object shape/i);
+});
+
+test("Gemini enrichment also preserves body images already present before an edit", () => {
+  const request = pendingBlogRequest("gemini-repeat-edit", 1);
+  const existingPath = "/media/blog/gemini-repeat-edit/body-existing01.webp";
+  const newImage = request.bodyImages[0];
+
+  if (!newImage) {
+    throw new Error("The repeat-edit fixture requires one newly uploaded image.");
+  }
+  const newPath = newImage.path;
+  request.bodyKo = [
+    "# 다시 편집한 글",
+    `![기존 이미지](${existingPath})`,
+    `![새 이미지](${newPath})`
+  ].join("\n\n");
+
+  const output = {
+    ...blogEnrichmentOutput(request),
+    bodyEn: [
+      "# An edited article",
+      `![Existing image](${existingPath})`,
+      `![New image](${newPath})`
+    ].join("\n\n")
+  };
+
+  expect(extractOwnedBlogBodyImagePaths(request.bodyKo, request.slug)).toEqual([
+    existingPath,
+    newPath
+  ]);
+  expect(buildGeminiBlogEnrichmentPrompt(request)).toContain(existingPath);
+  expect(validateGeminiBlogEnrichmentOutput(output, request)).toEqual(output);
+
+  expect(() =>
+    validateGeminiBlogEnrichmentOutput(
+      {
+        ...output,
+        bodyEn: [
+          "# An edited article",
+          `![New image](${newPath})`,
+          `![Existing image](${existingPath})`
+        ].join("\n\n")
+      },
+      request
+    )
+  ).toThrow(/image paths changed/i);
+});
+
+test("BLOG enrichment cron is configured for one daily 18:00 UTC run", () => {
+  const config = JSON.parse(
+    readFileSync(join(process.cwd(), "vercel.json"), "utf8")
+  ) as {
+    crons?: Array<{ path?: string; schedule?: string }>;
+  };
+
+  expect(config.crons).toContainEqual({
+    path: "/api/cron/blog-enrichment",
+    schedule: "0 18 * * *"
+  });
+});
+
+test("BLOG enrichment rotates its daily batch so old failures cannot starve newer requests", () => {
+  const requests = Array.from({ length: 9 }, (_, index) => ({
+    ...pendingBlogRequest(`queued-${String(index).padStart(2, "0")}`),
+    queuedAt: new Date(index * 1_000).toISOString()
+  })).reverse();
+
+  const firstThreeDays = Array.from({ length: 3 }, (_, day) =>
+    selectDailyBlogEnrichmentBatch(requests, day * BLOG_ENRICHMENT_MS_PER_DAY).map(
+      ({ slug }) => slug
+    )
+  );
+
+  expect(firstThreeDays[0]).toEqual(["queued-00", "queued-01", "queued-02", "queued-03"]);
+  expect(firstThreeDays[1]).toEqual(["queued-04", "queued-05", "queued-06", "queued-07"]);
+  expect(firstThreeDays[2]).toEqual(["queued-08", "queued-00", "queued-01", "queued-02"]);
+  expect(new Set(firstThreeDays.flat())).toEqual(
+    new Set(requests.map(({ slug }) => slug))
+  );
+});
+
+test("BLOG enrichment stops the batch after timeout or shared upstream failures", () => {
+  expect(shouldStopBlogEnrichmentBatch("request_timeout")).toBe(true);
+  expect(shouldStopBlogEnrichmentBatch("upstream_rate_limit")).toBe(true);
+  expect(shouldStopBlogEnrichmentBatch("upstream_unavailable")).toBe(true);
+  expect(shouldStopBlogEnrichmentBatch("invalid_response")).toBe(false);
+  expect(shouldStopBlogEnrichmentBatch("unsafe_output")).toBe(false);
+  expect(shouldStopBlogEnrichmentBatch("upstream_rejected")).toBe(false);
 });
 
 test("project and career media include evidence metadata", () => {

@@ -11,7 +11,7 @@ function blankDocument(): BlogEditorPostDocument {
 
   return {
     slug: "",
-    status: "published",
+    status: "draft",
     publishedAt: today,
     updatedAt: today,
     cover: "/media/identity-octopus.jpg",
@@ -55,6 +55,7 @@ export default async function NewPostPage() {
         document={blankDocument()}
         expectedHeadOid={expectedHeadOid}
         mode="new"
+        queued={false}
         saved={false}
       />
     </EditorShell>

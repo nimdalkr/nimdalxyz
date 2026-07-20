@@ -1,9 +1,13 @@
 import type {
   BlogEditorLocalizedContent,
+  BlogPendingRequest,
   BlogEditorPostDocument,
   BlogEditorTextFile
 } from "@/lib/blog-editor/types";
-import { validateBlogPostDocument } from "@/lib/blog-editor/validation";
+import {
+  validateBlogPendingRequest,
+  validateBlogPostDocument
+} from "@/lib/blog-editor/validation";
 
 function yamlString(value: string) {
   return JSON.stringify(value);
@@ -58,6 +62,25 @@ export function serializeBlogPostFiles(document: BlogEditorPostDocument): BlogEd
     {
       path: `${directory}/bodyEn.md`,
       contents: normalizeBlogMarkdown(document.bodyEn)
+    }
+  ];
+}
+
+export function serializeBlogPendingRequestFiles(
+  request: BlogPendingRequest
+): BlogEditorTextFile[] {
+  validateBlogPendingRequest(request);
+  const directory = `content/blog/pending/${request.slug}`;
+  const { bodyKo, ...metadata } = request;
+
+  return [
+    {
+      path: `${directory}/request.json`,
+      contents: `${JSON.stringify(metadata, null, 2)}\n`
+    },
+    {
+      path: `${directory}/bodyKo.md`,
+      contents: normalizeBlogMarkdown(bodyKo)
     }
   ];
 }
