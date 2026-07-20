@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: BlogHubPageProps): Promise<Me
   const { locale: localeParam } = await params;
 
   if (!isLocale(localeParam)) {
-    return { title: `BLOG | ${siteConfig.name}` };
+    return { title: "BLOG" };
   }
 
   const locale = localeParam;
@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: BlogHubPageProps): Promise<Me
   const imageDimensions = getMediaDimensions("/media/identity-octopus.jpg");
 
   return {
-    title: `${copy.title} | Nimdal`,
+    title: copy.title,
     description: copy.description,
     alternates: blogHubMetadataAlternates(locale, surface),
     openGraph: {

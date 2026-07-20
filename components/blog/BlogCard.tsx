@@ -1,40 +1,45 @@
+import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
 import Image from "next/image";
 import Link from "next/link";
 
 import type { LocalizedBlogPost } from "@/content/blog/posts";
-import { formatPostDate } from "@/content/blog/posts";
 
-export function BlogCard({ post }: { post: LocalizedBlogPost }) {
-  const readLabel = post.locale === "ko" ? `${post.title} 글 읽기` : `Read ${post.title}`;
+import styles from "./BlogSurface.module.css";
 
+interface BlogCardProps {
+  post: LocalizedBlogPost;
+  highlighted?: boolean;
+  eager?: boolean;
+}
+
+function archiveDate(value: string) {
+  return value.replaceAll("-", ".");
+}
+
+export function BlogCard({ post, highlighted = false, eager = false }: BlogCardProps) {
   return (
-    <article className="blog-card">
-      <Link className="blog-card-media" href={post.canonicalUrl} aria-label={readLabel}>
-        <Image
-          src={post.cover}
-          alt=""
-          fill
-          sizes="(max-width: 900px) calc(100vw - 40px), 360px"
-          className="blog-card-image"
-        />
+    <article className={styles.archiveCard}>
+      <Link
+        className={`${styles.archiveRow} ${highlighted ? styles.archiveRowHighlighted : ""}`}
+        href={post.canonicalUrl}
+      >
+        <time className={styles.rowDate} dateTime={post.publishedAt}>{archiveDate(post.publishedAt)}</time>
+        <span className={styles.rowCategory}>{post.category}</span>
+        <h3 className={styles.rowTitle}>{post.title}</h3>
+        <span className={styles.rowMedia}>
+          <Image
+            src={post.cover}
+            alt=""
+            fill
+            loading={eager ? "eager" : "lazy"}
+            sizes="(max-width: 720px) 88px, 142px"
+            className={styles.image}
+          />
+        </span>
+        <span className={styles.rowArrow} aria-hidden="true">
+          <ArrowRight size={26} weight="regular" />
+        </span>
       </Link>
-      <div className="blog-card-body">
-        <div className="blog-card-topline">
-          <span>{post.category}</span>
-          <time dateTime={post.publishedAt}>{formatPostDate(post.publishedAt, post.locale)}</time>
-        </div>
-        <h2>
-          <Link href={post.canonicalUrl}>{post.title}</Link>
-        </h2>
-        <p>{post.description}</p>
-        <div className="blog-card-tags" aria-label={post.locale === "ko" ? "태그" : "Post tags"}>
-          {post.tagLinks.map((tag) => (
-            <Link key={tag.slug} href={tag.canonicalUrl}>
-              {tag.label}
-            </Link>
-          ))}
-        </div>
-      </div>
     </article>
   );
 }

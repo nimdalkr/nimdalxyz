@@ -12,7 +12,11 @@ export async function BlogPostBody({ load }: { load: BlogContentLoader }) {
     throw new Error("This blog post contains invalid content.");
   }
 
-  const renderable = Markdoc.transform(node);
+  const renderable = Markdoc.transform(node, {
+    nodes: {
+      document: { render: "div" }
+    }
+  });
 
   return <>{Markdoc.renderers.react(renderable, React)}</>;
 }

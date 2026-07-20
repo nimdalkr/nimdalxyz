@@ -15,6 +15,8 @@ import { siteConfig } from "@/lib/site";
 const BLOG_HOST = new URL(siteConfig.blogUrl).hostname;
 const MAIN_HOST = new URL(siteConfig.mainUrl).hostname;
 const EDITOR_PATH = /^\/(?:keystatic|api\/keystatic)(?:\/|$)/;
+const WRITE_PATH = /^\/write(?:\/|$)/;
+const AUTH_PATH = /^\/api\/auth(?:\/|$)/;
 
 const BLOG_ROOT_FILES = new Map([
   ["/robots.txt", "/blog/robots.txt"],
@@ -26,6 +28,15 @@ function requestHost(request: NextRequest) {
   const host = forwardedHost ?? request.headers.get("host") ?? request.nextUrl.hostname;
 
   return host.trim().split(":")[0].toLowerCase();
+}
+
+function isBlogHost(request: NextRequest) {
+  const host = requestHost(request);
+
+  return (
+    host === BLOG_HOST ||
+    (process.env.NODE_ENV !== "production" && host === "blog.localhost")
+  );
 }
 
 function redirect(
@@ -56,7 +67,7 @@ function redirect(
 }
 
 function mainHostFor(request: NextRequest) {
-  return requestHost(request) === BLOG_HOST ? MAIN_HOST : undefined;
+  return isBlogHost(request) ? MAIN_HOST : undefined;
 }
 
 function blogSurfaceHeaders(request: NextRequest) {
@@ -191,8 +202,15 @@ function prefixedLegacyBlogPath(pathname: string) {
 function handleBlogHost(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Keep the authenticated editor on the portfolio host. Exposing the same
-  // OAuth surface through the blog host would create a second callback origin.
+  // The custom editor and its Google callback share the BLOG origin. Detailed
+  // authorization is re-checked in the page, actions, and route handlers.
+  if (WRITE_PATH.test(pathname) || AUTH_PATH.test(pathname)) {
+    return NextResponse.next({
+      request: { headers: blogSurfaceHeaders(request) }
+    });
+  }
+
+  // The retired Keystatic surface stays unavailable on the public BLOG host.
   if (EDITOR_PATH.test(pathname)) {
     return new NextResponse(null, { status: 404 });
   }
@@ -256,6 +274,45 @@ function handleBlogHost(request: NextRequest) {
 
 function handleMainHost(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // Keep local Google OAuth on the exact localhost origin registered with
+  // Google while production uses the BLOG subdomain as its sole auth origin.
+  if (
+    process.env.NODE_ENV !== "production" &&
+    (WRITE_PATH.test(pathname) || AUTH_PATH.test(pathname))
+  ) {
+    return NextResponse.next({
+      request: { headers: blogSurfaceHeaders(request) }
+    });
+  }
+
+  if (process.env.NODE_ENV === "production" && EDITOR_PATH.test(pathname)) {
+    if (pathname.startsWith("/api/keystatic")) {
+      return redirect(request, pathname, {
+        host: BLOG_HOST,
+        preserveSearch: true
+      });
+    }
+
+    return redirect(request, "/write", {
+      host: BLOG_HOST,
+      preserveSearch: true
+    });
+  }
+
+  if (AUTH_PATH.test(pathname)) {
+    return redirect(request, pathname, {
+      host: BLOG_HOST,
+      preserveSearch: true
+    });
+  }
+
+  if (WRITE_PATH.test(pathname)) {
+    return redirect(request, pathname, {
+      host: BLOG_HOST,
+      preserveSearch: true
+    });
+  }
 
   if (pathname === "/admin" || pathname === "/admin/blog") {
     return redirect(request, "/keystatic", { preserveSearch: true });
@@ -325,7 +382,7 @@ export function proxy(request: NextRequest) {
     return projectFromPath;
   }
 
-  return requestHost(request) === BLOG_HOST
+  return isBlogHost(request)
     ? handleBlogHost(request)
     : handleMainHost(request);
 }
