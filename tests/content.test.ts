@@ -1,4 +1,6 @@
 import { expect, test } from "@playwright/test";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 
 import { serializeStructuredData } from "../components/seo/StructuredData";
 import { getLocalizedBlogPosts } from "../content/blog/posts";
@@ -237,6 +239,13 @@ test("BLOG editor binds writes to the exact production deployment head", () => {
   expect(isExpectedBlogEditorHead(deployedHead, deployedHead)).toBe(true);
   expect(isExpectedBlogEditorHead(newerHead, deployedHead)).toBe(false);
   expect(isExpectedBlogEditorHead("forged", deployedHead)).toBe(false);
+});
+
+test("BLOG server action module only exports async runtime values", () => {
+  const source = readFileSync(join(process.cwd(), "app/write/actions.ts"), "utf8");
+  const invalidRuntimeExports = source.match(/^export (?!type\s|async function\s).+$/gm) ?? [];
+
+  expect(invalidRuntimeExports).toEqual([]);
 });
 
 test("BLOG editor rejects unsafe tag URLs and forged image content", () => {

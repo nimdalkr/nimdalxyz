@@ -20,11 +20,6 @@ export type EditorActionState = {
   field?: string;
 };
 
-export const initialEditorActionState: EditorActionState = {
-  status: "idle",
-  message: ""
-};
-
 function formString(formData: FormData, name: string) {
   const value = formData.get(name);
   return typeof value === "string" ? value.trim() : "";
