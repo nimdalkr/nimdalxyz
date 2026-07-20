@@ -95,30 +95,27 @@ export default async function HomePage({ params }: HomePageProps) {
     return item;
   };
 
-  const nevada = careerCase("nevada-korea-marketing-lead");
-  const community = careerCase("community-kol-campaigns");
-  const mkr = careerCase("mkr-agency-operating-system");
   const leica = careerCase("leica-online-acquisition");
   const hospital = careerCase("busan-h-animal-hospital");
   const joya = careerCase("swiss-j-functional-shoes");
   const localizedPosts = await getLocalizedBlogPosts(locale);
   const engagements = [
     {
-      period: nevada.period,
+      period: "2026.04–2026.06",
       organization: "1six.tech Inc. / NEVADA",
-      relationship: "CLIENT · KR GTM",
+      relationship: "Marketing Lead",
       focus: "SEO / KOL / LOCALIZATION"
     },
     {
-      period: community.period,
-      organization: "071Labs / AlphaDuo",
-      relationship: "WEB3 · COMMUNITY / KOL",
+      period: "2025.01–2025.09",
+      organization: "071Labs",
+      relationship: "GTM",
       focus: "CONTENT / COMMUNITY OPS"
     },
     {
-      period: mkr.period,
+      period: "2012.12.–2024.09",
       organization: "MKR",
-      relationship: "AGENCY OPERATIONS",
+      relationship: "MARKETING AGENCY",
       focus: "CLIENT OPS / CAMPAIGN SYSTEM"
     }
   ];
