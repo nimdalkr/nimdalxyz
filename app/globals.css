@@ -3541,7 +3541,6 @@ body:has(.pp-home) .scroll-progress {
 
 .pp-masthead,
 .pp-scene-number,
-.pp-kicker,
 .pp-intro-meta,
 .pp-intro-detail,
 .pp-about-profile,
@@ -3551,7 +3550,6 @@ body:has(.pp-home) .scroll-progress {
 .pp-career-signals,
 .pp-career-timeline,
 .pp-brand-rail,
-.pp-career-note,
 .pp-blog-list,
 .pp-contact,
 .pp-footer {
@@ -3665,16 +3663,8 @@ body:has(.pp-home) .scroll-progress {
   white-space: nowrap;
 }
 
-.pp-kicker {
-  margin-top: clamp(1.2rem, 2.5vh, 2.2rem) !important;
-  color: var(--pp-coral);
-  font-size: clamp(0.88rem, 1.9vw, 1.85rem);
-  font-weight: 600;
-  letter-spacing: 0.09em;
-}
-
 .pp-intro-meta {
-  margin-top: 1.35rem !important;
+  margin-top: clamp(1.4rem, 3vh, 2.5rem) !important;
   color: var(--pp-muted);
   font-size: clamp(0.58rem, 0.8vw, 0.76rem);
   text-transform: uppercase;
@@ -4226,12 +4216,6 @@ body:has(.pp-home) .scroll-progress {
   font-size: 0.58rem;
 }
 
-.pp-career-signals small {
-  grid-column: 2;
-  color: var(--pp-dim);
-  font-size: 0.45rem;
-}
-
 .pp-career-timeline {
   min-width: 0;
   padding: 2rem clamp(1rem, 2.2vw, 2.2rem);
@@ -4354,15 +4338,6 @@ body:has(.pp-home) .scroll-progress {
 .pp-brand-rail span {
   margin-top: auto;
   padding-top: 0.45rem;
-}
-
-.pp-career-note {
-  max-width: 58rem;
-  margin: 1rem 0 0 auto !important;
-  color: var(--pp-dim);
-  font-size: 0.5rem;
-  line-height: 1.55;
-  text-align: right;
 }
 
 .pp-blog {
@@ -4657,10 +4632,6 @@ body:has(.pp-home) .scroll-progress {
     width: min(77vw, 500px);
   }
 
-  .pp-kicker {
-    font-size: clamp(0.86rem, 4vw, 1.25rem);
-  }
-
   .pp-intro-meta {
     font-size: 0.55rem;
   }
@@ -4784,10 +4755,6 @@ body:has(.pp-home) .scroll-progress {
 
   .pp-brand-rail article:last-child {
     border-bottom: 0;
-  }
-
-  .pp-career-note {
-    text-align: left;
   }
 
   .pp-blog,
