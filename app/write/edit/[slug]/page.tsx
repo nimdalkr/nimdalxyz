@@ -6,6 +6,8 @@ import { BLOG_SLUG_PATTERN, getBlogEditorPost } from "@/lib/blog-editor";
 import { EditorForm } from "../../_components/EditorForm";
 import { EditorShell } from "../../_components/EditorShell";
 
+export const maxDuration = 120;
+
 interface EditPostPageProps {
   params: Promise<{ slug: string }>;
   searchParams: Promise<{ deleteError?: string; saved?: string }>;

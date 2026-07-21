@@ -2,19 +2,22 @@
 
 The private editor is available at `https://blog.nimdal.xyz/write`.
 
-The writer enters only a Korean title and Markdown body. A daily job translates the complete
-article into English and creates both languages' summary, category, tags, and reading time. The
-Korean and English versions are published together in one Git commit.
+The writer enters only a Korean title and Markdown body. Saving immediately asks Gemini to
+translate the complete article into English and create both languages' summary, category, tags,
+and reading time. The Korean and English versions are published together when processing succeeds.
 
 ## Publishing flow
 
 1. `/write` saves the Korean source under `content/blog/pending/{slug}`.
-2. The current public article remains unchanged while that request is pending. A new article is
-   not added to public routes, RSS, or the sitemap yet.
-3. Vercel calls `/api/cron/blog-enrichment` once a day at `18:00 UTC` (`03:00 KST`).
-4. Gemini translates and classifies up to four pending articles per run.
-5. Valid results are written to `content/blog/posts/{slug}` and the matching pending files are
-   removed atomically. Invalid or failed results stay pending for the next run.
+2. The same save flow immediately asks Gemini to translate and classify that article.
+3. Valid results are written to `content/blog/posts/{slug}` and the matching pending files are
+   removed. The public Korean and English routes are then ready for the new deployment.
+4. If Gemini is unavailable or returns an invalid result, the Korean source remains pending and
+   the editor shows `처리 필요`. After the queue commit finishes deploying, reopen the editor and
+   use `다시 처리` to retry. No scheduled Vercel Cron or enrichment endpoint is used.
+
+The current public article remains unchanged while a request is pending. A new article is not
+added to public routes, RSS, or the sitemap until processing succeeds.
 
 This repository is public. Pending Korean source files are hidden from the website but remain
 readable in GitHub.
@@ -70,20 +73,19 @@ BLOG_GITHUB_BRANCH=main
 All three `BLOG_GITHUB_APP_*` values are required together in production. Each mutation is bound
 to the exact `VERCEL_GIT_COMMIT_SHA`; a stale deployment cannot overwrite a newer commit.
 
-## Gemini and the daily job
+## Gemini processing
 
 Create a Gemini API key in Google AI Studio and configure these server-only values in Vercel:
 
 ```dotenv
 GEMINI_API_KEY=<Google AI Studio API key>
 GEMINI_BLOG_MODEL=gemini-3.5-flash
-CRON_SECRET=<long random value>
 ```
 
-Vercel sends `CRON_SECRET` as a Bearer token when invoking the configured cron route. The route
-fails closed when either secret is absent. Gemini responses are accepted only when they match the
-expected JSON shape, preserve Markdown image URLs, and pass the same public-post validation used
-by the site.
+The save action starts Gemini processing immediately. Gemini responses are accepted only when they
+match the expected JSON shape, preserve Markdown image URLs, and pass the same public-post
+validation used by the site. Failed processing leaves the Korean source available for a manual
+retry after the queue commit's deployment is live.
 
 Gemini's free tier may use submitted prompts and responses to improve Google products. Use a paid
 tier instead if that data policy is not acceptable for unpublished source text.

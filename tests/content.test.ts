@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { mkdir, rm, writeFile } from "node:fs/promises";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 
 import { serializeStructuredData } from "../components/seo/StructuredData";
@@ -9,13 +9,12 @@ import {
   getLocalizedBlogPosts
 } from "../content/blog/posts";
 import { buildPublishedBlogDocument } from "../lib/blog-automation/document";
+import { queueAndPublishBlogRequestImmediately } from "../lib/blog-automation/immediate";
 import { buildGeminiBlogEnrichmentPrompt } from "../lib/blog-automation/prompt";
 import {
-  BLOG_ENRICHMENT_MS_PER_DAY,
-  selectDailyBlogEnrichmentBatch,
-  shouldStopBlogEnrichmentBatch
-} from "../lib/blog-automation/scheduling";
-import type { BlogEnrichmentOutput } from "../lib/blog-automation/types";
+  BlogAutomationError,
+  type BlogEnrichmentOutput
+} from "../lib/blog-automation/types";
 import {
   extractOwnedBlogBodyImagePaths,
   validateGeminiBlogEnrichmentOutput
@@ -58,6 +57,11 @@ import {
 
 const expectedLocales = ["en", "ko"] as const;
 const mediaRoles = ["career", "concept", "document", "identity", "proof"] as const;
+const baselineBlogSlugs = [
+  "campaign-operations-to-product-systems",
+  "nimdal-logbook",
+  "research-tools-should-make-markets-readable"
+] as const;
 
 function pendingBlogRequest(slug: string, imageCount = 0): BlogPendingRequest {
   const bodyImages = Array.from({ length: imageCount }, (_, index) => {
@@ -178,16 +182,18 @@ function expectMediaMetadata(
   expectLocalizedEntry(media.limitation, `${path}.limitation`);
 }
 
-test("content inventory has the expected project, career, and post counts", async () => {
+test("content inventory keeps the baseline content and unique public posts", async () => {
   const blogPosts = await getLocalizedBlogPosts("en");
+  const blogSlugs = blogPosts.map(({ slug }) => slug);
 
   expect(projects).toHaveLength(9);
   expect(careerCases).toHaveLength(6);
-  expect(blogPosts).toHaveLength(3);
+  expect(blogPosts.length).toBeGreaterThanOrEqual(baselineBlogSlugs.length);
+  baselineBlogSlugs.forEach((slug) => expect(blogSlugs).toContain(slug));
 
   expect(new Set(projects.map(({ slug }) => slug)).size).toBe(projects.length);
   expect(new Set(careerCases.map(({ id }) => id)).size).toBe(careerCases.length);
-  expect(new Set(blogPosts.map(({ slug }) => slug)).size).toBe(blogPosts.length);
+  expect(new Set(blogSlugs).size).toBe(blogPosts.length);
 });
 
 test("all public content has complete KO/EN entries", async () => {
@@ -504,46 +510,112 @@ test("Gemini enrichment also preserves body images already present before an edi
   ).toThrow(/image paths changed/i);
 });
 
-test("BLOG enrichment cron is configured for one daily 18:00 UTC run", () => {
+test("BLOG save queues the Korean source before immediate Gemini publishing", async () => {
+  const request = pendingBlogRequest("immediate-publish-order");
+  const queuedOid = "a".repeat(40);
+  const publishedOid = "b".repeat(40);
+  const deploymentOid = "c".repeat(40);
+  const events: string[] = [];
+
+  const result = await queueAndPublishBlogRequestImmediately(
+    { request, expectedHeadOid: deploymentOid },
+    {
+      queue: async (input) => {
+        events.push("queue");
+        expect(input.expectedHeadOid).toBe(deploymentOid);
+        return { oid: queuedOid, url: "https://example.com/queue", committedDate: request.queuedAt };
+      },
+      generate: async (input) => {
+        events.push("generate");
+        expect(input).toEqual(request);
+        return blogEnrichmentOutput(request);
+      },
+      publish: async (input) => {
+        events.push("publish");
+        expect(input.expectedHeadOid).toBe(queuedOid);
+        expect(input.document.status).toBe("published");
+        expect(input.document.bodyKo).toBe(request.bodyKo);
+        return { oid: publishedOid, url: "https://example.com/publish", committedDate: request.queuedAt };
+      }
+    }
+  );
+
+  expect(events).toEqual(["queue", "generate", "publish"]);
+  expect(result.outcome).toBe("published");
+  if (result.outcome === "published") {
+    expect(result.publishedCommit.oid).toBe(publishedOid);
+  }
+});
+
+test("BLOG immediate processing keeps the queued source when Gemini fails", async () => {
+  const request = pendingBlogRequest("immediate-publish-fallback");
+  const events: string[] = [];
+
+  const result = await queueAndPublishBlogRequestImmediately(
+    { request, expectedHeadOid: "c".repeat(40) },
+    {
+      queue: async () => {
+        events.push("queue");
+        return {
+          oid: "a".repeat(40),
+          url: "https://example.com/queue",
+          committedDate: request.queuedAt
+        };
+      },
+      generate: async () => {
+        events.push("generate");
+        throw new BlogAutomationError("request_timeout", "Gemini request timed out");
+      },
+      publish: async () => {
+        events.push("publish");
+        throw new Error("publish should not run");
+      }
+    }
+  );
+
+  expect(events).toEqual(["queue", "generate"]);
+  expect(result.outcome).toBe("queued");
+  if (result.outcome === "queued") {
+    expect(result.failureCode).toBe("request_timeout");
+  }
+});
+
+test("BLOG immediate processing does not call Gemini when source storage fails", async () => {
+  const request = pendingBlogRequest("immediate-publish-save-error");
+  let generated = false;
+
+  await expect(
+    queueAndPublishBlogRequestImmediately(
+      { request, expectedHeadOid: "c".repeat(40) },
+      {
+        queue: async () => {
+          throw new Error("queue failed");
+        },
+        generate: async () => {
+          generated = true;
+          return blogEnrichmentOutput(request);
+        },
+        publish: async () => ({
+          oid: "b".repeat(40),
+          url: "https://example.com/publish",
+          committedDate: request.queuedAt
+        })
+      }
+    )
+  ).rejects.toThrow("queue failed");
+
+  expect(generated).toBe(false);
+});
+
+test("BLOG has no scheduled enrichment cron", () => {
   const config = JSON.parse(
     readFileSync(join(process.cwd(), "vercel.json"), "utf8")
   ) as {
     crons?: Array<{ path?: string; schedule?: string }>;
   };
 
-  expect(config.crons).toContainEqual({
-    path: "/api/cron/blog-enrichment",
-    schedule: "0 18 * * *"
-  });
-});
-
-test("BLOG enrichment rotates its daily batch so old failures cannot starve newer requests", () => {
-  const requests = Array.from({ length: 9 }, (_, index) => ({
-    ...pendingBlogRequest(`queued-${String(index).padStart(2, "0")}`),
-    queuedAt: new Date(index * 1_000).toISOString()
-  })).reverse();
-
-  const firstThreeDays = Array.from({ length: 3 }, (_, day) =>
-    selectDailyBlogEnrichmentBatch(requests, day * BLOG_ENRICHMENT_MS_PER_DAY).map(
-      ({ slug }) => slug
-    )
-  );
-
-  expect(firstThreeDays[0]).toEqual(["queued-00", "queued-01", "queued-02", "queued-03"]);
-  expect(firstThreeDays[1]).toEqual(["queued-04", "queued-05", "queued-06", "queued-07"]);
-  expect(firstThreeDays[2]).toEqual(["queued-08", "queued-00", "queued-01", "queued-02"]);
-  expect(new Set(firstThreeDays.flat())).toEqual(
-    new Set(requests.map(({ slug }) => slug))
-  );
-});
-
-test("BLOG enrichment stops the batch after timeout or shared upstream failures", () => {
-  expect(shouldStopBlogEnrichmentBatch("request_timeout")).toBe(true);
-  expect(shouldStopBlogEnrichmentBatch("upstream_rate_limit")).toBe(true);
-  expect(shouldStopBlogEnrichmentBatch("upstream_unavailable")).toBe(true);
-  expect(shouldStopBlogEnrichmentBatch("invalid_response")).toBe(false);
-  expect(shouldStopBlogEnrichmentBatch("unsafe_output")).toBe(false);
-  expect(shouldStopBlogEnrichmentBatch("upstream_rejected")).toBe(false);
+  expect(config.crons ?? []).toEqual([]);
+  expect(existsSync(join(process.cwd(), "app/api/cron/blog-enrichment/route.ts"))).toBe(false);
 });
 
 test("project and career media include evidence metadata", () => {

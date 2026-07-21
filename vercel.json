@@ -1,8 +1,1 @@
-{
-  "crons": [
-    {
-      "path": "/api/cron/blog-enrichment",
-      "schedule": "0 18 * * *"
-    }
-  ]
-}
+{}

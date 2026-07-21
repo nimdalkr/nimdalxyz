@@ -597,52 +597,56 @@ export async function saveBlogPendingRequest(input: SaveBlogPendingRequestInput)
   });
 }
 
-export async function publishPendingBlogEnrichments(input: {
-  documents: readonly BlogEditorPostDocument[];
+function assertPublishedDocumentMatchesRequest(
+  request: BlogPendingRequest,
+  document: BlogEditorPostDocument
+) {
+  validateBlogPendingRequest(request);
+  validateBlogPostDocument(document);
+
+  if (
+    document.status !== "published" ||
+    document.slug !== request.slug ||
+    document.publishedAt !== request.publishedAt ||
+    document.updatedAt !== request.updatedAt ||
+    document.cover !== request.cover ||
+    document.coverWidth !== request.coverWidth ||
+    document.coverHeight !== request.coverHeight ||
+    document.ko.title !== request.titleKo ||
+    document.bodyKo !== request.bodyKo
+  ) {
+    throw new BlogEditorConflictError(
+      `즉시 처리 결과가 저장한 한국어 원문과 일치하지 않습니다: ${request.slug}`
+    );
+  }
+}
+
+export async function publishQueuedBlogEnrichment(input: {
+  request: BlogPendingRequest;
+  document: BlogEditorPostDocument;
   expectedHeadOid: string;
 }) {
-  if (input.documents.length === 0) {
-    throw new BlogEditorValidationError([
-      { field: "documents", message: "공개할 자동 처리 결과가 없습니다." }
-    ]);
-  }
+  const request: BlogPendingRequest = {
+    ...input.request,
+    bodyImages: input.request.bodyImages.map((image) => ({ ...image }))
+  };
+  const document: BlogEditorPostDocument = {
+    ...input.document,
+    ko: { ...input.document.ko, tags: [...input.document.ko.tags] },
+    en: { ...input.document.en, tags: [...input.document.en.tags] }
+  };
 
-  const pendingRequests = new Map(
-    (await readLocalBlogPendingRequests()).map((request) => [request.slug, request])
-  );
-  const seenSlugs = new Set<string>();
+  assertPublishedDocumentMatchesRequest(request, document);
 
-  for (const document of input.documents) {
-    validateBlogPostDocument(document);
-    if (document.status !== "published") {
-      throw new BlogEditorValidationError([
-        { field: "status", message: "자동 처리 결과는 공개 상태여야 합니다." }
-      ]);
-    }
-    if (seenSlugs.has(document.slug)) {
-      throw new BlogEditorValidationError([
-        { field: "slug", message: "같은 글을 한 번에 두 번 공개할 수 없습니다." }
-      ]);
-    }
-    seenSlugs.add(document.slug);
-
-    const request = pendingRequests.get(document.slug);
-    if (!request || request.titleKo !== document.ko.title || request.bodyKo !== document.bodyKo) {
-      throw new BlogEditorConflictError(
-        `자동 처리 원문이 현재 대기 글과 일치하지 않습니다: ${document.slug}`
-      );
-    }
-    await assertExistingCoverAsset(document.cover);
-    await Promise.all(request.bodyImages.map((image) => assertExistingCoverAsset(image.path)));
-  }
-
-  const useGitHubPersistence = shouldUseGitHubPersistence();
-  if (!useGitHubPersistence) {
+  if (!shouldUseGitHubPersistence()) {
     try {
-      const oid = await publishLocalBlogPendingResults(input);
+      const oid = await publishLocalBlogPendingResults({
+        documents: [document],
+        expectedHeadOid: input.expectedHeadOid
+      });
       return {
         oid,
-        url: `file://${process.cwd()}/content/blog/posts`,
+        url: `file://${process.cwd()}/content/blog/posts/${document.slug}`,
         committedDate: new Date().toISOString()
       } satisfies BlogEditorCommitResult;
     } catch (error) {
@@ -653,27 +657,30 @@ export async function publishPendingBlogEnrichments(input: {
     }
   }
 
-  await assertExpectedEditorHead(input.expectedHeadOid);
-  const additions = input.documents.flatMap((document) => serializeBlogPostFiles(document));
-  const deletions: string[] = [];
+  const directory = `content/blog/pending/${document.slug}`;
+  const deletions = [`${directory}/request.json`, `${directory}/bodyKo.md`];
+  const existingDocument = await readLocalBlogPostDocument(document.slug);
+  const oldCover = existingDocument
+    ? blogOwnedCoverPath(document.slug, existingDocument.cover)
+    : undefined;
+  const newCover = blogOwnedCoverPath(document.slug, document.cover);
 
-  for (const document of input.documents) {
-    const directory = `content/blog/pending/${document.slug}`;
-    deletions.push(`${directory}/request.json`, `${directory}/bodyKo.md`);
-    const existingDocument = await readLocalBlogPostDocument(document.slug);
-    const oldCover = existingDocument
-      ? blogOwnedCoverPath(document.slug, existingDocument.cover)
-      : undefined;
-    const newCover = blogOwnedCoverPath(document.slug, document.cover);
-    if (oldCover && oldCover !== newCover) {
-      deletions.push(`public${oldCover}`);
-    }
+  if (
+    oldCover &&
+    oldCover !== newCover &&
+    !document.bodyKo.includes(oldCover) &&
+    !document.bodyEn.includes(oldCover)
+  ) {
+    deletions.push(`public${oldCover}`);
   }
 
+  // expectedHeadOid is the OID returned by saveBlogPendingRequest, not the
+  // deployment SHA. GitHub's atomic head comparison safely chains the publish
+  // commit without requiring the current deployment to see the queued files.
   return createCommit({
-    message: `Publish ${input.documents.length} translated blog post${input.documents.length > 1 ? "s" : ""}`,
+    message: `Publish translated blog post: ${document.slug}`,
     expectedHeadOid: input.expectedHeadOid,
-    additions,
+    additions: serializeBlogPostFiles(document),
     deletions
   });
 }
@@ -788,14 +795,6 @@ function pendingRequestToEditorDocument(request: BlogPendingRequest): BlogEditor
   };
 }
 
-export async function getPendingBlogRequests() {
-  const [requests, expectedHeadOid] = await Promise.all([
-    readLocalBlogPendingRequests(),
-    getBlogEditorHeadOid()
-  ]);
-  return { requests, expectedHeadOid };
-}
-
 export async function getBlogEditorPosts(): Promise<BlogEditorPostsSnapshot> {
   const [publishedPosts, pendingRequests, expectedHeadOid] = await Promise.all([
     readLocalBlogPostDocuments(),
@@ -828,8 +827,4 @@ export async function getBlogEditorPost(slug: string): Promise<BlogEditorPostSna
     : publishedDocument;
 
   return document ? { document, expectedHeadOid, queued: Boolean(pendingRequest) } : undefined;
-}
-
-export function isBlogEditorConflictError(error: unknown): error is BlogEditorConflictError {
-  return error instanceof BlogEditorConflictError;
 }

@@ -57,8 +57,8 @@ export default async function WriteIndexPage({
                 <span className={styles.listMeta}>{post.slug}</span>
               </span>
               <span>
-                <span className={styles.status} data-status={pending.has(post.slug) ? "draft" : post.status}>
-                  {pending.has(post.slug) ? "자동 처리 대기" : post.status === "published" ? "공개" : "비공개"}
+                <span className={styles.status} data-status={pending.has(post.slug) ? "queued" : post.status}>
+                  {pending.has(post.slug) ? "처리 필요" : post.status === "published" ? "공개" : "비공개"}
                 </span>
                 <br />
                 <span className={styles.listMeta}>{post.updatedAt}</span>

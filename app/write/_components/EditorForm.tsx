@@ -166,8 +166,14 @@ export function EditorForm({
     }
   }, [state]);
 
+  const remoteCommitCreated = state.status === "queued" || state.status === "success";
   const actionResultIsCurrent = resultRevision !== null && resultRevision === editRevision;
-  const visibleActionStatus = actionResultIsCurrent ? state.status : "idle";
+  const visibleActionStatus = remoteCommitCreated
+    ? state.status
+    : actionResultIsCurrent
+      ? state.status
+      : "idle";
+  const formLocked = pending || remoteCommitCreated;
 
   useEffect(() => {
     if (
@@ -229,7 +235,7 @@ export function EditorForm({
 
     setAttachmentError("");
 
-    if (readingImagesRef.current || pending) {
+    if (readingImagesRef.current || formLocked) {
       setAttachmentError("이미지를 처리 중입니다. 잠시 후 다시 시도해 주세요.");
       return;
     }
@@ -363,6 +369,8 @@ export function EditorForm({
   }
 
   function submitWithImages(formData: FormData) {
+    if (remoteCommitCreated) return;
+
     submittedRevisionRef.current = editRevision;
     formData.set("attachmentsManifest", attachmentsManifest);
     activeAttachments.forEach((attachment) => {
@@ -371,11 +379,22 @@ export function EditorForm({
     formAction(formData);
   }
 
-  const defaultStatus = queued
-    ? "반영 대기 중입니다."
+  const justQueued = state.status === "queued";
+  const processingRequired = justQueued || (queued && state.status !== "success");
+  const statusTone = pending
+    ? "idle"
+    : visibleActionStatus === "error"
+      ? "error"
+      : processingRequired
+        ? "queued"
+        : visibleActionStatus === "idle" && saved && editRevision === 0
+          ? "success"
+          : visibleActionStatus;
+  const defaultStatus = processingRequired
+    ? "원문 저장 완료 · 처리 필요"
     : saved && editRevision === 0
-      ? "저장했습니다."
-      : "저장하면 반영 대기 목록에 추가됩니다.";
+      ? "공개 준비 완료"
+      : "저장하면 즉시 번역을 시작합니다.";
 
   return (
     <div className={styles.editorWrap}>
@@ -387,7 +406,7 @@ export function EditorForm({
           </Link>
           <div className={styles.editorHeadingMeta}>
             <span className={styles.eyebrow}>{mode === "new" ? "새 글" : "글 수정"}</span>
-            {queued ? <span className={styles.queueBadge}>반영 대기</span> : null}
+            {processingRequired ? <span className={styles.queueBadge}>처리 필요</span> : null}
           </div>
           <h1>글쓰기</h1>
         </div>
@@ -419,6 +438,7 @@ export function EditorForm({
               }}
               placeholder="제목을 입력하세요"
               maxLength={140}
+              readOnly={formLocked}
               required
               autoComplete="off"
               autoFocus
@@ -447,7 +467,7 @@ export function EditorForm({
                     type="file"
                     accept="image/jpeg,image/png,image/webp"
                     multiple
-                    disabled={readingImages || pending}
+                    disabled={readingImages || formLocked}
                     onChange={handleImageChange}
                     aria-describedby="body-image-help body-image-error"
                     aria-invalid={Boolean(attachmentError) || hasEditorIssue("bodyImages", "attachmentsManifest")}
@@ -475,7 +495,7 @@ export function EditorForm({
               value={body}
               placeholder="본문을 입력하세요"
               maxLength={MAX_BLOG_BODY_LENGTH}
-              readOnly={readingImages || pending}
+              readOnly={readingImages || formLocked}
               required
               spellCheck="true"
               onChange={handleBodyChange}
@@ -517,7 +537,7 @@ export function EditorForm({
                             onChange={(event) => handleAltChange(attachment.id, event.target.value)}
                             placeholder="이미지 설명"
                             maxLength={180}
-                            disabled={readingImages || pending}
+                            disabled={readingImages || formLocked}
                             required={placed}
                           />
                         </label>
@@ -528,7 +548,7 @@ export function EditorForm({
                       <button
                         className={styles.removeImageButton}
                         type="button"
-                        disabled={readingImages || pending}
+                        disabled={readingImages || formLocked}
                         onClick={() => removeAttachment(attachment)}
                         aria-label={`${attachment.file.name} 첨부 취소`}
                       >
@@ -557,6 +577,7 @@ export function EditorForm({
               type="submit"
               formAction={deletePostAction}
               formNoValidate
+              disabled={formLocked}
               onClick={(event) => {
                 if (!window.confirm("이 글을 삭제할까요?")) event.preventDefault();
               }}
@@ -570,12 +591,12 @@ export function EditorForm({
         <footer className={styles.formFooter}>
           <p
             className={styles.formStatus}
-            data-tone={visibleActionStatus}
+            data-tone={statusTone}
             role={visibleActionStatus === "error" ? "alert" : "status"}
             aria-live={visibleActionStatus === "error" ? "assertive" : "polite"}
           >
             {pending
-              ? "저장 중입니다."
+              ? "저장·번역 중 · 약 1분"
               : visibleActionStatus !== "idle"
                 ? state.message
                 : defaultStatus}
@@ -585,16 +606,18 @@ export function EditorForm({
             <button
               className={styles.primaryButton}
               type="submit"
-              disabled={pending || readingImages || visibleActionStatus === "success"}
+              disabled={readingImages || formLocked}
             >
               <FloppyDisk aria-hidden="true" size={18} />
               {pending
-                ? "저장 중"
+                ? "저장·번역 중"
                 : visibleActionStatus === "success"
-                  ? "저장 완료"
-                  : state.status === "success" || queued
-                    ? "다시 저장"
-                    : "저장"}
+                  ? "공개 준비 완료"
+                  : justQueued
+                    ? "새 배포 후 다시 처리"
+                    : processingRequired
+                      ? "다시 처리"
+                      : "저장"}
             </button>
           </div>
         </footer>

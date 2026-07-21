@@ -6,6 +6,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { getWriterAccess } from "@/lib/auth";
+import { runImmediateBlogPublishing } from "@/lib/blog-automation/immediate-server";
+import type { BlogEnrichmentFailureCode } from "@/lib/blog-automation/types";
 import {
   assertValidBlogSlug,
   BLOG_ATTACHMENT_ID_PATTERN,
@@ -15,7 +17,6 @@ import {
   MAX_BLOG_BODY_IMAGES,
   readBlogPendingRequest,
   readBlogPostDocument,
-  saveBlogPendingRequest,
   validateBlogBodyImageUploads,
   type BlogEditorCoverImage,
   type BlogPendingBodyImage,
@@ -23,7 +24,7 @@ import {
 } from "@/lib/blog-editor";
 
 export type EditorActionState = {
-  status: "idle" | "error" | "success";
+  status: "idle" | "error" | "queued" | "success";
   message: string;
   field?: string;
 };
@@ -254,6 +255,30 @@ function humanizeEditorError(error: unknown): Pick<EditorActionState, "message" 
   return { message: "저장하지 못했습니다. 잠시 뒤 다시 시도해 주세요." };
 }
 
+function queuedProcessingMessage(code: BlogEnrichmentFailureCode) {
+  if (code === "configuration") {
+    return "원문은 저장했습니다. 새 배포가 끝난 뒤 Gemini 설정을 확인하고 다시 처리해 주세요.";
+  }
+
+  if (code === "upstream_rate_limit") {
+    return "원문은 저장했습니다. 새 배포가 끝나고 Gemini 사용량 제한이 풀리면 다시 처리해 주세요.";
+  }
+
+  if (code === "request_timeout" || code === "upstream_unavailable") {
+    return "원문은 저장했습니다. Gemini 응답이 지연되어 공개하지 못했습니다. 새 배포 후 다시 처리해 주세요.";
+  }
+
+  if (
+    code === "invalid_response" ||
+    code === "unsafe_output" ||
+    code === "upstream_rejected"
+  ) {
+    return "원문은 저장했습니다. 생성 결과를 검증하지 못했습니다. 새 배포 후 내용을 확인하고 다시 처리해 주세요.";
+  }
+
+  return "원문은 저장했습니다. 공개 처리 중 문제가 발생했습니다. 새 배포 후 다시 처리해 주세요.";
+}
+
 export async function savePostAction(
   _previousState: EditorActionState,
   formData: FormData
@@ -313,20 +338,43 @@ export async function savePostAction(
       bodyImages
     };
 
-    await saveBlogPendingRequest({
+    const publishing = await runImmediateBlogPublishing({
       request,
       expectedHeadOid,
       bodyImages: prepared.uploads
     });
 
     revalidatePath("/write");
+
+    if (publishing.outcome === "queued") {
+      console.error("[blog-editor] immediate publishing deferred", {
+        slug,
+        failureCode: publishing.failureCode,
+        queuedCommitOid: publishing.queuedCommit.oid
+      });
+
+      return {
+        status: "queued",
+        message: queuedProcessingMessage(publishing.failureCode)
+      };
+    }
+
+    console.info("[blog-editor] immediate publishing committed", {
+      slug,
+      publishedCommitOid: publishing.publishedCommit.oid
+    });
+    revalidatePath("/ko/blog");
+    revalidatePath("/en/blog");
+    revalidatePath(`/ko/posts/${slug}`);
+    revalidatePath(`/en/posts/${slug}`);
+
     if (process.env.NODE_ENV !== "production") {
       redirect(`/write/edit/${slug}?saved=1`);
     }
 
     return {
       status: "success",
-      message: "저장했습니다. 다음 자동 처리 후 한국어·영어 글이 함께 공개됩니다."
+      message: "번역과 분류를 마쳤습니다. 새 배포가 끝나면 한국어·영어 글이 함께 공개됩니다."
     };
   } catch (error) {
     if (

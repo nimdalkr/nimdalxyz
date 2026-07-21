@@ -6,6 +6,8 @@ import { getBlogEditorPosts, type BlogEditorPostDocument } from "@/lib/blog-edit
 import { EditorForm } from "../_components/EditorForm";
 import { EditorShell } from "../_components/EditorShell";
 
+export const maxDuration = 120;
+
 function blankDocument(): BlogEditorPostDocument {
   const today = new Date().toISOString().slice(0, 10);
 

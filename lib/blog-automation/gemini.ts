@@ -1,3 +1,5 @@
+import "server-only";
+
 import type { BlogPendingRequest } from "@/lib/blog-editor/types";
 
 import {

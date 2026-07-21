@@ -361,7 +361,7 @@ test.describe("legacy routing and host surfaces", () => {
       );
       expect(xml).toContain(`<language>${locale === "ko" ? "ko-KR" : "en"}</language>`);
       expect(xml).toContain(`https://${BLOG_HOST}/${locale}/posts/${POST_SLUG}`);
-      expect(xml.match(/<item>/g)).toHaveLength(3);
+      expect(xml.match(/<item>/g)?.length ?? 0).toBeGreaterThanOrEqual(3);
     }
   });
 

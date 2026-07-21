@@ -322,6 +322,12 @@
   color: #f2eee5;
 }
 
+.status[data-status="queued"] {
+  border-color: #8a5a00;
+  background: #f3dfae;
+  color: #6f4700;
+}
+
 .postAction {
   justify-self: end;
   font-family: var(--font-plex-mono), monospace;
@@ -469,9 +475,10 @@
   display: inline-flex;
   min-height: 26px;
   align-items: center;
-  border: 1px solid #006b90;
+  border: 1px solid #8a5a00;
   padding: 0 8px;
-  color: #006b90;
+  background: #f3dfae;
+  color: #6f4700;
   font-family: var(--font-plex-mono), monospace;
   font-size: 10px;
   font-weight: 700;
@@ -916,6 +923,10 @@
 
 .formStatus[data-tone="success"] {
   color: #006b90;
+}
+
+.formStatus[data-tone="queued"] {
+  color: #765000;
 }
 
 .formActions {
