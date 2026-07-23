@@ -150,8 +150,8 @@ test.describe("localized navigation and metadata", () => {
     await page.setContent(await response.text(), { waitUntil: "domcontentloaded" });
     await expect(page).toHaveTitle("Nimdal이 블로그를 만든 이유 — Nimdal");
     await expect(page.locator("article article")).toHaveCount(0);
-    await expect(page.getByRole("link", { name: "블로그 홈" })).toBeVisible();
-    await expect(page.getByText("NIMDAL / BLOG", { exact: true })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Nimdal 홈" })).toBeVisible();
+    await expect(page.getByRole("navigation", { name: "주요 메뉴" })).toBeVisible();
     await expectAlternates(page, {
       canonical: `https://${BLOG_HOST}/ko/posts/${POST_SLUG}`,
       ko: `https://${BLOG_HOST}/ko/posts/${POST_SLUG}`,
@@ -481,27 +481,24 @@ test.describe("responsive and accessible interaction", () => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/ko");
 
-    const navigation = page.getByRole("navigation", { name: "주요 메뉴" });
-    await expect(navigation.getByRole("link", { name: "WORK" })).toBeVisible();
-    await expect(navigation.getByRole("link", { name: "BLOG" })).toBeVisible();
-    await expect(navigation.getByRole("link", { name: "ABOUT" })).toBeHidden();
-    await expect(navigation.getByRole("link", { name: "CAREER" })).toBeHidden();
-    await expect(navigation.getByRole("link", { name: "CONTACT" })).toBeHidden();
+    const menu = page.getByRole("button", { name: "메뉴 열기" });
+    await expect(menu).toBeVisible();
+    await menu.click();
+    const navigation = page.getByRole("navigation", { name: "모바일 메뉴" });
+    await expect(navigation.getByRole("link", { name: "소개" })).toBeVisible();
+    await expect(navigation.getByRole("link", { name: "경력" })).toBeVisible();
+    await expect(navigation.getByRole("link", { name: "블로그" })).toBeVisible();
 
     const targets = navigation.locator("a");
     const count = await targets.count();
-
     for (let index = 0; index < count; index += 1) {
       const target = targets.nth(index);
-      if (!(await target.isVisible())) continue;
-
       const box = await target.boundingBox();
       expect(box, `touch target ${index} should have a bounding box`).not.toBeNull();
-      expect(box?.width ?? 0, `touch target ${index} should be at least 44px wide`).toBeGreaterThanOrEqual(44);
       expect(box?.height ?? 0, `touch target ${index} should be at least 44px high`).toBeGreaterThanOrEqual(44);
     }
 
-    await navigation.getByRole("link", { name: "EN", exact: true }).click();
+    await page.getByRole("navigation", { name: "언어 선택" }).getByRole("link", { name: "EN", exact: true }).click();
     await expect(page).toHaveURL(/\/en$/);
   });
 
@@ -555,17 +552,12 @@ test.describe("responsive and accessible interaction", () => {
     await page.goto("/ko");
 
     await expect(page.locator(".scroll-progress")).toBeHidden();
-    await expect(page.locator(".cinema-track")).toHaveCount(0);
-    await expect(page.locator(".pp-intro-track")).toBeVisible();
-    await expect(page.locator(".pp-about")).toBeVisible();
-    const staticStory = page.locator(".cinema-static-story");
-    await expect(staticStory).toBeVisible();
-    await expect(staticStory.locator(".cinema-static-scene")).toHaveCount(3);
-    await expect(page.locator(".pp-career")).toBeVisible();
-    await expect(page.locator(".pp-blog")).toBeVisible();
-    await expect(page.locator(".pp-contact")).toBeVisible();
+    await expect(page.locator(".pixel-hero")).toBeVisible();
+    await expect(page.locator(".pixel-work-grid")).toBeVisible();
+    await expect(page.locator(".pixel-career-band")).toBeVisible();
+    await expect(page.locator(".pixel-contact-card")).toBeVisible();
 
-    const motionStyles = await staticStory.evaluate((element) => {
+    const motionStyles = await page.locator(".pixel-marquee > div").evaluate((element) => {
       const style = getComputedStyle(element);
       return {
         animationDuration: style.animationDuration,

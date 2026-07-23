@@ -7,6 +7,7 @@ import type { Metadata } from "next";
 import { BlogCard } from "@/components/blog/BlogCard";
 import { BlogHeader } from "@/components/blog/BlogHeader";
 import { BlogPostBody } from "@/components/blog/BlogPostBody";
+import { PixelEffects } from "@/components/pixel/PixelEffects";
 import { StructuredData } from "@/components/seo/StructuredData";
 import {
   formatPostDate,
@@ -146,6 +147,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
   return (
     <div className={`${styles.shell} blog-surface`}>
+      <PixelEffects />
       <StructuredData data={jsonLd} />
       <BlogHeader
         locale={locale}

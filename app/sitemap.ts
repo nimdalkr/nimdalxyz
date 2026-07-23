@@ -27,6 +27,7 @@ function localizedEntries(pathname: string, options: SitemapOptions): MetadataRo
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     ...localizedEntries("/", { changeFrequency: "weekly", priority: 1 }),
+    ...localizedEntries("/about", { changeFrequency: "monthly", priority: 0.9 }),
     ...localizedEntries("/lab", { changeFrequency: "monthly", priority: 0.85 }),
     ...localizedEntries("/portfolio", { changeFrequency: "monthly", priority: 0.85 }),
     ...projectSlugs.flatMap((slug) =>

@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { BlogCard } from "@/components/blog/BlogCard";
 import { BlogHeader } from "@/components/blog/BlogHeader";
+import { PixelEffects } from "@/components/pixel/PixelEffects";
 import type {
   LocalizedBlogPost,
   LocalizedBlogTag
@@ -78,6 +79,7 @@ export function BlogIndex({
 
   return (
     <div className={`${styles.shell} blog-surface`}>
+      <PixelEffects />
       <BlogHeader
         locale={locale}
         hubHref={hubHref}

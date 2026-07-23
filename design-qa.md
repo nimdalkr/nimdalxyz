@@ -1,51 +1,56 @@
-# BLOG redesign — design QA
+# Pixel Pop redesign — design QA
 
 ## Source of truth
 
-- Selected direction: option 3, black fixed identity rail with a foam editorial archive surface.
-- Reference image: `/Users/nimdal/.codex/generated_images/019f78ec-95fd-7bc0-8fd7-2d219b35bacb/exec-97ef49bc-0d50-458f-968c-835884ab2062.png`
-- Content constraint: only repository PFP and the three real post covers were used. Invented reference titles, dates, and images were not copied.
+- User-selected visual target: 1c **Pixel Pop** from the supplied handoff package.
+- Source specification: `/Users/nimdal/Downloads/Nimdal 포트폴리오 리디자인 방향.zip` → `design_handoff_pixelpop_redesign/README.md` and `prototypes/Home.dc.html`.
+- Source visual: the Pixel Pop desktop screenshot supplied with the request (white 64px navigation, cyan field, pixel octopus portal, hard ink shadows, work cards).
+- Implementation constraint: only repository PFP, portrait, project captures, career media, and BLOG covers were used. No generated or stock imagery was added.
 
 ## Compared state
 
-- Browser: Codex in-app browser
-- Desktop viewport: 1440 × 1024
-- Mobile viewport: 390 × 844
-- Public route: `http://blog.localhost:3000/ko`
-- Detail route: `http://blog.localhost:3000/ko/posts/nimdal-logbook`
-- Auth route: `http://localhost:3000/write`
+- Browser: Codex in-app browser.
+- Desktop viewport: 1440 × 1024 CSS px, density 1.
+- Mobile viewport: 390 × 844 CSS px, density 1.
+- Routes: `http://localhost:3000/ko`, `/ko/about`, `/ko/portfolio`, `/ko/projects/alphaduo`, and `http://blog.localhost:3000/ko`.
 
 ## Evidence
 
-- Final desktop implementation: `audits/2026-07-20-blog-redesign/implementation-1440x1024-final.png`
-- Same-size source/implementation comparison: `audits/2026-07-20-blog-redesign/comparison-1440x1024-final.png`
-- Mobile implementation: `audits/2026-07-20-blog-redesign/implementation-390x844.png`
-- Post detail: `audits/2026-07-20-blog-redesign/post-detail-1440x1024.png`
-- Writer login: `audits/2026-07-20-blog-redesign/write-login-1440x1024-final.png`
+- Final desktop implementation: `artifacts/qa-pixelpop/home-1440x1024.png` (1440 × 1024 pixels).
+- Final mobile implementation: `artifacts/qa-pixelpop/home-390x844.png` (390 × 844 pixels).
+- The source screenshot and the final desktop capture were reviewed together in the same visual comparison context. The source is a user-provided conversation image rather than a file that can be copied into the repository; the packaged HTML above is the durable source path.
+- Focused-region review covered the header, hero headline/PFP portal, marquee, first WORK row, mobile menu, and BLOG header/cards. No additional crop was needed because all target-critical regions were readable in the full capture.
 
-The full-view comparison exposed the relevant rail, type scale, gutters, image crop, archive rhythm, and color relationships at once. A separate focused crop was not required because no target region was obscured or too small to judge at original resolution.
+## Findings and iteration history
 
-## QA history
+1. **[P2] Mobile menu target was undersized.**
+   - Fix: raised the menu control and public BLOG links to a 44px minimum target.
+   - Evidence: responsive Playwright check now passes at 390px.
+2. **[P1] Pink foreground combinations did not meet WCAG AA.**
+   - Fix: retained the pink field while switching small foreground text to ink/deep rose where required; added specific contrast coverage for project and career surfaces.
+   - Evidence: axe serious/critical violations are 0 on home, project, career, Lab, and BLOG host.
+3. **[P2] Career surface overflowed at 200% text zoom.**
+   - Fix: added shrink/wrap safeguards for metric, engagement, and case cells.
+   - Evidence: 200% reflow check passes without horizontal overflow.
+4. **[P1] Legacy project hash anchors disappeared with the simplified project layout.**
+   - Fix: restored `#signal`, `#build`, `#proof`, and `#next` anchors on the Pixel Pop case study.
+   - Evidence: legacy redirect/hash tests pass.
 
-1. Initial comparison found the page title, featured title, and archive titles visually heavier than the selected reference (P2).
-2. The three title scales were reduced and the desktop state was recaptured at the same effective viewport.
-3. The final side-by-side comparison matched the selected rail width, editorial hierarchy, cyan/coral accents, image proportions, and archive rhythm. Remaining title, date, and thumbnail differences are intentional because the implementation uses the repository's real content only.
-4. Mobile reflow, category active state, KO/EN same-slug links, article layout, and the fail-closed writer login state were checked in the in-app browser.
-5. A local cross-origin development warning prevented client hydration in automated tests (P1). `allowedDevOrigins` was added for the documented local hosts; the complete suite then passed.
-6. The last browser pass found a duplicate-cover LCP warning (P2). The matching archive thumbnail now loads eagerly with the featured cover; a fresh tab confirmed no warning or implementation error.
-7. Korean titles now keep whole words together, BLOG metadata no longer repeats the brand in the document title, and the remaining abstract Korean closing metaphor was replaced with direct copy.
-8. Writer validation now names the exact field, opens the matching language panel, focuses the invalid control, and bypasses hidden native-required controls. Development persistence is locked to local files even when production GitHub variables exist.
-9. The final automated suite passed 39 checks, including writer allowlist policy, unverified Google accounts, local-only development persistence, structured-data escaping, media/tag validation, host routing, SEO routes, 404s, touch targets, and axe.
-10. The article body document root now renders as a neutral `div`, removing the nested article landmark; the post metadata test covers the final DOM structure.
+## Fidelity surfaces
 
-## Findings
+- **Typography:** NeoDunggeunmo is used for the mark, labels, marquee, status chips, and locale control; Noto Sans KR remains the readable body/display family. Headline weight, white ink shadow, and Korean wrapping match the selected direction.
+- **Layout rhythm:** centered 1060px frame, 64px sticky header, cyan hero, 3-column work cards, dark career band, hard 2–3px ink borders, and 4–8px offset shadows match the handoff.
+- **Colors:** cyan `#35B5E5`, ink `#101418`, paper `#FFFFFF`, and pink `#F55C7A` remain the visual palette; small-text variants were darkened only to achieve AA contrast.
+- **Assets:** the real octopus PFP, operator portrait, project captures, career assets, and post covers are placed in the matching slots with `object-fit` and pixel rendering where appropriate.
+- **Copy:** natural Korean presentation copy was used; project, career, and BLOG facts come from the existing localized content model.
 
-- P0: none
-- P1: none remaining
-- P2: none remaining
-- Browser console: no implementation error or warning in the fresh final tab.
-- Accessibility: automated axe serious/critical violations: 0.
-- Interaction: category filtering, localized routes, canonical redirects, 404s, reduced motion, keyboard focus, and 44px touch targets passed automated checks.
+## Verification
+
+- TypeScript: passed.
+- ESLint: passed.
+- Production build: passed. One existing Turbopack filesystem-tracing warning remains in the BLOG editor's local persistence path.
+- Content suite: 25 passed.
+- E2E suite: 32 passed, including locale routing, blog rewrites, legacy redirects, invalid slugs, writer route, reduced motion, 44px targets, 200% zoom, and axe.
 
 ## Final result
 

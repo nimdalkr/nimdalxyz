@@ -4,53 +4,31 @@ import { List, X } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useState } from "react";
 
-import type { Locale } from "@/lib/content";
 import { LocaleSwitch } from "@/components/site/LocaleSwitch";
+import type { Locale } from "@/lib/content";
+import { blogCanonicalUrl } from "@/lib/seo";
 
-interface MobileMenuProps {
-  locale: Locale;
-  labels: {
-    work: string;
-    lab: string;
-    about: string;
-    log: string;
-    contact: string;
-  };
-}
+interface MobileMenuProps { locale: Locale; absoluteOrigin?: string; }
 
-export function MobileMenu({ locale, labels }: MobileMenuProps) {
+export function MobileMenu({ locale, absoluteOrigin }: MobileMenuProps) {
   const [open, setOpen] = useState(false);
-  const menuLabels = locale === "ko"
-    ? { open: "메뉴 열기", close: "메뉴 닫기" }
-    : { open: "Open navigation", close: "Close navigation" };
-  const menuLabel = open ? menuLabels.close : menuLabels.open;
-
-  function closeMenu() {
-    setOpen(false);
-  }
+  const copy = locale === "ko"
+    ? { open: "메뉴 열기", close: "메뉴 닫기", about: "소개", career: "경력", blog: "블로그" }
+    : { open: "Open menu", close: "Close menu", about: "About", career: "Career", blog: "BLOG" };
 
   return (
-    <div className="mobile-menu">
-      <button
-        type="button"
-        className="icon-button"
-        onClick={() => setOpen((current) => !current)}
-        aria-expanded={open}
-        aria-controls="mobile-navigation"
-        aria-label={menuLabel}
-      >
-        {open ? <X aria-hidden weight="bold" /> : <List aria-hidden weight="bold" />}
+    <div className="pixel-mobile-menu">
+      <button type="button" className="pixel-menu-button" onClick={() => setOpen((value) => !value)} aria-expanded={open} aria-controls="pixel-mobile-navigation" aria-label={open ? copy.close : copy.open}>
+        {open ? <X weight="bold" aria-hidden /> : <List weight="bold" aria-hidden />}
       </button>
       {open ? (
-        <div className="mobile-menu-panel" id="mobile-navigation">
+        <div className="pixel-mobile-panel" id="pixel-mobile-navigation">
           <nav aria-label={locale === "ko" ? "모바일 메뉴" : "Mobile navigation"}>
-            <Link href={`/${locale}#work`} onClick={closeMenu}>{labels.work}</Link>
-            <Link href={`/${locale}#lab`} onClick={closeMenu}>{labels.lab}</Link>
-            <Link href={`/${locale}#about`} onClick={closeMenu}>{labels.about}</Link>
-            <Link href={`/${locale}#log`} onClick={closeMenu}>{labels.log}</Link>
-            <Link href={`/${locale}#contact`} onClick={closeMenu}>{labels.contact}</Link>
+            <Link href={`/${locale}/about`} onClick={() => setOpen(false)}>{copy.about}</Link>
+            <Link href={`/${locale}/portfolio`} onClick={() => setOpen(false)}>{copy.career}</Link>
+            <a href={blogCanonicalUrl(locale)} onClick={() => setOpen(false)}>{copy.blog}</a>
           </nav>
-          <LocaleSwitch locale={locale} compact />
+          <LocaleSwitch locale={locale} compact absoluteOrigin={absoluteOrigin} />
         </div>
       ) : null}
     </div>
