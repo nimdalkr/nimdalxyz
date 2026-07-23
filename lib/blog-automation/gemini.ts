@@ -3,10 +3,13 @@ import "server-only";
 import type { BlogPendingRequest } from "@/lib/blog-editor/types";
 
 import {
-  BLOG_ENRICHMENT_JSON_SCHEMA,
   BLOG_ENRICHMENT_SYSTEM_INSTRUCTION,
   buildGeminiBlogEnrichmentPrompt
 } from "@/lib/blog-automation/prompt";
+import {
+  buildGeminiGenerateContentBody,
+  classifyGeminiUpstreamFailure
+} from "@/lib/blog-automation/gemini-request";
 import { BlogAutomationError, type BlogEnrichmentOutput } from "@/lib/blog-automation/types";
 import { validateGeminiBlogEnrichmentOutput } from "@/lib/blog-automation/validation";
 
@@ -27,6 +30,14 @@ type GeminiResponse = {
   promptFeedback?: { blockReason?: unknown };
 };
 
+type GeminiErrorResponse = {
+  error?: {
+    code?: unknown;
+    message?: unknown;
+    status?: unknown;
+  };
+};
+
 export function getGeminiBlogEnrichmentConfig() {
   const apiKey = process.env.GEMINI_API_KEY?.trim();
   const model = process.env.GEMINI_BLOG_MODEL?.trim() || DEFAULT_GEMINI_MODEL;
@@ -38,16 +49,37 @@ export function getGeminiBlogEnrichmentConfig() {
   return { apiKey, model };
 }
 
-function upstreamFailure(status: number) {
-  if (status === 429) {
-    return new BlogAutomationError("upstream_rate_limit", "Gemini rate limit reached");
+function safeUpstreamMessage(value: unknown) {
+  if (typeof value !== "string") return undefined;
+
+  return value
+    .replace(/AIza[A-Za-z0-9_-]{20,}/g, "[redacted-api-key]")
+    .replace(/[\r\n]+/g, " ")
+    .slice(0, 500);
+}
+
+async function upstreamFailure(response: Response) {
+  let payload: GeminiErrorResponse = {};
+  try {
+    payload = (await response.json()) as GeminiErrorResponse;
+  } catch {
+    // HTTP status still provides a safe and useful failure classification.
   }
 
-  if (status >= 500) {
-    return new BlogAutomationError("upstream_unavailable", "Gemini is unavailable");
-  }
+  const upstreamStatus =
+    typeof payload.error?.status === "string" ? payload.error.status : undefined;
+  const upstreamMessage = safeUpstreamMessage(payload.error?.message);
 
-  return new BlogAutomationError("upstream_rejected", "Gemini rejected the request");
+  console.error("[blog-gemini] upstream request rejected", {
+    httpStatus: response.status,
+    upstreamStatus,
+    upstreamMessage
+  });
+
+  return new BlogAutomationError(
+    classifyGeminiUpstreamFailure(response.status),
+    `Gemini request rejected (${response.status}${upstreamStatus ? ` ${upstreamStatus}` : ""})`
+  );
 }
 
 function responseText(response: GeminiResponse) {
@@ -88,27 +120,9 @@ export async function generateGeminiBlogEnrichment(
           "content-type": "application/json",
           "x-goog-api-key": apiKey
         },
-        body: JSON.stringify({
-          systemInstruction: {
-            parts: [{ text: BLOG_ENRICHMENT_SYSTEM_INSTRUCTION }]
-          },
-          contents: [
-            {
-              role: "user",
-              parts: [{ text: prompt }]
-            }
-          ],
-          generationConfig: {
-            candidateCount: 1,
-            maxOutputTokens: 65_536,
-            responseFormat: {
-              text: {
-                mimeType: "application/json",
-                schema: BLOG_ENRICHMENT_JSON_SCHEMA
-              }
-            }
-          }
-        }),
+        body: JSON.stringify(
+          buildGeminiGenerateContentBody(BLOG_ENRICHMENT_SYSTEM_INSTRUCTION, prompt)
+        ),
         cache: "no-store",
         signal: AbortSignal.timeout(GEMINI_REQUEST_TIMEOUT_MS)
       }
@@ -126,7 +140,7 @@ export async function generateGeminiBlogEnrichment(
   }
 
   if (!response.ok) {
-    throw upstreamFailure(response.status);
+    throw await upstreamFailure(response);
   }
 
   let payload: GeminiResponse;

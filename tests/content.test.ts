@@ -9,6 +9,11 @@ import {
   getLocalizedBlogPosts
 } from "../content/blog/posts";
 import { buildPublishedBlogDocument } from "../lib/blog-automation/document";
+import {
+  buildGeminiGenerateContentBody,
+  classifyGeminiUpstreamFailure,
+  GEMINI_JSON_MIME_TYPE
+} from "../lib/blog-automation/gemini-request";
 import { queueAndPublishBlogRequestImmediately } from "../lib/blog-automation/immediate";
 import { buildGeminiBlogEnrichmentPrompt } from "../lib/blog-automation/prompt";
 import {
@@ -508,6 +513,24 @@ test("Gemini enrichment also preserves body images already present before an edi
       request
     )
   ).toThrow(/image paths changed/i);
+});
+
+test("Gemini generateContent uses the REST enum for structured JSON output", () => {
+  const body = buildGeminiGenerateContentBody("System instruction", "User prompt");
+
+  expect(GEMINI_JSON_MIME_TYPE).toBe("APPLICATION_JSON");
+  expect(body.generationConfig.responseFormat.text.mimeType).toBe("APPLICATION_JSON");
+  expect(body.generationConfig.responseFormat.text.schema).toBeDefined();
+  expect(JSON.stringify(body)).not.toContain('"mimeType":"application/json"');
+});
+
+test("Gemini HTTP failures distinguish configuration, quota, and upstream outages", () => {
+  expect(classifyGeminiUpstreamFailure(400)).toBe("upstream_rejected");
+  expect(classifyGeminiUpstreamFailure(401)).toBe("configuration");
+  expect(classifyGeminiUpstreamFailure(403)).toBe("configuration");
+  expect(classifyGeminiUpstreamFailure(404)).toBe("configuration");
+  expect(classifyGeminiUpstreamFailure(429)).toBe("upstream_rate_limit");
+  expect(classifyGeminiUpstreamFailure(503)).toBe("upstream_unavailable");
 });
 
 test("BLOG save queues the Korean source before immediate Gemini publishing", async () => {

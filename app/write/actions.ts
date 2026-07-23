@@ -268,11 +268,11 @@ function queuedProcessingMessage(code: BlogEnrichmentFailureCode) {
     return "원문은 저장했습니다. Gemini 응답이 지연되어 공개하지 못했습니다. 새 배포 후 다시 처리해 주세요.";
   }
 
-  if (
-    code === "invalid_response" ||
-    code === "unsafe_output" ||
-    code === "upstream_rejected"
-  ) {
+  if (code === "upstream_rejected") {
+    return "원문은 저장했습니다. Gemini 요청이 거절되었습니다. 새 배포 후 다시 처리해 주세요.";
+  }
+
+  if (code === "invalid_response" || code === "unsafe_output") {
     return "원문은 저장했습니다. 생성 결과를 검증하지 못했습니다. 새 배포 후 내용을 확인하고 다시 처리해 주세요.";
   }
 
@@ -350,7 +350,12 @@ export async function savePostAction(
       console.error("[blog-editor] immediate publishing deferred", {
         slug,
         failureCode: publishing.failureCode,
-        queuedCommitOid: publishing.queuedCommit.oid
+        queuedCommitOid: publishing.queuedCommit.oid,
+        errorName: publishing.error instanceof Error ? publishing.error.name : undefined,
+        errorMessage:
+          publishing.error instanceof Error
+            ? publishing.error.message.replace(/[\r\n]+/g, " ").slice(0, 500)
+            : undefined
       });
 
       return {
