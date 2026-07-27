@@ -16,6 +16,7 @@ interface HomePageProps { params: Promise<{ locale: string }>; }
 
 const work = ["hyperalphaduo", "alphaduo", "mylol"] as const;
 const engagementRows = [
+  { period: "2026.08–현재", organization: "FIVE OVER TWO", role: "Co-Founder", focus: undefined },
   { period: "2026.04–2026.06", organization: "1six.tech Inc. / NEVADA", role: "Marketing Lead", focus: "SEO / KOL / LOCALIZATION" },
   { period: "2025.01–2025.09", organization: "071Labs", role: "GTM", focus: "CONTENT / COMMUNITY OPS" },
   { period: "2012.12–2024.09", organization: "MKR", role: "MARKETING AGENCY", focus: "CLIENT OPS / CAMPAIGN SYSTEM" }
@@ -114,7 +115,7 @@ export default async function HomePage({ params }: HomePageProps) {
 
         <section className="pixel-career-band" id="career" aria-labelledby="career-title"><div className="pixel-wrap">
           <div className="pixel-section-title is-dark" data-pixel-reveal><span>CAREER</span><h2 id="career-title">{korean ? "거쳐온 곳들" : "Where I've worked"}</h2><Link href={`/${locale}/portfolio`}>{korean ? "경력 자세히" : "FULL CAREER"} →</Link></div>
-          <div className="pixel-career-list" data-pixel-reveal>{engagementRows.map((row) => <div key={row.organization}><time>{row.period}</time><strong>{row.organization}</strong><span>{row.role} · {row.focus}</span></div>)}</div>
+          <div className="pixel-career-list" data-pixel-reveal>{engagementRows.map((row) => <div key={row.organization}><time>{row.period}</time><strong>{row.organization}</strong><span>{row.role}{row.focus ? <> · {row.focus}</> : null}</span></div>)}</div>
           <p className="pixel-client-tags" data-pixel-reveal><span>LEICA</span><span>H ANIMAL MEDICAL CENTER</span><span>JOYA SWISS</span><span>NEVADA</span></p>
         </div></section>
 

@@ -29,6 +29,7 @@ export default async function AboutPage({ params }: Props) {
     ["SOLO OPS", korean ? "혼자서도 한 사이클" : "A full working loop", korean ? "기획, 제작, 운영, 회고까지 직접 돌립니다. 반복되는 일은 자동화합니다." : "I plan, build, operate, review — and automate the parts that repeat."]
   ] as const;
   const journey = [
+    ["2026.08–NOW", "FIVE OVER TWO", "Co-Founder"],
     ["2012–2024", "MKR", korean ? "클라이언트 운영 · 캠페인 시스템" : "Client operations · campaign systems"],
     ["2025", "071Labs", korean ? "GTM · 콘텐츠 · 커뮤니티 운영" : "GTM · content · community operations"],
     ["2026", "1six.tech / NEVADA", korean ? "Marketing Lead · SEO · KOL · 현지화" : "Marketing Lead · SEO · KOL · localization"],
