@@ -23,6 +23,7 @@ import type { Locale } from "@/lib/content";
 const ui = {
   ko: {
     skip: "읽기 모드",
+    boot: "물에 들어가는 중",
     soundOn: "소리: 켜짐",
     soundOff: "소리: 꺼짐",
     start: "잠수 시작",
@@ -35,6 +36,7 @@ const ui = {
   },
   en: {
     skip: "Read as a page",
+    boot: "Entering the water",
     soundOn: "SOUND: ON",
     soundOff: "SOUND: OFF",
     start: "Start the dive",
@@ -100,6 +102,15 @@ export function AtlasStage({ locale, landmarks, tier, onExit }: AtlasStageProps)
   const [index, setIndex] = useState(0);
   const [room, setRoom] = useState<AtlasLandmark | null>(null);
   const station = stations[index];
+
+  const [booted, setBooted] = useState(false);
+  const bootStart = useRef(0);
+  useEffect(() => { bootStart.current = performance.now(); }, []);
+  const onOceanReady = useCallback(() => {
+    // Hold the boot card long enough to read, never longer than needed.
+    const remaining = Math.max(0, 900 - (performance.now() - bootStart.current));
+    window.setTimeout(() => setBooted(true), remaining);
+  }, []);
 
   const [soundOn, setSoundOn] = useState(false);
   const soundRef = useRef<DiveSound | null>(null);
@@ -214,6 +225,17 @@ export function AtlasStage({ locale, landmarks, tier, onExit }: AtlasStageProps)
     oceanRef.current?.setPointer(x, y);
   };
 
+  // A press on open water sends the guide to investigate. Controls keep their
+  // own meaning: anything interactive is exempt.
+  const onPointerDown = (event: React.PointerEvent) => {
+    if (roomRef.current) return;
+    if ((event.target as Element).closest("button, a, nav")) return;
+    const x = (event.clientX / window.innerWidth) * 2 - 1;
+    const y = (event.clientY / window.innerHeight) * 2 - 1;
+    octoRef.current?.poke(x, y);
+    soundRef.current?.ping();
+  };
+
   const depthMeters = Math.round((index / (count - 1)) * 3400);
 
   return (
@@ -221,6 +243,7 @@ export function AtlasStage({ locale, landmarks, tier, onExit }: AtlasStageProps)
       ref={stageEl}
       className="stage"
       onPointerMove={onPointerMove}
+      onPointerDown={onPointerDown}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
@@ -230,7 +253,7 @@ export function AtlasStage({ locale, landmarks, tier, onExit }: AtlasStageProps)
         gl={{ antialias: false, powerPreference: "high-performance" }}
       >
         <Suspense fallback={null}>
-          <Ocean handleRef={oceanRef} />
+          <Ocean handleRef={oceanRef} onReady={onOceanReady} />
           <OctopusGuide handleRef={octoRef} pointerRef={pointerRef} />
         </Suspense>
       </Canvas>
@@ -300,6 +323,15 @@ export function AtlasStage({ locale, landmarks, tier, onExit }: AtlasStageProps)
       {room ? (
         <ProjectRoom landmark={room} locale={locale} onClose={() => setRoom(null)} />
       ) : null}
+
+      {/* The arrival. Honest loading: it leaves as soon as the water is ready. */}
+      <div className={booted ? "stage-boot is-done" : "stage-boot"} aria-hidden={booted}>
+        <div className="stage-boot-inner">
+          <span className="stage-mark">NIMDAL.XYZ</span>
+          <span className="stage-boot-line" />
+          <span className="stage-boot-word">{t.boot}</span>
+        </div>
+      </div>
     </div>
   );
 }

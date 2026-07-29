@@ -69,6 +69,8 @@ const bodyFragment = /* glsl */ `
 export type OctopusHandle = {
   /** Where the guide should swim, in viewport world units. */
   setTarget: (x: number, y: number) => void;
+  /** A pointer press in NDC (-1..1): the guide darts over to look. */
+  poke: (nx: number, ny: number) => void;
   /** Startle: a quick dash impulse, used when the station changes. */
   dart: (dx: number, dy: number) => void;
   setDeep: (value: number) => void;
@@ -109,7 +111,9 @@ export function OctopusGuide({
     pos: new THREE.Vector2(-2.1, -1.35),
     vel: new THREE.Vector2(0, 0),
     target: new THREE.Vector2(-2.1, -1.35),
-    deep: 0
+    deep: 0,
+    pokeUntil: 0,
+    poke: new THREE.Vector2(0, 0)
   });
 
   // Tentacle bead positions persist across frames; physics comes from chasing.
@@ -139,6 +143,11 @@ export function OctopusGuide({
   useEffect(() => {
     handleRef.current = {
       setTarget: (x, y) => { state.current.target.set(x, y); },
+      poke: (nx, ny) => {
+        // NDC to world at z=0, held briefly so the dash reads as curiosity.
+        state.current.poke.set(nx, ny);
+        state.current.pokeUntil = performance.now() + 650;
+      },
       dart: (dx, dy) => { state.current.vel.x += dx; state.current.vel.y += dy; },
       setDeep: (value) => { state.current.deep = value; },
       setAccent: (hue) => { accent.current.set(hue); }
@@ -150,11 +159,28 @@ export function OctopusGuide({
     const t = frame.clock.elapsedTime;
     const s = state.current;
 
-    // Swim: a soft spring toward the target, plus idle bobbing.
+    // The stage speaks in desktop-scale world units; on a narrow viewport the
+    // same coordinates land off-screen, so targets are rescaled and clamped to
+    // what this frustum can actually show.
+    const halfW = viewport.width / 2;
+    const halfH = viewport.height / 2;
+    const fit = Math.min(1, halfW / 2.9);
+    let goalX = s.target.x * fit;
+    let goalY = s.target.y * Math.min(1, halfH / 2.1);
+
+    // A pointer press outranks the itinerary: dart over, look, drift back.
+    if (performance.now() < s.pokeUntil) {
+      goalX = s.poke.x * halfW * 0.82;
+      goalY = -s.poke.y * halfH * 0.82;
+    }
+    goalX = THREE.MathUtils.clamp(goalX, -halfW + 0.85, halfW - 0.85);
+    goalY = THREE.MathUtils.clamp(goalY, -halfH + 1.0, halfH - 0.8);
+
+    // Swim: a soft spring toward the goal, plus idle bobbing.
     const bobX = Math.sin(t * 0.6) * 0.25;
     const bobY = Math.sin(t * 1.4) * 0.16;
-    s.vel.x += (s.target.x + bobX - s.pos.x) * 3.2 * dt;
-    s.vel.y += (s.target.y + bobY - s.pos.y) * 3.2 * dt;
+    s.vel.x += (goalX + bobX - s.pos.x) * 3.2 * dt;
+    s.vel.y += (goalY + bobY - s.pos.y) * 3.2 * dt;
     s.vel.multiplyScalar(Math.exp(-2.4 * dt));
     s.pos.x += s.vel.x * dt;
     s.pos.y += s.vel.y * dt;
@@ -163,7 +189,8 @@ export function OctopusGuide({
       group.current.position.set(s.pos.x, s.pos.y, 0.6);
       group.current.rotation.z = THREE.MathUtils.clamp(-s.vel.x * 0.06, -0.4, 0.4);
       const squash = 1 + Math.sin(t * 2.6) * 0.04 + Math.min(s.vel.length() * 0.03, 0.12);
-      group.current.scale.set(1 / squash, squash, 1);
+      const bodyFit = Math.min(1, halfW / 3.2);
+      group.current.scale.set(bodyFit / squash, bodyFit * squash, 1);
     }
 
     // Three clones constructor uniforms; write to the material's own set.
@@ -183,10 +210,14 @@ export function OctopusGuide({
     const geom = ribbon.current?.geometry as THREE.BufferGeometry | undefined;
     const attr = geom?.getAttribute("position") as THREE.BufferAttribute | undefined;
     if (attr) {
+      // Arms wear the same fit as the body, or a small phone gets desktop-
+      // length tentacles on a shrunken torso.
+      const armFit = Math.min(1, halfW / 3.2);
+      const seg = SEG * armFit;
       for (let i = 0; i < TENTACLES; i++) {
         const spread = (i / (TENTACLES - 1) - 0.5) * 1.7;
-        const anchorX = s.pos.x + Math.sin(spread) * 0.42;
-        const anchorY = s.pos.y - 0.2 - Math.cos(spread) * 0.08;
+        const anchorX = s.pos.x + Math.sin(spread) * 0.42 * armFit;
+        const anchorY = s.pos.y - (0.2 + Math.cos(spread) * 0.08) * armFit;
         // The rest direction fans outward and down; blending a little of it
         // into the follow direction keeps the arms from collapsing into one.
         const restX = Math.sin(spread) * 0.85;
@@ -205,7 +236,7 @@ export function OctopusGuide({
           dx = (dx / len) * 0.8 + (restX / restLen) * 0.2;
           dy = (dy / len) * 0.8 + (restY / restLen) * 0.2;
           const norm = Math.max(Math.hypot(dx, dy), 0.0001);
-          bead.set(prev.x + (dx / norm) * SEG, prev.y + (dy / norm) * SEG);
+          bead.set(prev.x + (dx / norm) * seg, prev.y + (dy / norm) * seg);
         }
         // Extrude: offset each point perpendicular to its local direction.
         const base = i * BEADS * 2;
@@ -217,7 +248,7 @@ export function OctopusGuide({
           let ty = next.y - prev.y;
           const tl = Math.max(Math.hypot(tx, ty), 0.0001);
           tx /= tl; ty /= tl;
-          const w = Math.max(0.062 * (1 - (j / (BEADS - 1)) * 0.9), 0.008);
+          const w = Math.max(0.062 * armFit * (1 - (j / (BEADS - 1)) * 0.9), 0.006);
           const v = (base + j * 2) * 3;
           const arr = attr.array as Float32Array;
           arr[v] = cur.x - ty * w; arr[v + 1] = cur.y + tx * w; arr[v + 2] = 0.55;

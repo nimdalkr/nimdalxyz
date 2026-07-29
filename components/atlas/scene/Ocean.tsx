@@ -199,9 +199,19 @@ export type OceanHandle = {
   setPointer: (x: number, y: number) => void;
 };
 
-export function Ocean({ handleRef }: { handleRef: React.MutableRefObject<OceanHandle | null> }) {
+export function Ocean({
+  handleRef,
+  onReady
+}: {
+  handleRef: React.MutableRefObject<OceanHandle | null>;
+  /** Fired once the portrait is decoded and the first frames have rendered. */
+  onReady?: () => void;
+}) {
   const { size, viewport } = useThree();
   const mesh = useRef<THREE.Mesh>(null);
+
+  // Written only from the frame loop, which runs outside render.
+  const ready = useRef({ frames: 0, fired: false });
 
   const portrait = useMemo(() => {
     const t = new THREE.TextureLoader().load("/media/operator-portrait.png");
@@ -273,6 +283,16 @@ export function Ocean({ handleRef }: { handleRef: React.MutableRefObject<OceanHa
     (window as unknown as Record<string, unknown>).__dive = {
       depth: u.uDepth.value, target: target.current.depth
     };
+
+    // Boot: the surface is ready once the portrait decoded and frames flow.
+    // No loader callback needed: a decoded image simply has a width.
+    const r = ready.current;
+    r.frames += 1;
+    const decoded = Boolean((portrait.image as HTMLImageElement | undefined)?.width);
+    if (!r.fired && decoded && r.frames > 2) {
+      r.fired = true;
+      onReady?.();
+    }
   });
 
   return (
