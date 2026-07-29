@@ -65,38 +65,31 @@ test.describe("riso motion", () => {
     await context.close();
   });
 
-  test("both stocks keep the primary call to action readable", async ({ page }) => {
+  test("the primary call to action stays readable", async ({ page }) => {
     await page.goto("/en");
 
     const cta = page.locator(".cover .btn").first();
-    const toggle = page.getByRole("button", { name: /switch to .* stock/i });
+    const { color, background } = await cta.evaluate((el) => {
+      const cs = getComputedStyle(el);
+      let bg = cs.backgroundColor;
+      let node: HTMLElement | null = el as HTMLElement;
+      while (bg === "rgba(0, 0, 0, 0)" && node?.parentElement) {
+        node = node.parentElement;
+        bg = getComputedStyle(node).backgroundColor;
+      }
+      return { color: cs.color, background: bg };
+    });
 
-    for (let pass = 0; pass < 2; pass += 1) {
-      const { color, background } = await cta.evaluate((el) => {
-        const cs = getComputedStyle(el);
-        let bg = cs.backgroundColor;
-        let node: HTMLElement | null = el as HTMLElement;
-        while (bg === "rgba(0, 0, 0, 0)" && node?.parentElement) {
-          node = node.parentElement;
-          bg = getComputedStyle(node).backgroundColor;
-        }
-        return { color: cs.color, background: bg };
+    const luminance = (value: string) => {
+      const [r, g, b] = value.match(/\d+/g)!.map(Number).map((channel) => {
+        const scaled = channel / 255;
+        return scaled <= 0.03928 ? scaled / 12.92 : Math.pow((scaled + 0.055) / 1.055, 2.4);
       });
-
-      const luminance = (value: string) => {
-        const [r, g, b] = value.match(/\d+/g)!.map(Number).map((channel) => {
-          const scaled = channel / 255;
-          return scaled <= 0.03928 ? scaled / 12.92 : Math.pow((scaled + 0.055) / 1.055, 2.4);
-        });
-        return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-      };
-      const a = luminance(color);
-      const b = luminance(background);
-      const ratio = (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
-      expect(ratio).toBeGreaterThanOrEqual(4.5);
-
-      await toggle.click();
-      await page.waitForTimeout(300);
-    }
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    };
+    const a = luminance(color);
+    const b = luminance(background);
+    const ratio = (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+    expect(ratio).toBeGreaterThanOrEqual(4.5);
   });
 });

@@ -1,10 +1,9 @@
 import { expect, test } from "@playwright/test";
 
 /**
- * Contrast has to hold on both stocks, and the accent is the trap: it is a
- * plate colour, not a type colour, and any softened ink laid over it composites
- * down below AA. Alpha is resolved here rather than compared raw, which is the
- * check that caught the accent flood.
+ * One dark theme now, but the trap is unchanged: the accent is a plate colour,
+ * not a type colour, and any softened ink laid over it composites down below
+ * AA. Alpha is resolved here rather than compared raw.
  */
 const PAGES = ["/ko", "/en", "/en/about", "/en/portfolio", "/en/lab", "/en/projects/hyperalphaduo"];
 
@@ -55,15 +54,9 @@ const AUDIT = `(() => {
 })()`;
 
 for (const path of PAGES) {
-  test(`contrast holds on both stocks for ${path}`, async ({ page }) => {
+  test(`contrast holds for ${path}`, async ({ page }) => {
     await page.goto(path);
-
-    for (const stock of ["paper", "black"]) {
-      await page.evaluate((value) => {
-        document.documentElement.dataset.stock = value;
-      }, stock);
-      const failures = await page.evaluate(AUDIT);
-      expect(failures, `${path} on ${stock} stock`).toEqual([]);
-    }
+    const failures = await page.evaluate(AUDIT);
+    expect(failures, path).toEqual([]);
   });
 }

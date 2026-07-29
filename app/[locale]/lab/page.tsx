@@ -20,7 +20,7 @@ function localeOrNotFound(value: string) {
 export async function generateMetadata({ params }: LabPageProps): Promise<Metadata> {
   const locale = localeOrNotFound((await params).locale);
   const copy = siteContent[locale].lab;
-  const title = locale === "ko" ? "Nimdal Lab / 9개 프로젝트" : "Nimdal Lab / 9 projects";
+  const title = locale === "ko" ? "Nimdal Lab / 세 개의 제품" : "Nimdal Lab / Three products";
   return {
     title,
     description: copy.description,
@@ -45,7 +45,8 @@ export default async function LabPage({ params }: LabPageProps) {
   const korean = locale === "ko";
   const content = siteContent[locale];
   const ui = uiCopy[locale];
-  const items = projects.map((project) => {
+  const shown = new Set(["hyperalphaduo", "alphaduo", "mylol"]);
+  const items = projects.filter((project) => shown.has(project.slug)).map((project) => {
     const copy = project.copy[locale];
     const media = project.media.find((item) => item.role === "proof") ?? project.media[0];
     const statusKey = project.slug === "ethosalpha" ? "repository" : project.status === "live" ? "live" : project.status;
@@ -71,7 +72,7 @@ export default async function LabPage({ params }: LabPageProps) {
         description: content.lab.description,
         url: absoluteCanonicalUrl(locale, "/lab"),
         inLanguage: locale,
-        hasPart: projects.map((project) => ({
+        hasPart: projects.filter((project) => shown.has(project.slug)).map((project) => ({
           "@type": "CreativeWork",
           name: project.copy[locale].title,
           url: absoluteCanonicalUrl(locale, `/projects/${project.slug}`)

@@ -1,5 +1,12 @@
 "use client";
 
+/* eslint-disable react-hooks/immutability --
+   Everything in this file that mutates does so inside the r3f frame loop,
+   which runs outside React's render. Driving per-frame values through state
+   would re-render the tree sixty times a second; mutating instanced matrices,
+   uniforms, and shared position refs is the intended r3f pattern. */
+
+
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
@@ -67,10 +74,13 @@ export type OctopusHandle = {
 
 export function OctopusGuide({
   handleRef,
-  pointerRef
+  pointerRef,
+  posOut
 }: {
   handleRef: React.MutableRefObject<OctopusHandle | null>;
   pointerRef: React.MutableRefObject<{ x: number; y: number }>;
+  /** Written every frame: the fish need to know where to flee from. */
+  posOut: React.MutableRefObject<{ x: number; y: number }>;
 }) {
   const { viewport } = useThree();
   const group = useRef<THREE.Group>(null);
@@ -207,6 +217,9 @@ export function OctopusGuide({
     // The pointer already drives the ocean's parallax; the sprite's own eyes
     // are part of the artwork, so nothing tracks here.
     void pointerRef;
+
+    posOut.current.x = s.pos.x;
+    posOut.current.y = s.pos.y;
   });
 
   return (

@@ -67,16 +67,9 @@ export async function generateMetadata({
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#e6e5df" },
-    { media: "(prefers-color-scheme: dark)", color: "#191b1a" }
-  ],
-  colorScheme: "light dark"
+  themeColor: "#0b111e",
+  colorScheme: "dark"
 };
-
-/** Applies a stored stock choice before first paint so the page never flashes. */
-const stockScript =
-  "try{var s=localStorage.getItem('nimdal-stock');if(s==='paper'||s==='black'){document.documentElement.dataset.stock=s}}catch(e){}";
 
 export default async function LocaleLayout({ children, params }: LocaleLayoutProps) {
   const { locale: localeParam } = await params;
@@ -89,7 +82,6 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
       className={`${bricolage.variable} ${gothicA1.variable} ${notoSansKr.variable} ${plexMono.variable}`}
     >
       <head>
-        <script dangerouslySetInnerHTML={{ __html: stockScript }} />
         {/* Scroll reveals render at opacity 0 before the script runs. Without
             this, a failed or disabled script would hide everything below the
             fold permanently. */}

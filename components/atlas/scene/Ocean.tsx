@@ -129,7 +129,9 @@ const fragmentShader = /* glsl */ `
     float shaftPhase = suv.x * 2.6 + uPointer.x * 0.25;
     float shaft = pow(max(sin(shaftPhase + sin(uTime * 0.16) * 0.5), 0.0), 20.0)
                 + pow(max(sin(shaftPhase * 0.6 - uTime * 0.08), 0.0), 28.0) * 0.7;
-    water += vec3(0.85, 0.95, 0.92) * shaft * smoothstep(1.0, 0.1, uv.y) * sun * 0.5;
+    water += vec3(0.85, 0.95, 0.92) * shaft * smoothstep(1.0, 0.1, uv.y) * sun * 0.62;
+    float wide = pow(max(sin(suv.x * 1.1 + uTime * 0.05), 0.0), 6.0);
+    water += vec3(0.7, 0.9, 0.95) * wide * smoothstep(1.0, 0.2, uv.y) * sun * 0.14;
     water += vec3(1.0) * caustic(suv * 1.5, uTime * 0.45) * sun * 0.12;
 
     // Marine snow, three layers of parallax.
@@ -213,6 +215,20 @@ const fragmentShader = /* glsl */ `
         shot = pow(max(shot, 0.0), vec3(1.3)) * vec3(0.85, 0.9, 1.0);
         water = mix(water, shot, pmix * 0.9);
       }
+    }
+
+    // The floor rises to meet the end of the dive: a kelp-fringed silhouette
+    // that only exists near the abyss, so arrival reads as landing.
+    float floorRise = smoothstep(0.72, 1.0, d);
+    if (floorRise > 0.001) {
+      float h = 0.05 + 0.13 * floorRise
+              + floorRise * (0.035 * sin(uv.x * 19.0 + uTime * 0.18)
+              + 0.05 * sin(uv.x * 6.0 - uTime * 0.11)
+              + 0.02 * sin(uv.x * 43.0));
+      float ground = smoothstep(h, h - 0.02, uv.y);
+      water = mix(water, vec3(0.004, 0.01, 0.028), ground * 0.94);
+      // The ridge keeps a thread of the station's light.
+      water += uAccent * smoothstep(0.012, 0.0, abs(uv.y - h)) * 0.3 * floorRise;
     }
 
     // Vignette.

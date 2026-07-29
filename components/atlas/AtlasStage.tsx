@@ -4,6 +4,7 @@ import { Canvas } from "@react-three/fiber";
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Ocean, type OceanHandle } from "@/components/atlas/scene/Ocean";
+import { Life } from "@/components/atlas/scene/Life";
 import { OctopusGuide, type OctopusHandle } from "@/components/atlas/scene/OctopusGuide";
 import { ProjectRoom, type RoomData } from "@/components/atlas/ProjectRoom";
 import { ATLAS_BUDGET } from "@/lib/atlas/capability";
@@ -214,12 +215,15 @@ export function AtlasStage({ locale, landmarks, cases, tier, onExit }: AtlasStag
   const oceanRef = useRef<OceanHandle | null>(null);
   const octoRef = useRef<OctopusHandle | null>(null);
   const pointerRef = useRef({ x: 0, y: 0 });
+  const octoPosRef = useRef({ x: -2, y: -1 });
+  const depthRef = useRef(0);
   const roomRef = useRef<RoomData | null>(null);
   useEffect(() => { roomRef.current = room; }, [room]);
 
   // Drive the scene whenever the station or room changes.
   useEffect(() => {
     const depth = index / (count - 1);
+    depthRef.current = depth;
     oceanRef.current?.setDepth(depth);
     oceanRef.current?.setStation(index, station.hue, beaconKind(station));
     octoRef.current?.setDeep(depth);
@@ -356,7 +360,8 @@ export function AtlasStage({ locale, landmarks, cases, tier, onExit }: AtlasStag
       >
         <Suspense fallback={null}>
           <Ocean handleRef={oceanRef} onReady={onOceanReady} />
-          <OctopusGuide handleRef={octoRef} pointerRef={pointerRef} />
+          <Life octoPos={octoPosRef} depthRef={depthRef} />
+          <OctopusGuide handleRef={octoRef} pointerRef={pointerRef} posOut={octoPosRef} />
         </Suspense>
       </Canvas>
 
@@ -394,7 +399,13 @@ export function AtlasStage({ locale, landmarks, cases, tier, onExit }: AtlasStag
 
         <div className="stage-panel" key={station.key}>
           <p className="stage-eyebrow">{station.eyebrow}</p>
-          <h1 className="stage-title">{station.title}</h1>
+          <h1 className="stage-title">
+            {station.title.split(" ").map((word, wordIndex) => (
+              <span className="stage-title-word" key={`${station.key}-${wordIndex}`}>
+                <i style={{ "--i": wordIndex } as React.CSSProperties}>{word}</i>
+              </span>
+            ))}
+          </h1>
           {station.kind === "contact" ? (
             <a className="stage-cta" href="mailto:0xnimdal@gmail.com">{t.mail}</a>
           ) : station.kind === "record" || station.kind === "principles" ? null : (

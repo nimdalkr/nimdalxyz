@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { StockToggle } from "@/components/riso/StockToggle";
 import { LocaleSwitch } from "@/components/site/LocaleSwitch";
 import { MobileMenu } from "@/components/site/MobileMenu";
 import type { Locale } from "@/lib/content";
@@ -53,7 +52,6 @@ export function SiteHeader({ locale, active, blogSurface = false }: SiteHeaderPr
       </nav>
       <div className="masthead-tools">
         <LocaleSwitch locale={locale} absoluteOrigin={origin} />
-        <StockToggle locale={locale} />
         <MobileMenu locale={locale} absoluteOrigin={origin} />
       </div>
     </header>
