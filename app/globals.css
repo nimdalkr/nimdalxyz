@@ -1664,6 +1664,9 @@ a.ledger-row:focus-visible span {
 
 .stage-ui > * { pointer-events: auto; }
 
+/* While a room is open the dive HUD stands down entirely. */
+.stage-ui.is-hidden { opacity: 0; visibility: hidden; transition: opacity 240ms var(--ease); }
+
 .stage-top {
   display: flex;
   align-items: center;
@@ -1776,6 +1779,26 @@ a.ledger-row:focus-visible span {
   line-height: 1.85;
 }
 
+.stage-links {
+  display: flex;
+  gap: 1.6rem;
+  margin-top: 2rem;
+}
+
+.stage-links a {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  color: rgba(226,234,245,.84);
+  border-bottom: 1px solid rgba(226,234,245,.4);
+  font-family: var(--font-mono), monospace;
+  font-size: .7rem;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+}
+
+.stage-links a:hover { color: #fff; border-color: var(--accent); }
+
 .stage-bottom {
   display: flex;
   align-items: center;
@@ -1784,23 +1807,43 @@ a.ledger-row:focus-visible span {
   flex-wrap: wrap;
 }
 
-.stage-rail { display: flex; gap: .3rem; }
+/* Depth meter: where you are in the column, and the way to anywhere else. */
+.stage-depth {
+  position: absolute;
+  left: clamp(1.25rem, 2.6vw, 2.25rem);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: .8rem;
+  align-items: flex-start;
+}
+
+.stage-depth-read {
+  color: rgba(226,234,245,.84);
+  font-family: var(--font-mono), monospace;
+  font-size: .68rem;
+  letter-spacing: .22em;
+}
+
+.stage-rail { display: flex; flex-direction: column; gap: .15rem; }
 
 .stage-rail button {
-  width: 34px; height: 44px;
+  width: 44px; height: 26px;
   padding: 0; border: 0;
   background: none; cursor: pointer;
+  display: flex; align-items: center;
 }
 
 .stage-rail button::before {
-  display: block; width: 100%; height: 1px;
+  display: block; width: 16px; height: 1px;
   background: rgba(226,234,245,.45);
   content: "";
-  transition: background-color 260ms var(--ease), height 260ms var(--ease);
+  transition: background-color 260ms var(--ease), width 260ms var(--ease), height 260ms var(--ease);
 }
 
-.stage-rail button:hover::before { background: rgba(226,234,245,.7); }
-.stage-rail button.is-active::before { height: 3px; background: var(--accent); }
+.stage-rail button:hover::before { background: rgba(226,234,245,.8); width: 26px; }
+.stage-rail button.is-active::before { width: 34px; height: 3px; background: var(--accent); }
 
 .stage-steps {
   display: flex;
@@ -1832,6 +1875,197 @@ a.ledger-row:focus-visible span {
   letter-spacing: .2em;
   white-space: pre;
 }
+
+
+/* -----------------------------------------------------------------------------
+   15c. THE ROOM (station interior)
+   -----------------------------------------------------------------------------
+   Entering a project stays inside the dive: the ocean darkens behind and the
+   room opens over it. DOM, not canvas, so text selects and readers read.
+   -------------------------------------------------------------------------- */
+
+.room {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  overflow-y: auto;
+  background:
+    linear-gradient(180deg, rgba(4,8,18,.93), rgba(3,6,14,.985) 30%, rgba(2,4,10,.995));
+  animation: room-in 480ms cubic-bezier(.16,1,.3,1);
+}
+
+@keyframes room-in {
+  from { opacity: 0; transform: translateY(26px); }
+  to { opacity: 1; transform: none; }
+}
+
+.room-inner {
+  width: min(74rem, 100%);
+  margin: 0 auto;
+  padding: clamp(1.5rem, 4vw, 3.5rem) clamp(1.25rem, 3.4vw, 3.5rem) clamp(2.5rem, 5vw, 4rem);
+}
+
+.room-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding-bottom: clamp(1.25rem, 2.5vw, 2rem);
+  border-bottom: 1px solid rgba(226,234,245,.16);
+}
+
+.room-place {
+  margin: 0 0 .9rem;
+  color: var(--room-accent, #7fe3c4);
+  font-family: var(--font-mono), monospace;
+  font-size: .68rem;
+  font-weight: 600;
+  letter-spacing: .26em;
+  text-transform: uppercase;
+}
+
+.room-title {
+  margin: 0;
+  color: #f7f9fc;
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  font-size: clamp(1.8rem, 3.6vw, 3rem);
+  font-weight: 300;
+  letter-spacing: .1em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  outline: none;
+}
+
+:lang(ko) .room-title {
+  font-family: var(--font-display-kr), var(--font-sans), sans-serif;
+  font-weight: 400;
+  letter-spacing: .03em;
+  text-transform: none;
+}
+
+.room-ascend {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  gap: .8rem;
+  padding: 0 1.2rem;
+  border: 1px solid rgba(226,234,245,.4);
+  background: none;
+  color: rgba(226,234,245,.9);
+  font-family: var(--font-mono), monospace;
+  font-size: .68rem;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.room-ascend span { opacity: .5; }
+.room-ascend:hover { border-color: #f7f9fc; color: #fff; }
+
+.room-columns {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1.5rem, 3vw, 3rem);
+  padding: clamp(1.75rem, 3.5vw, 3rem) 0;
+}
+
+.room-columns h3,
+.room-proof h3 {
+  margin: 0 0 1rem;
+  color: rgba(226,234,245,.6);
+  font-family: var(--font-mono), monospace;
+  font-size: .66rem;
+  font-weight: 600;
+  letter-spacing: .26em;
+  text-transform: uppercase;
+}
+
+.room-columns h3::before,
+.room-proof h3::before {
+  display: inline-block;
+  width: 14px; height: 2px;
+  margin-right: .7rem;
+  vertical-align: middle;
+  background: var(--room-accent, #7fe3c4);
+  content: "";
+}
+
+.room-columns p {
+  margin: 0;
+  color: rgba(226,234,245,.86);
+  font-size: .94rem;
+  line-height: 1.85;
+}
+
+.room-proof {
+  padding-top: clamp(1.5rem, 3vw, 2.5rem);
+  border-top: 1px solid rgba(226,234,245,.16);
+}
+
+.room-proof > p {
+  max-width: 70ch;
+  margin: 0 0 1.75rem;
+  color: rgba(226,234,245,.86);
+  font-size: .94rem;
+  line-height: 1.85;
+}
+
+.room-shots {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1.25rem, 2.5vw, 2rem);
+}
+
+.room-shots figure { margin: 0; }
+
+.room-shot {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  border: 1px solid rgba(226,234,245,.2);
+  background: #05070f;
+}
+
+.room-shot img { object-fit: cover; object-position: top; }
+
+.room-shots figcaption {
+  margin-top: .7rem;
+  color: rgba(226,234,245,.62);
+  font-size: .82rem;
+  line-height: 1.6;
+}
+
+.room-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .9rem;
+  margin-top: clamp(2rem, 4vw, 3rem);
+}
+
+.room-link {
+  display: inline-flex;
+  min-height: 52px;
+  align-items: center;
+  padding: 0 1.6rem;
+  border: 1px solid rgba(226,234,245,.4);
+  color: rgba(226,234,245,.92);
+  font-family: var(--font-mono), monospace;
+  font-size: .7rem;
+  font-weight: 600;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+}
+
+.room-link:hover { border-color: #f7f9fc; color: #fff; }
+
+.room-link.is-primary {
+  border-color: var(--room-accent, #7fe3c4);
+  background: var(--room-accent, #7fe3c4);
+  color: #05070f;
+}
+
+.room-link.is-primary:hover { background: #f7f9fc; border-color: #f7f9fc; }
 
 /* Offered on the readable page to anyone whose device can run the experience. */
 .atlas-return {
@@ -1865,6 +2099,14 @@ a.ledger-row:focus-visible span {
 
 @media (max-width: 900px) {
   .stage-grid { display: none; }
+
+  .stage-depth { left: .6rem; }
+  .stage-depth-read { display: none; }
+  .stage-rail button { width: 30px; height: 22px; }
+
+  .room-columns { grid-template-columns: 1fr; }
+  .room-shots { grid-template-columns: 1fr; }
+  .room-head { flex-direction: column; }
 
   .stage-scrim {
     background: linear-gradient(

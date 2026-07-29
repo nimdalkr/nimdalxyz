@@ -14,7 +14,7 @@ const CONTRAST = `(() => {
   const WHITE = { r:255, g:255, b:255, a:1 };
   const scrim = getComputedStyle(document.querySelector('.stage-scrim'));
   const out = [];
-  document.querySelectorAll('.stage-ui *').forEach((el) => {
+  document.querySelectorAll('.stage-ui *, .room *').forEach((el) => {
     const hasText = [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim());
     if (!hasText) return;
     const cs = getComputedStyle(el);
@@ -73,18 +73,41 @@ test("stage advances through every chapter and can be left", async ({ page }) =>
   await page.waitForSelector(".stage canvas", { timeout: 25000 });
 
   const rail = page.locator(".stage-rail button");
-  await expect(rail).toHaveCount(10);
+  await expect(rail).toHaveCount(11);
 
-  await expect(page.locator(".stage-steps span")).toHaveText("01 / 10");
+  await expect(page.locator(".stage-steps span")).toHaveText("01 / 11");
   await page.keyboard.press("ArrowRight");
-  await expect(page.locator(".stage-steps span")).toHaveText("02 / 10");
+  await expect(page.locator(".stage-steps span")).toHaveText("02 / 11");
 
-  await rail.nth(9).click();
-  await expect(page.locator(".stage-steps span")).toHaveText("10 / 10");
+  await rail.nth(10).click();
+  await expect(page.locator(".stage-steps span")).toHaveText("11 / 11");
 
   // Escape returns to the readable portfolio.
   await page.keyboard.press("Escape");
   await expect(page.locator("#main-content")).toBeVisible();
+});
+
+test("a station opens its room and the room can be left", async ({ page }) => {
+  await page.goto("/en");
+  await page.waitForSelector(".stage canvas", { timeout: 25000 });
+
+  // Station 2 is the first project. Enter opens its room in place.
+  await page.keyboard.press("ArrowRight");
+  await page.keyboard.press("Enter");
+  const room = page.locator(".room");
+  await expect(room).toBeVisible();
+  await expect(room.getByRole("heading", { level: 2 })).toHaveText("HyperAlphaDuo");
+  // Real content, not a teaser: the three sections and the full-record link.
+  await expect(room.locator(".room-columns section")).toHaveCount(3);
+  await expect(room.getByRole("link", { name: /full record/i })).toHaveAttribute(
+    "href",
+    "/en/projects/hyperalphaduo"
+  );
+
+  // Escape ascends back to the dive without leaving the stage.
+  await page.keyboard.press("Escape");
+  await expect(room).toHaveCount(0);
+  await expect(page.locator(".stage canvas")).toBeVisible();
 });
 
 test("no-webgl and reduced-motion visitors get the readable page", async ({ browser }) => {
