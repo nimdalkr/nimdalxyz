@@ -37,6 +37,7 @@ const fragmentShader = /* glsl */ `
   uniform float uSeed;       // current station index
   uniform sampler2D uPortrait;
   uniform vec2  uCover;      // portrait cover-fit correction
+  uniform float uVel;        // depth velocity, signed
 
   float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453123); }
   float noise(vec2 p){
@@ -48,7 +49,10 @@ const fragmentShader = /* glsl */ `
   // One layer of drifting particles. As the diver descends, the water moves
   // upward past the frame; parallax separates the layers.
   float snow(vec2 uv, float scale, float rise, float seed) {
-    vec2 g = uv * scale;
+    // Travel stretches the cells vertically, so falling snow becomes streaks
+    // rushing past the diver: motion read directly from the water.
+    float speed = clamp(abs(uVel) * 3.0, 0.0, 1.0);
+    vec2 g = uv * vec2(scale, scale / (1.0 + speed * 3.5));
     g.y += uDepth * rise + uTime * 0.02 * (1.0 + seed);
     vec2 id = floor(g), f = fract(g);
     float h = hash(id + seed * 17.0);
@@ -160,11 +164,17 @@ const fragmentShader = /* glsl */ `
       }
     }
 
-    // Vignette, and the dive iris that closes when entering a room.
+    // Vignette.
     vec2 v = uv - vec2(0.38, 0.5);
     water *= mix(0.3, 1.0, smoothstep(1.1, 0.2, length(v * vec2(1.0, 1.3))));
-    water *= 1.0 - uDive * smoothstep(0.15, 0.75, length(uv - vec2(0.5)) + 0.15);
-    water *= 1.0 - uDive * 0.45;
+
+    // The dive iris: entering a room closes a circle over the water, its rim
+    // ringed in the station's own light.
+    float ir = length((uv - vec2(0.45, 0.5)) * vec2(aspect, 1.0));
+    float irisR = mix(2.4, 0.14, smoothstep(0.0, 1.0, uDive));
+    float inside = smoothstep(irisR, irisR - 0.22, ir);
+    water *= mix(1.0, 0.05 + inside * 0.4, uDive);
+    water += uAccent * smoothstep(0.03, 0.0, abs(ir - irisR)) * uDive * (1.0 - uDive * 0.55) * 0.6;
 
     // The type column keeps a dependable dark ground at every depth.
     water *= mix(1.0, 0.22, smoothstep(0.42, 0.9, uv.x) * (1.0 - pmix * 0.35));
@@ -209,7 +219,8 @@ export function Ocean({ handleRef }: { handleRef: React.MutableRefObject<OceanHa
       uAccent: { value: new THREE.Color("#7fe3c4") },
       uSeed: { value: 0 },
       uPortrait: { value: portrait },
-      uCover: { value: new THREE.Vector2(1, 1) }
+      uCover: { value: new THREE.Vector2(1, 1) },
+      uVel: { value: 0 }
     }),
     [portrait]
   );
@@ -240,7 +251,11 @@ export function Ocean({ handleRef }: { handleRef: React.MutableRefObject<OceanHa
     u.uRes.value.set(size.width, size.height);
 
     // Glide, don't jump: the dive should feel like water resistance.
+    const before = u.uDepth.value;
     u.uDepth.value += (target.current.depth - u.uDepth.value) * Math.min(1, dt * 1.9);
+    // Smoothed vertical velocity drives the streak layer.
+    const rawVel = (u.uDepth.value - before) / Math.max(dt, 0.001);
+    u.uVel.value += (rawVel - u.uVel.value) * Math.min(1, dt * 4);
     u.uDive.value += (target.current.dive - u.uDive.value) * Math.min(1, dt * 3.2);
     u.uSeed.value = target.current.seed;
     u.uPointer.value.x += (target.current.px - u.uPointer.value.x) * Math.min(1, dt * 2.4);

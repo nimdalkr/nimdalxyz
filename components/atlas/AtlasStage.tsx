@@ -7,6 +7,7 @@ import { Ocean, type OceanHandle } from "@/components/atlas/scene/Ocean";
 import { OctopusGuide, type OctopusHandle } from "@/components/atlas/scene/OctopusGuide";
 import { ProjectRoom } from "@/components/atlas/ProjectRoom";
 import { ATLAS_BUDGET } from "@/lib/atlas/capability";
+import { DiveSound } from "@/lib/atlas/sound";
 import type { AtlasLandmark } from "@/lib/atlas/world";
 import type { Locale } from "@/lib/content";
 
@@ -22,6 +23,8 @@ import type { Locale } from "@/lib/content";
 const ui = {
   ko: {
     skip: "읽기 모드",
+    soundOn: "소리: 켜짐",
+    soundOff: "소리: 꺼짐",
     start: "잠수 시작",
     enter: "들어가기",
     mail: "메일 보내기",
@@ -32,6 +35,8 @@ const ui = {
   },
   en: {
     skip: "Read as a page",
+    soundOn: "SOUND: ON",
+    soundOff: "SOUND: OFF",
     start: "Start the dive",
     enter: "Enter",
     mail: "Write to me",
@@ -96,6 +101,8 @@ export function AtlasStage({ locale, landmarks, tier, onExit }: AtlasStageProps)
   const [room, setRoom] = useState<AtlasLandmark | null>(null);
   const station = stations[index];
 
+  const [soundOn, setSoundOn] = useState(false);
+  const soundRef = useRef<DiveSound | null>(null);
   const oceanRef = useRef<OceanHandle | null>(null);
   const octoRef = useRef<OctopusHandle | null>(null);
   const pointerRef = useRef({ x: 0, y: 0 });
@@ -109,6 +116,8 @@ export function AtlasStage({ locale, landmarks, tier, onExit }: AtlasStageProps)
     oceanRef.current?.setStation(index, station.hue);
     octoRef.current?.setDeep(depth);
     octoRef.current?.setAccent(station.hue);
+    soundRef.current?.setDepth(depth);
+    if (index > 0) { soundRef.current?.whoosh(0.8); soundRef.current?.ping(); }
     // The guide swims to a slightly different spot at each station.
     const wobble = ((index * 137) % 5) / 5;
     if (index === 0) octoRef.current?.setTarget(-2.1, -1.35);
@@ -118,8 +127,26 @@ export function AtlasStage({ locale, landmarks, tier, onExit }: AtlasStageProps)
 
   useEffect(() => {
     oceanRef.current?.setDive(room ? 1 : 0);
-    if (room) octoRef.current?.setTarget(-2.3, -1.6);
+    if (room) {
+      octoRef.current?.setTarget(-2.3, -1.6);
+      soundRef.current?.whoosh(1.2);
+    }
   }, [room]);
+
+  // The audio context lives as long as the stage does.
+  useEffect(() => () => { soundRef.current?.dispose(); }, []);
+
+  const toggleSound = async () => {
+    if (!soundRef.current) soundRef.current = new DiveSound();
+    if (soundOn) {
+      soundRef.current.stop();
+      setSoundOn(false);
+    } else {
+      await soundRef.current.start();
+      soundRef.current.setDepth(index / (count - 1));
+      setSoundOn(true);
+    }
+  };
 
   const go = useCallback((delta: number) => {
     setIndex((value) => Math.min(Math.max(value + delta, 0), count - 1));
@@ -214,7 +241,12 @@ export function AtlasStage({ locale, landmarks, tier, onExit }: AtlasStageProps)
       <div className={room ? "stage-ui is-hidden" : "stage-ui"}>
         <header className="stage-top">
           <span className="stage-mark">NIMDAL.XYZ</span>
-          <button type="button" className="stage-quiet" onClick={onExit}>{t.skip}</button>
+          <div className="stage-top-right">
+            <button type="button" className="stage-quiet" onClick={toggleSound} aria-pressed={soundOn}>
+              {soundOn ? t.soundOn : t.soundOff}
+            </button>
+            <button type="button" className="stage-quiet" onClick={onExit}>{t.skip}</button>
+          </div>
         </header>
 
         {/* Depth meter: place, position, and navigation in one instrument. */}

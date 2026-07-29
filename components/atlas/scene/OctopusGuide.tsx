@@ -12,9 +12,10 @@ import * as THREE from "three";
  * swims. It shadows the diver through the water column, darts ahead when the
  * station changes, and tucks into the corner when a room opens.
  *
- * Follow-the-leader chains give the tentacles their physics: each bead chases
+ * Follow-the-leader chains give the tentacles their physics: each point chases
  * the one before it at a fixed segment length, so momentum, drag, and curl all
- * emerge from movement instead of being animated by hand.
+ * emerge from movement instead of being animated by hand. The chains render as
+ * continuous tapered ribbons (one triangle strip per arm), not bead dots.
  */
 
 const TENTACLES = 8;
@@ -84,8 +85,25 @@ export function OctopusGuide({
   const { viewport } = useThree();
   const group = useRef<THREE.Group>(null);
   const bodyMat = useRef<THREE.ShaderMaterial>(null);
-  const beadsMesh = useRef<THREE.InstancedMesh>(null);
-  const dummy = useMemo(() => new THREE.Object3D(), []);
+  const ribbon = useRef<THREE.Mesh>(null);
+
+  // One triangle strip for all arms: two vertices per chain point, indexed
+  // once at mount, positions rewritten every frame.
+  const ribbonGeom = useMemo(() => {
+    const geom = new THREE.BufferGeometry();
+    const vertexCount = TENTACLES * BEADS * 2;
+    geom.setAttribute("position", new THREE.BufferAttribute(new Float32Array(vertexCount * 3), 3));
+    const indices: number[] = [];
+    for (let ti = 0; ti < TENTACLES; ti++) {
+      const base = ti * BEADS * 2;
+      for (let j = 0; j < BEADS - 1; j++) {
+        const a = base + j * 2;
+        indices.push(a, a + 1, a + 2, a + 1, a + 3, a + 2);
+      }
+    }
+    geom.setIndex(indices);
+    return geom;
+  }, []);
 
   const state = useRef({
     pos: new THREE.Vector2(-2.1, -1.35),
@@ -160,9 +178,11 @@ export function OctopusGuide({
       );
     }
 
-    // Tentacles: anchors fan across the underside; beads chase their leaders.
-    if (beadsMesh.current) {
-      let instance = 0;
+    // Tentacles: anchors fan across the underside; points chase their leaders,
+    // then the chain extrudes into a tapered ribbon.
+    const geom = ribbon.current?.geometry as THREE.BufferGeometry | undefined;
+    const attr = geom?.getAttribute("position") as THREE.BufferAttribute | undefined;
+    if (attr) {
       for (let i = 0; i < TENTACLES; i++) {
         const spread = (i / (TENTACLES - 1) - 0.5) * 1.7;
         const anchorX = s.pos.x + Math.sin(spread) * 0.42;
@@ -186,14 +206,25 @@ export function OctopusGuide({
           dy = (dy / len) * 0.8 + (restY / restLen) * 0.2;
           const norm = Math.max(Math.hypot(dx, dy), 0.0001);
           bead.set(prev.x + (dx / norm) * SEG, prev.y + (dy / norm) * SEG);
-          const taper = 0.085 * (1 - (j / BEADS) * 0.8);
-          dummy.position.set(bead.x, bead.y, 0.55);
-          dummy.scale.setScalar(taper);
-          dummy.updateMatrix();
-          beadsMesh.current.setMatrixAt(instance++, dummy.matrix);
+        }
+        // Extrude: offset each point perpendicular to its local direction.
+        const base = i * BEADS * 2;
+        for (let j = 0; j < BEADS; j++) {
+          const cur = chain[j];
+          const next = chain[Math.min(j + 1, BEADS - 1)];
+          const prev = chain[Math.max(j - 1, 0)];
+          let tx = next.x - prev.x;
+          let ty = next.y - prev.y;
+          const tl = Math.max(Math.hypot(tx, ty), 0.0001);
+          tx /= tl; ty /= tl;
+          const w = Math.max(0.062 * (1 - (j / (BEADS - 1)) * 0.9), 0.008);
+          const v = (base + j * 2) * 3;
+          const arr = attr.array as Float32Array;
+          arr[v] = cur.x - ty * w; arr[v + 1] = cur.y + tx * w; arr[v + 2] = 0.55;
+          arr[v + 3] = cur.x + ty * w; arr[v + 4] = cur.y - tx * w; arr[v + 5] = 0.55;
         }
       }
-      beadsMesh.current.instanceMatrix.needsUpdate = true;
+      attr.needsUpdate = true;
     }
   });
 
@@ -213,14 +244,16 @@ export function OctopusGuide({
           />
         </mesh>
       </group>
-      <instancedMesh
-        ref={beadsMesh}
-        args={[undefined, undefined, TENTACLES * (BEADS - 1)]}
-        frustumCulled={false}
-      >
-        <circleGeometry args={[1, 10]} />
-        <meshBasicMaterial color="#0a1626" transparent opacity={0.95} depthWrite={false} toneMapped={false} />
-      </instancedMesh>
+      <mesh ref={ribbon} geometry={ribbonGeom} frustumCulled={false}>
+        <meshBasicMaterial
+          color="#0c1a2c"
+          transparent
+          opacity={0.96}
+          side={THREE.DoubleSide}
+          depthWrite={false}
+          toneMapped={false}
+        />
+      </mesh>
       {/* Keep the guide inside the frame on any viewport. */}
       <group visible={false} position={[viewport.width / 2, viewport.height / 2, 0]} />
     </>

@@ -1674,6 +1674,12 @@ a.ledger-row:focus-visible span {
   gap: 1rem;
 }
 
+.stage-top-right {
+  display: flex;
+  align-items: center;
+  gap: 1.4rem;
+}
+
 .stage-mark {
   color: #f2f5fa;
   font-family: var(--font-mono), monospace;
@@ -1892,7 +1898,8 @@ a.ledger-row:focus-visible span {
   overflow-y: auto;
   background:
     linear-gradient(180deg, rgba(4,8,18,.93), rgba(3,6,14,.985) 30%, rgba(2,4,10,.995));
-  animation: room-in 480ms cubic-bezier(.16,1,.3,1);
+  /* Waits for the ocean iris to close before arriving. */
+  animation: room-in 460ms cubic-bezier(.16,1,.3,1) 230ms backwards;
 }
 
 @keyframes room-in {
