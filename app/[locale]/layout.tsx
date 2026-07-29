@@ -50,16 +50,16 @@ export async function generateMetadata({
       siteName: "Nimdal",
       images: [
         {
-          url: "/favicon.png",
-          width: 400,
-          height: 400,
-          alt: isKorean ? "Nimdal의 픽셀 문어 아이덴티티" : "Nimdal pixel-octopus identity"
+          url: "/media/og-dive.png",
+          width: 1200,
+          height: 630,
+          alt: isKorean ? "님달 포트폴리오의 잠수 인터페이스" : "The dive interface of the Nimdal portfolio"
         }
       ]
     },
     twitter: {
-      card: "summary",
-      images: ["/favicon.png"]
+      card: "summary_large_image",
+      images: ["/media/og-dive.png"]
     }
   };
 }

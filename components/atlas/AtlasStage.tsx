@@ -8,7 +8,7 @@ import { OctopusGuide, type OctopusHandle } from "@/components/atlas/scene/Octop
 import { ProjectRoom } from "@/components/atlas/ProjectRoom";
 import { ATLAS_BUDGET } from "@/lib/atlas/capability";
 import { DiveSound } from "@/lib/atlas/sound";
-import type { AtlasLandmark } from "@/lib/atlas/world";
+import type { AtlasLandmark, LandmarkKind } from "@/lib/atlas/world";
 import type { Locale } from "@/lib/content";
 
 /**
@@ -49,10 +49,21 @@ const ui = {
   }
 } as const;
 
+const KIND_INDEX: Record<LandmarkKind, number> = {
+  current: 0, reef: 1, ruin: 2, lighthouse: 3, port: 4,
+  canal: 5, lagoon: 6, forest: 7, dock: 8
+};
+
 type Station =
   | { kind: "intro"; key: string; eyebrow: string; title: string; body: string; hue: string }
   | { kind: "project"; key: string; eyebrow: string; title: string; body: string; hue: string; landmark: AtlasLandmark }
   | { kind: "contact"; key: string; eyebrow: string; title: string; body: string; hue: string };
+
+function beaconKind(station: Station): number {
+  if (station.kind === "project") return KIND_INDEX[station.landmark.kind];
+  if (station.kind === "contact") return 9;
+  return -1;
+}
 
 interface AtlasStageProps {
   locale: Locale;
@@ -124,7 +135,7 @@ export function AtlasStage({ locale, landmarks, tier, onExit }: AtlasStageProps)
   useEffect(() => {
     const depth = index / (count - 1);
     oceanRef.current?.setDepth(depth);
-    oceanRef.current?.setStation(index, station.hue);
+    oceanRef.current?.setStation(index, station.hue, beaconKind(station));
     octoRef.current?.setDeep(depth);
     octoRef.current?.setAccent(station.hue);
     soundRef.current?.setDepth(depth);
@@ -134,7 +145,7 @@ export function AtlasStage({ locale, landmarks, tier, onExit }: AtlasStageProps)
     if (index === 0) octoRef.current?.setTarget(-2.1, -1.35);
     else octoRef.current?.setTarget(-1.5 - wobble * 0.6, 0.9 - wobble * 2.0);
     octoRef.current?.dart(0, index === 0 ? 0 : -1.1);
-  }, [index, count, station.hue]);
+  }, [index, count, station]);
 
   useEffect(() => {
     oceanRef.current?.setDive(room ? 1 : 0);

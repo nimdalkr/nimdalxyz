@@ -38,6 +38,7 @@ const fragmentShader = /* glsl */ `
   uniform sampler2D uPortrait;
   uniform vec2  uCover;      // portrait cover-fit correction
   uniform float uVel;        // depth velocity, signed
+  uniform float uKind;       // landmark kind, -1 when no beacon
 
   float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453123); }
   float noise(vec2 p){
@@ -73,6 +74,12 @@ const fragmentShader = /* glsl */ `
     float tw = 0.35 + 0.65 * pow(0.5 + 0.5 * sin(uTime * (1.5 + h * 3.0) + h * 40.0), 3.0);
     float r = 0.05 + 0.06 * fract(h * 6.3);
     return smoothstep(r, 0.0, length(f - c)) * tw;
+  }
+
+  // A single soft lamp, stretchable into bars, beams, and basins.
+  float lampAt(vec2 uv, vec2 c, vec2 stretchXY, float k, float aspect) {
+    vec2 dl = (uv - c) * vec2(aspect, 1.0) * stretchXY;
+    return exp(-dot(dl, dl) * k);
   }
 
   float caustic(vec2 uv, float t) {
@@ -136,15 +143,52 @@ const fragmentShader = /* glsl */ `
     water += uAccent * biolume(suv, 12.0, 1.0) * glow * 0.55;
     water += vec3(0.4, 0.9, 1.0) * biolume(suv, 22.0, 2.0) * glow * 0.30;
 
-    // Station beacon: the place, abstracted to its light. Left of centre so it
-    // lives on the subject side, clear of the type column.
-    for (int i = 0; i < 3; i++) {
-      float h = hash(vec2(uSeed * 13.7, float(i) * 7.3));
-      vec2 bp = vec2(0.14 + fract(h * 5.3) * 0.28, 0.30 + fract(h * 8.7) * 0.42);
-      vec2 delta = (uv - bp) * vec2(aspect, 1.0);
-      float pulse = 0.75 + 0.25 * sin(uTime * (0.7 + h) + h * 20.0);
-      float fall = exp(-dot(delta, delta) * (26.0 + h * 40.0));
-      water += uAccent * fall * pulse * 0.34 * smoothstep(0.06, 0.3, d);
+    // Station beacon: every kind of place has its own light signature, drawn
+    // left of centre where the subject lives, clear of the type column.
+    float visible = smoothstep(0.06, 0.3, d);
+    if (uKind > -0.5 && visible > 0.001) {
+      float k = floor(uKind + 0.5);
+      float pulse = 0.8 + 0.2 * sin(uTime * 0.9 + uSeed);
+      float lamp = 0.0;
+      vec2 base = vec2(0.28, 0.5);
+      if (k < 0.5) {            // market current: a rushing diagonal
+        vec2 q = uv - base;
+        q = vec2((q.x + q.y * 0.6) * aspect, (q.y - q.x * 0.3) * 5.5);
+        lamp = exp(-dot(q, q) * 9.0) * 1.15;
+      } else if (k < 1.5) {     // wallet reef: clustered polyps
+        lamp += lampAt(uv, base + vec2(-0.045, -0.05), vec2(1.0), 260.0, aspect);
+        lamp += lampAt(uv, base + vec2(0.05, 0.02), vec2(1.0), 220.0, aspect);
+        lamp += lampAt(uv, base + vec2(-0.01, 0.09), vec2(1.0), 300.0, aspect);
+      } else if (k < 2.5) {     // reputation ruin: a broken arch
+        lamp += lampAt(uv, base + vec2(-0.07, 0.0), vec2(2.2, 1.0), 130.0, aspect);
+        lamp += lampAt(uv, base + vec2(0.07, -0.02), vec2(2.2, 1.0), 130.0, aspect);
+      } else if (k < 3.5) {     // signal lighthouse: a standing beam
+        lamp += lampAt(uv, vec2(base.x, 0.44), vec2(6.5, 0.75), 26.0, aspect) * 1.2;
+        lamp += lampAt(uv, vec2(base.x, 0.26), vec2(1.0), 320.0, aspect)
+              * (0.6 + 0.4 * sin(uTime * 2.4));
+      } else if (k < 4.5) {     // message port: a row of moorings
+        for (int i = 0; i < 4; i++) {
+          lamp += lampAt(uv, vec2(base.x - 0.09 + float(i) * 0.06, 0.6), vec2(1.0), 420.0, aspect);
+        }
+      } else if (k < 5.5) {     // automation canal: twin gates
+        lamp += lampAt(uv, base + vec2(-0.05, 0.0), vec2(7.0, 0.9), 55.0, aspect);
+        lamp += lampAt(uv, base + vec2(0.05, 0.0), vec2(7.0, 0.9), 55.0, aspect);
+      } else if (k < 6.5) {     // game lagoon: a wide shallow basin
+        lamp = lampAt(uv, vec2(base.x, 0.58), vec2(0.9, 3.4), 26.0, aspect) * 1.1;
+      } else if (k < 7.5) {     // pixel forest: swaying fronds
+        for (int i = 0; i < 4; i++) {
+          float fx = base.x - 0.08 + float(i) * 0.055;
+          float swayF = sin(uTime * 0.8 + float(i) * 1.9) * 0.012;
+          lamp += lampAt(uv, vec2(fx + swayF, 0.52), vec2(9.0, 0.8), 50.0, aspect) * 0.8;
+        }
+      } else if (k < 8.5) {     // exit dock: a low pier light
+        lamp += lampAt(uv, vec2(base.x, 0.66), vec2(0.9, 8.0), 36.0, aspect);
+        lamp += lampAt(uv, vec2(base.x + 0.1, 0.62), vec2(1.0), 380.0, aspect)
+              * (0.5 + 0.5 * sin(uTime * 1.6));
+      } else {                   // abyss floor: the ground answering
+        lamp = lampAt(uv, vec2(0.4, 0.86), vec2(0.7, 3.2), 15.0, aspect) * 0.9;
+      }
+      water += uAccent * lamp * pulse * 0.4 * visible;
     }
 
     // The portrait floats at the surface and sinks away as the dive begins.
@@ -195,7 +239,8 @@ export type OceanHandle = {
   setDepth: (value: number) => void;
   /** Room state, 0 or 1. */
   setDive: (value: number) => void;
-  setStation: (index: number, hue: string) => void;
+  /** kind: beacon signature index, -1 for none. */
+  setStation: (index: number, hue: string, kind: number) => void;
   setPointer: (x: number, y: number) => void;
 };
 
@@ -230,20 +275,22 @@ export function Ocean({
       uSeed: { value: 0 },
       uPortrait: { value: portrait },
       uCover: { value: new THREE.Vector2(1, 1) },
-      uVel: { value: 0 }
+      uVel: { value: 0 },
+      uKind: { value: -1 }
     }),
     [portrait]
   );
 
-  const target = useRef({ depth: 0, dive: 0, px: 0, py: 0, seed: 0 });
+  const target = useRef({ depth: 0, dive: 0, px: 0, py: 0, seed: 0, kind: -1 });
   const accent = useRef(new THREE.Color("#7fe3c4"));
 
   useEffect(() => {
     handleRef.current = {
       setDepth: (value) => { target.current.depth = value; },
       setDive: (value) => { target.current.dive = value; },
-      setStation: (index, hue) => {
+      setStation: (index, hue, kind) => {
         target.current.seed = index;
+        target.current.kind = kind;
         accent.current.set(hue);
       },
       setPointer: (x, y) => { target.current.px = x; target.current.py = y; }
@@ -268,6 +315,7 @@ export function Ocean({
     u.uVel.value += (rawVel - u.uVel.value) * Math.min(1, dt * 4);
     u.uDive.value += (target.current.dive - u.uDive.value) * Math.min(1, dt * 3.2);
     u.uSeed.value = target.current.seed;
+    u.uKind.value = target.current.kind;
     u.uPointer.value.x += (target.current.px - u.uPointer.value.x) * Math.min(1, dt * 2.4);
     u.uPointer.value.y += (target.current.py - u.uPointer.value.y) * Math.min(1, dt * 2.4);
     u.uAccent.value.lerp(accent.current, Math.min(1, dt * 2.2));

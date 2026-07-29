@@ -21,6 +21,7 @@ import * as THREE from "three";
 const TENTACLES = 8;
 const BEADS = 16;
 const SEG = 0.088;
+const INK = 12;
 
 const bodyVertex = /* glsl */ `
   varying vec2 vUv;
@@ -113,7 +114,8 @@ export function OctopusGuide({
     target: new THREE.Vector2(-2.1, -1.35),
     deep: 0,
     pokeUntil: 0,
-    poke: new THREE.Vector2(0, 0)
+    poke: new THREE.Vector2(0, 0),
+    inkPending: false
   });
 
   // Tentacle bead positions persist across frames; physics comes from chasing.
@@ -127,6 +129,13 @@ export function OctopusGuide({
         );
       }),
     []
+  );
+
+  // Ink cloud: a burst of dark blots released where the guide was startled.
+  const inkMesh = useRef<THREE.InstancedMesh>(null);
+  const inkDummy = useMemo(() => new THREE.Object3D(), []);
+  const inkSeeds = useRef(
+    Array.from({ length: INK }, () => ({ x: 0, y: 0, vx: 0, vy: 0, born: -10 }))
   );
 
   const bodyUniforms = useMemo(
@@ -147,6 +156,7 @@ export function OctopusGuide({
         // NDC to world at z=0, held briefly so the dash reads as curiosity.
         state.current.poke.set(nx, ny);
         state.current.pokeUntil = performance.now() + 650;
+        state.current.inkPending = true;
       },
       dart: (dx, dy) => { state.current.vel.x += dx; state.current.vel.y += dy; },
       setDeep: (value) => { state.current.deep = value; },
@@ -257,6 +267,37 @@ export function OctopusGuide({
       }
       attr.needsUpdate = true;
     }
+
+    // Ink: spawned on startle, drifting apart, swallowed by the water.
+    if (s.inkPending) {
+      s.inkPending = false;
+      for (const blot of inkSeeds.current) {
+        const a = Math.random() * Math.PI * 2;
+        const speed = 0.4 + Math.random() * 0.9;
+        blot.x = s.pos.x; blot.y = s.pos.y - 0.1;
+        blot.vx = Math.cos(a) * speed; blot.vy = Math.sin(a) * speed - 0.15;
+        blot.born = t + Math.random() * 0.08;
+      }
+    }
+    if (inkMesh.current) {
+      const life = 1.1;
+      const fit = Math.min(1, (viewport.width / 2) / 3.2);
+      inkSeeds.current.forEach((blot, idx) => {
+        const age = t - blot.born;
+        let scale = 0;
+        if (age > 0 && age < life) {
+          blot.x += blot.vx * dt; blot.y += blot.vy * dt;
+          blot.vx *= Math.exp(-2.2 * dt); blot.vy *= Math.exp(-2.2 * dt);
+          const grow = Math.min(age / 0.14, 1);
+          scale = 0.16 * fit * grow * (1 - age / life);
+        }
+        inkDummy.position.set(blot.x, blot.y, 0.5);
+        inkDummy.scale.setScalar(Math.max(scale, 0.0001));
+        inkDummy.updateMatrix();
+        inkMesh.current!.setMatrixAt(idx, inkDummy.matrix);
+      });
+      inkMesh.current.instanceMatrix.needsUpdate = true;
+    }
   });
 
   return (
@@ -275,6 +316,10 @@ export function OctopusGuide({
           />
         </mesh>
       </group>
+      <instancedMesh ref={inkMesh} args={[undefined, undefined, INK]} frustumCulled={false}>
+        <circleGeometry args={[1, 10]} />
+        <meshBasicMaterial color="#071120" transparent opacity={0.8} depthWrite={false} toneMapped={false} />
+      </instancedMesh>
       <mesh ref={ribbon} geometry={ribbonGeom} frustumCulled={false}>
         <meshBasicMaterial
           color="#0c1a2c"

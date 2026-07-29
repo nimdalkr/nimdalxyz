@@ -33,17 +33,19 @@ export async function generateMetadata({ params }: HomePageProps): Promise<Metad
       locale: openGraphLocaleByLocale[locale],
       type: "website",
       images: [{
-        url: "/media/operator-portrait.png",
-        width: 640,
-        height: 853,
-        alt: content.home.identity.portraitAlt
+        url: "/media/og-dive.png",
+        width: 1200,
+        height: 630,
+        alt: locale === "ko"
+          ? "님달 포트폴리오: 수면의 초상과 잠수 인터페이스"
+          : "Nimdal portfolio: the surface portrait and dive interface"
       }]
     },
     twitter: {
-      card: "summary",
+      card: "summary_large_image",
       title: content.seo.title,
       description: content.seo.description,
-      images: ["/media/operator-portrait.png"]
+      images: ["/media/og-dive.png"]
     }
   };
 }
