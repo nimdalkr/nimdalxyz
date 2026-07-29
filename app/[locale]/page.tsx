@@ -5,7 +5,7 @@ import { AtlasGate } from "@/components/atlas/AtlasGate";
 import { LegacyHashBridge } from "@/components/compat/LegacyHashBridge";
 import { ReadableHome } from "@/components/home/ReadableHome";
 import { StructuredData } from "@/components/seo/StructuredData";
-import { buildAtlas } from "@/lib/atlas/world";
+import { buildAtlas, buildCases } from "@/lib/atlas/world";
 import { isLocale, siteContent } from "@/lib/content";
 import { absoluteCanonicalUrl, metadataAlternates, openGraphLocaleByLocale } from "@/lib/seo";
 
@@ -54,6 +54,7 @@ export default async function HomePage({ params }: HomePageProps) {
   const locale = pageLocale((await params).locale);
   const korean = locale === "ko";
   const landmarks = buildAtlas(locale);
+  const cases = buildCases(locale);
   const schema = {
     "@context": "https://schema.org",
     "@type": "Person",
@@ -71,7 +72,7 @@ export default async function HomePage({ params }: HomePageProps) {
       <StructuredData data={schema} />
       {/* The readable portfolio is the server-rendered payload. The atlas is an
           upgrade the client applies only when the device can carry it. */}
-      <AtlasGate locale={locale} landmarks={landmarks}>
+      <AtlasGate locale={locale} landmarks={landmarks} cases={cases}>
         <ReadableHome locale={locale} />
       </AtlasGate>
     </>

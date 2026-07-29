@@ -185,8 +185,15 @@ const fragmentShader = /* glsl */ `
         lamp += lampAt(uv, vec2(base.x, 0.66), vec2(0.9, 8.0), 36.0, aspect);
         lamp += lampAt(uv, vec2(base.x + 0.1, 0.62), vec2(1.0), 380.0, aspect)
               * (0.5 + 0.5 * sin(uTime * 1.6));
-      } else {                   // abyss floor: the ground answering
+      } else if (k < 9.5) {     // abyss floor: the ground answering
         lamp = lampAt(uv, vec2(0.4, 0.86), vec2(0.7, 3.2), 15.0, aspect) * 0.9;
+      } else {                   // sonar: rings leaving the reading
+        float rr = length((uv - vec2(0.30, 0.5)) * vec2(aspect, 1.0));
+        for (int i = 0; i < 3; i++) {
+          float ph = fract(uTime * 0.22 + float(i) / 3.0);
+          lamp += smoothstep(0.022, 0.0, abs(rr - ph * 0.5)) * (1.0 - ph) * 0.9;
+        }
+        lamp += lampAt(uv, vec2(0.30, 0.5), vec2(1.0), 300.0, aspect) * 0.8;
       }
       water += uAccent * lamp * pulse * 0.4 * visible;
     }

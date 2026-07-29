@@ -1,13 +1,13 @@
 import type { Locale } from "@/lib/content";
-import { getProject, projects } from "@/lib/content";
+import { careerCases, getProject, projects } from "@/lib/content";
 
 /**
  * The dive plan.
  *
- * The portfolio is a descent. Every project is a station in the water column
- * with a place name, an accent it glows with, and a depth. The order is
- * hand-authored: it opens on the strongest live product and settles into the
- * small utilities near the floor, which is how the work should be read.
+ * The portfolio is a descent. The dive carries only the three builds worth
+ * showing and, before them, the career itself: the record, the agency years,
+ * the brand work, and the Web3 crossing, each opening a verified case room.
+ * The rest of the projects stay reachable from the archive, not the stage.
  */
 
 type Place = { ko: string; en: string };
@@ -19,13 +19,7 @@ export type LandmarkKind =
 const STATIONS: ReadonlyArray<{ slug: string; place: Place; hue: string; kind: LandmarkKind }> = [
   { slug: "hyperalphaduo", kind: "current", place: { ko: "시장 해류", en: "Market Current" }, hue: "#ffb347" },
   { slug: "alphaduo", kind: "reef", place: { ko: "지갑 산호초", en: "Wallet Reef" }, hue: "#ff7ab8" },
-  { slug: "ethosalpha", kind: "ruin", place: { ko: "평판 유적", en: "Reputation Ruin" }, hue: "#7fe3c4" },
-  { slug: "kol-listing", kind: "lighthouse", place: { ko: "시그널 등대", en: "Signal Lighthouse" }, hue: "#ffd166" },
-  { slug: "tg-finance-search-portal", kind: "port", place: { ko: "메시지 항구", en: "Message Port" }, hue: "#6ec6ff" },
-  { slug: "social-poster-one", kind: "canal", place: { ko: "자동화 수로", en: "Automation Canal" }, hue: "#b28dff" },
-  { slug: "mylol", kind: "lagoon", place: { ko: "게임 석호", en: "Game Lagoon" }, hue: "#5ee0a0" },
-  { slug: "maple-union", kind: "forest", place: { ko: "픽셀 숲 산호", en: "Pixel Forest Reef" }, hue: "#ff8fb1" },
-  { slug: "discord-bulk-leave", kind: "dock", place: { ko: "출항 부두", en: "Exit Dock" }, hue: "#9fb3c8" }
+  { slug: "mylol", kind: "lagoon", place: { ko: "게임 석호", en: "Game Lagoon" }, hue: "#5ee0a0" }
 ];
 
 export type AtlasMedia = {
@@ -90,6 +84,48 @@ export function buildAtlas(locale: Locale): AtlasLandmark[] {
       repositoryUrl: project.repositoryUrl
     }];
   });
+}
+
+export type CaseRoom = {
+  id: string;
+  period: string;
+  title: string;
+  context: string;
+  objective: string;
+  role: string;
+  result: string;
+  channels: string[];
+  media: AtlasMedia[];
+};
+
+/** The verified client work, shaped for the dive's story rooms. */
+export function buildCases(locale: Locale): Record<string, CaseRoom> {
+  const wanted = new Set([
+    "mkr-agency-operating-system",
+    "leica-online-acquisition",
+    "nevada-korea-marketing-lead"
+  ]);
+  const out: Record<string, CaseRoom> = {};
+  for (const item of careerCases) {
+    if (!wanted.has(item.id)) continue;
+    const copy = item.copy[locale];
+    out[item.id] = {
+      id: item.id,
+      period: item.period,
+      title: copy.title,
+      context: copy.context,
+      objective: copy.objective,
+      role: copy.role,
+      result: copy.result,
+      channels: [...copy.channels],
+      media: [{
+        src: item.media.src,
+        alt: item.media.alt[locale],
+        caption: item.media.claim[locale]
+      }]
+    };
+  }
+  return out;
 }
 
 /** Guards the hand-authored plan against a project being renamed or removed. */

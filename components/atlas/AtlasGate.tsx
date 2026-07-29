@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 
-import type { AtlasLandmark } from "@/lib/atlas/world";
+import type { AtlasLandmark, CaseRoom } from "@/lib/atlas/world";
 import {
   ATLAS_STORAGE_KEY,
   detectAtlasCapability,
@@ -28,12 +28,13 @@ const AtlasStage = dynamic(
 interface AtlasGateProps {
   locale: Locale;
   landmarks: AtlasLandmark[];
+  cases: Record<string, CaseRoom>;
   children: React.ReactNode;
 }
 
 type Mode = "pending" | "atlas" | "readable";
 
-export function AtlasGate({ locale, landmarks, children }: AtlasGateProps) {
+export function AtlasGate({ locale, landmarks, cases, children }: AtlasGateProps) {
   const [mode, setMode] = useState<Mode>("pending");
   const [tier, setTier] = useState<AtlasTier>("off");
 
@@ -81,6 +82,7 @@ export function AtlasGate({ locale, landmarks, children }: AtlasGateProps) {
       <AtlasStage
         locale={locale}
         landmarks={landmarks}
+        cases={cases}
         tier={tier === "lite" ? "lite" : "full"}
         onExit={leaveAtlas}
       />

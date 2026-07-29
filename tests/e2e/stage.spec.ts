@@ -73,14 +73,14 @@ test("stage advances through every chapter and can be left", async ({ page }) =>
   await page.waitForSelector(".stage canvas", { timeout: 25000 });
 
   const rail = page.locator(".stage-rail button");
-  await expect(rail).toHaveCount(11);
+  await expect(rail).toHaveCount(10);
 
-  await expect(page.locator(".stage-steps span")).toHaveText("01 / 11");
+  await expect(page.locator(".stage-steps span")).toHaveText("01 / 10");
   await page.keyboard.press("ArrowRight");
-  await expect(page.locator(".stage-steps span")).toHaveText("02 / 11");
+  await expect(page.locator(".stage-steps span")).toHaveText("02 / 10");
 
-  await rail.nth(10).click();
-  await expect(page.locator(".stage-steps span")).toHaveText("11 / 11");
+  await rail.nth(9).click();
+  await expect(page.locator(".stage-steps span")).toHaveText("10 / 10");
 
   // Escape returns to the readable portfolio.
   await page.keyboard.press("Escape");
@@ -91,7 +91,23 @@ test("a station opens its room and the room can be left", async ({ page }) => {
   await page.goto("/en");
   await page.waitForSelector(".stage canvas", { timeout: 25000 });
 
-  // Station 2 is the first project. Enter opens its room in place.
+  // Station 3 is the first story chapter; its room is a verified case.
+  await page.keyboard.press("ArrowRight");
+  await page.keyboard.press("ArrowRight");
+  await page.keyboard.press("Enter");
+  const caseRoom = page.locator(".room");
+  await expect(caseRoom).toBeVisible();
+  await expect(caseRoom.locator(".room-columns section")).toHaveCount(3);
+  await expect(caseRoom.getByRole("link", { name: /full career/i })).toHaveAttribute(
+    "href",
+    "/en/portfolio"
+  );
+  await page.keyboard.press("Escape");
+  await expect(caseRoom).toHaveCount(0);
+
+  // Station 6 is the first project. Enter opens its room in place.
+  await page.keyboard.press("ArrowRight");
+  await page.keyboard.press("ArrowRight");
   await page.keyboard.press("ArrowRight");
   await page.keyboard.press("Enter");
   const room = page.locator(".room");

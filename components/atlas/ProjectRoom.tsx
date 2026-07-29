@@ -4,8 +4,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 
-import type { AtlasLandmark } from "@/lib/atlas/world";
+import type { AtlasLandmark, CaseRoom } from "@/lib/atlas/world";
 import type { Locale } from "@/lib/content";
+
+export type RoomData =
+  | { variant: "project"; hue: string; landmark: AtlasLandmark }
+  | { variant: "case"; hue: string; place: string; caseRoom: CaseRoom };
 
 /**
  * A station's room.
@@ -21,10 +25,15 @@ const ui = {
     problem: "문제",
     decision: "판단",
     system: "시스템",
+    objective: "목표",
+    role: "담당",
+    result: "결과",
+    channels: "채널",
     proof: "남은 화면",
     live: "라이브 제품",
     repo: "저장소",
     full: "전체 기록 보기",
+    career: "경력 전체 보기",
     ascend: "올라가기",
     close: "룸 닫기"
   },
@@ -32,22 +41,27 @@ const ui = {
     problem: "Problem",
     decision: "Decision",
     system: "System",
+    objective: "Objective",
+    role: "Ownership",
+    result: "Outcome",
+    channels: "Channels",
     proof: "Screens that remain",
     live: "Live product",
     repo: "Repository",
     full: "Read the full record",
+    career: "See the full career",
     ascend: "Ascend",
     close: "Close the room"
   }
 } as const;
 
 interface ProjectRoomProps {
-  landmark: AtlasLandmark;
+  data: RoomData;
   locale: Locale;
   onClose: () => void;
 }
 
-export function ProjectRoom({ landmark, locale, onClose }: ProjectRoomProps) {
+export function ProjectRoom({ data, locale, onClose }: ProjectRoomProps) {
   const t = ui[locale];
   const heading = useRef<HTMLHeadingElement>(null);
 
@@ -58,11 +72,24 @@ export function ProjectRoom({ landmark, locale, onClose }: ProjectRoomProps) {
     return () => previous?.focus?.();
   }, []);
 
-  const sections = [
-    { key: "problem", label: t.problem, body: landmark.detail.problem },
-    { key: "decision", label: t.decision, body: landmark.detail.decision },
-    { key: "system", label: t.system, body: landmark.detail.system }
-  ];
+  const isProject = data.variant === "project";
+  const title = isProject ? data.landmark.title : data.caseRoom.title;
+  const placeLine = isProject
+    ? `${data.landmark.place} · ${data.landmark.category}`
+    : `${data.place} · ${data.caseRoom.period}`;
+  const sections = isProject
+    ? [
+        { key: "problem", label: t.problem, body: data.landmark.detail.problem },
+        { key: "decision", label: t.decision, body: data.landmark.detail.decision },
+        { key: "system", label: t.system, body: data.landmark.detail.system }
+      ]
+    : [
+        { key: "objective", label: t.objective, body: data.caseRoom.objective },
+        { key: "role", label: t.role, body: data.caseRoom.role },
+        { key: "result", label: t.result, body: data.caseRoom.result }
+      ];
+  const media = isProject ? data.landmark.media : data.caseRoom.media;
+  const proofIntro = isProject ? data.landmark.detail.proof : data.caseRoom.context;
 
   return (
     <div
@@ -70,14 +97,14 @@ export function ProjectRoom({ landmark, locale, onClose }: ProjectRoomProps) {
       role="dialog"
       aria-modal="true"
       aria-labelledby="room-title"
-      style={{ "--room-accent": landmark.hue } as React.CSSProperties}
+      style={{ "--room-accent": data.hue } as React.CSSProperties}
     >
       <div className="room-inner">
         <header className="room-head">
           <div>
-            <p className="room-place">{landmark.place} · {landmark.category}</p>
+            <p className="room-place">{placeLine}</p>
             <h2 className="room-title" id="room-title" ref={heading} tabIndex={-1}>
-              {landmark.title}
+              {title}
             </h2>
           </div>
           <button type="button" className="room-ascend" onClick={onClose} aria-label={t.close}>
@@ -94,38 +121,51 @@ export function ProjectRoom({ landmark, locale, onClose }: ProjectRoomProps) {
           ))}
         </div>
 
-        <section className="room-proof" aria-label={t.proof}>
-          <h3>{t.proof}</h3>
-          <p>{landmark.detail.proof}</p>
+        <section className="room-proof" aria-label={isProject ? t.proof : t.channels}>
+          <h3>{isProject ? t.proof : t.channels}</h3>
+          {isProject ? (
+            <p>{proofIntro}</p>
+          ) : (
+            <>
+              <p>{proofIntro}</p>
+              <ul className="room-chips">
+                {data.caseRoom.channels.map((channel) => <li key={channel}>{channel}</li>)}
+              </ul>
+            </>
+          )}
           <div className="room-shots">
-            {landmark.media.map((media) => (
-              <figure key={media.src}>
+            {media.map((item) => (
+              <figure key={item.src}>
                 <div className="room-shot">
                   <Image
-                    src={media.src}
-                    alt={media.alt}
+                    src={item.src}
+                    alt={item.alt}
                     fill
                     sizes="(max-width: 900px) 100vw, 40vw"
                   />
                 </div>
-                <figcaption>{media.caption}</figcaption>
+                <figcaption>{item.caption}</figcaption>
               </figure>
             ))}
           </div>
         </section>
 
         <footer className="room-foot">
-          {landmark.liveUrl ? (
-            <a className="room-link is-primary" href={landmark.liveUrl} target="_blank" rel="noreferrer">
+          {isProject && data.landmark.liveUrl ? (
+            <a className="room-link is-primary" href={data.landmark.liveUrl} target="_blank" rel="noreferrer">
               {t.live}
             </a>
           ) : null}
-          {landmark.repositoryUrl ? (
-            <a className="room-link" href={landmark.repositoryUrl} target="_blank" rel="noreferrer">
+          {isProject && data.landmark.repositoryUrl ? (
+            <a className="room-link" href={data.landmark.repositoryUrl} target="_blank" rel="noreferrer">
               {t.repo}
             </a>
           ) : null}
-          <Link className="room-link" href={landmark.href}>{t.full}</Link>
+          {isProject ? (
+            <Link className="room-link" href={data.landmark.href}>{t.full}</Link>
+          ) : (
+            <Link className="room-link" href={`/${locale}/portfolio`}>{t.career}</Link>
+          )}
         </footer>
       </div>
     </div>
