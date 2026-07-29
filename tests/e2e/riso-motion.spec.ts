@@ -1,5 +1,14 @@
 import { expect, test } from "@playwright/test";
 
+// The home route now mounts the WebGL stage when the device supports it. These
+// suites cover the readable portfolio, so they opt into it explicitly.
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    try { window.localStorage.setItem("nimdal-atlas-mode", "readable"); } catch {}
+  });
+});
+
+
 /**
  * The design system leans on scroll-driven motion, so these guard the two ways
  * it can silently fail: a reveal that never fires leaves content invisible, and

@@ -9,6 +9,15 @@ import {
   type Page
 } from "@playwright/test";
 
+// The home route now mounts the WebGL stage when the device supports it. These
+// suites cover the readable portfolio, so they opt into it explicitly.
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    try { window.localStorage.setItem("nimdal-atlas-mode", "readable"); } catch {}
+  });
+});
+
+
 const BLOG_HOST = "blog.nimdal.xyz";
 const BLOG_HEADERS = {
   host: BLOG_HOST,
