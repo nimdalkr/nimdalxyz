@@ -1,0 +1,15 @@
+# Local-only working directories. These are untracked, so a git-based build
+# never sees them, but a CLI deploy uploads the working tree and Next traces
+# whatever it finds at the root into every serverless function. tmp/ alone is
+# ~263mb of old audit artifacts, which is enough to blow the 250mb function
+# limit on its own.
+tmp
+audits
+artifacts
+wiki
+docs
+.next
+*.docx
+*.pdf
+*.jpg
+!public/**/*.jpg
