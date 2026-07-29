@@ -1,10 +1,9 @@
 import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
-import Image from "next/image";
 import Link from "next/link";
 
 import { BlogCard } from "@/components/blog/BlogCard";
 import { BlogHeader } from "@/components/blog/BlogHeader";
-import { PixelEffects } from "@/components/pixel/PixelEffects";
+import { RisoPlate } from "@/components/riso/RisoPlate";
 import type {
   LocalizedBlogPost,
   LocalizedBlogTag
@@ -79,7 +78,6 @@ export function BlogIndex({
 
   return (
     <div className={`${styles.shell} blog-surface`}>
-      <PixelEffects />
       <BlogHeader
         locale={locale}
         hubHref={hubHref}
@@ -118,18 +116,16 @@ export function BlogIndex({
             <h2 className={styles.sectionLabel} id="featured-title">{ui.featured}</h2>
             <article className={styles.featured}>
               <Link
-                className={styles.featuredMedia}
                 href={featured.canonicalUrl}
                 aria-label={locale === "ko" ? `${featured.title} 글 읽기` : `Read ${featured.title}`}
               >
-                <Image
+                <RisoPlate
+                  className={styles.featuredMedia}
                   src={featured.cover}
                   alt=""
-                  fill
                   priority
-                  loading="eager"
-                  sizes="(max-width: 720px) calc(100vw - 40px), (max-width: 900px) 52vw, 520px"
-                  className={styles.image}
+                  offset={16}
+                  sizes="(max-width: 767px) calc(100vw - 2.5rem), 55vw"
                 />
               </Link>
               <div className={styles.featuredCopy}>

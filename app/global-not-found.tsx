@@ -1,23 +1,23 @@
 import Link from "next/link";
 
-import { notoSansKr, plexMono } from "@/lib/fonts";
+import { bricolage, notoSansKr, plexMono } from "@/lib/fonts";
 
 import "./globals.css";
 
 export const metadata = {
-  title: "404 — Lost signal",
+  title: "404 / Page not found",
   description: "The requested Nimdal route could not be found."
 };
 
 export default function GlobalNotFound() {
   return (
-    <html lang="en" className={`${notoSansKr.variable} ${plexMono.variable}`}>
+    <html lang="en" className={`${bricolage.variable} ${notoSansKr.variable} ${plexMono.variable}`}>
       <body>
         <main className="not-found-page" id="main-content">
-          <p className="section-kicker">404 / LOST SIGNAL</p>
-          <h1>Nothing surfaced here.</h1>
-          <p>The route may have moved deeper into the archive.</p>
-          <Link className="text-link" href="/ko">Return to Nimdal</Link>
+          <p className="press-mark">404</p>
+          <h1>This page is not in the run.</h1>
+          <p>The address may have changed, or the page moved somewhere else.</p>
+          <Link className="rule-link" href="/en">Back to Nimdal</Link>
         </main>
       </body>
     </html>

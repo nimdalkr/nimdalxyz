@@ -9,15 +9,15 @@ export default function NotFound() {
 
   return (
     <main className="not-found-page" id="main-content">
-      <p className="section-kicker">404 / {isKorean ? "경로 없음" : "LOST SIGNAL"}</p>
-      <h1>{isKorean ? "페이지를 찾을 수 없습니다." : "Nothing surfaced here."}</h1>
+      <p className="press-mark">404</p>
+      <h1>{isKorean ? "이 페이지는 없습니다." : "This page is not in the run."}</h1>
       <p>
         {isKorean
-          ? "주소가 바뀌었거나 페이지가 이동했을 수 있습니다."
-          : "The route may have moved deeper into the archive."}
+          ? "주소가 바뀌었거나 페이지가 다른 곳으로 옮겨졌을 수 있습니다."
+          : "The address may have changed, or the page moved somewhere else."}
       </p>
-      <Link className="text-link" href={isKorean ? "/ko" : "/en"}>
-        {isKorean ? "Nimdal 홈으로" : "Return to Nimdal"}
+      <Link className="rule-link" href={isKorean ? "/ko" : "/en"}>
+        {isKorean ? "홈으로 돌아가기" : "Back to Nimdal"}
       </Link>
     </main>
   );

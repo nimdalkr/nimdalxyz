@@ -9,10 +9,10 @@ interface SiteFooterProps {
 
 export function SiteFooter({ locale, note }: SiteFooterProps) {
   return (
-    <footer className="site-footer">
-      <Link href={`/${locale}`} className="site-wordmark">NIMDAL</Link>
+    <footer className="colophon">
+      <Link href={`/${locale}`}>NIMDAL.XYZ</Link>
       <p>{note}</p>
-      <span>© {new Date().getFullYear()} NIMDAL</span>
+      <span>{new Date().getFullYear()} Tak Chanwoo</span>
     </footer>
   );
 }

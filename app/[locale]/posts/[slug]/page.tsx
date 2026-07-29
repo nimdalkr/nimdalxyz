@@ -1,5 +1,4 @@
-import { ArrowRight } from "@phosphor-icons/react/dist/ssr";
-import Image from "next/image";
+import { ArrowLeft } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
@@ -7,7 +6,7 @@ import type { Metadata } from "next";
 import { BlogCard } from "@/components/blog/BlogCard";
 import { BlogHeader } from "@/components/blog/BlogHeader";
 import { BlogPostBody } from "@/components/blog/BlogPostBody";
-import { PixelEffects } from "@/components/pixel/PixelEffects";
+import { RisoPlate } from "@/components/riso/RisoPlate";
 import { StructuredData } from "@/components/seo/StructuredData";
 import {
   formatPostDate,
@@ -34,13 +33,13 @@ type BlogPostPageProps = {
 
 const labels = {
   ko: {
-    back: "블로그로 돌아가기",
+    back: "블로그 목록",
     tags: "태그",
     related: "함께 읽을 글",
     updated: "수정일"
   },
   en: {
-    back: "Back to BLOG",
+    back: "All posts",
     tags: "Post tags",
     related: "Read next",
     updated: "Updated"
@@ -147,7 +146,6 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
   return (
     <div className={`${styles.shell} blog-surface`}>
-      <PixelEffects />
       <StructuredData data={jsonLd} />
       <BlogHeader
         locale={locale}
@@ -159,7 +157,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         <article className={styles.article}>
           <header className={styles.articleHeader}>
             <Link href={blogCanonicalUrl(locale)} className={styles.backLink}>
-              <ArrowRight size={18} weight="regular" aria-hidden="true" />
+              <ArrowLeft size={18} weight="regular" aria-hidden="true" />
               {ui.back}
             </Link>
             <p className={styles.articleKicker}>{post.category}</p>
@@ -183,17 +181,14 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             </div>
           </header>
 
-          <figure className={styles.articleCover}>
-            <Image
-              src={post.cover}
-              alt=""
-              fill
-              priority
-              loading="eager"
-              sizes="(max-width: 900px) calc(100vw - 40px), 980px"
-              className={styles.image}
-            />
-          </figure>
+          <RisoPlate
+            className={styles.articleCover}
+            src={post.cover}
+            alt=""
+            priority
+            offset={18}
+            sizes="(max-width: 767px) calc(100vw - 2.5rem), 1180px"
+          />
 
           <div className={styles.prose}>
             <BlogPostBody load={post.body} />

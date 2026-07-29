@@ -9,7 +9,7 @@ export const revalidate = 0;
 export const fetchCache = "force-no-store";
 
 export const metadata: Metadata = {
-  title: "Write — Nimdal BLOG",
+  title: "Write / Nimdal BLOG",
   description: "Nimdal BLOG private writing workspace.",
   robots: {
     index: false,

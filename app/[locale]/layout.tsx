@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from "next";
 
 import { ScrollProgress } from "@/components/motion/ScrollProgress";
-import { notoSansKr, plexMono } from "@/lib/fonts";
+import { PaperGrain } from "@/components/riso/PaperGrain";
+import { bricolage, gothicA1, notoSansKr, plexMono } from "@/lib/fonts";
 import { isLocale, locales, siteContent } from "@/lib/content";
 
 import "../globals.css";
@@ -25,8 +26,8 @@ export async function generateMetadata({
   return {
     metadataBase: new URL("https://nimdal.xyz"),
     title: {
-      default: isKorean ? siteContent.ko.seo.title : "Nimdal — Signals into systems",
-      template: "%s — Nimdal"
+      default: isKorean ? siteContent.ko.seo.title : "Nimdal / Signals into systems",
+      template: "%s / Nimdal"
     },
     description: isKorean
       ? siteContent.ko.seo.description
@@ -66,9 +67,16 @@ export async function generateMetadata({
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#06a4ee",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#e6e5df" },
+    { media: "(prefers-color-scheme: dark)", color: "#191b1a" }
+  ],
   colorScheme: "light dark"
 };
+
+/** Applies a stored stock choice before first paint so the page never flashes. */
+const stockScript =
+  "try{var s=localStorage.getItem('nimdal-stock');if(s==='paper'||s==='black'){document.documentElement.dataset.stock=s}}catch(e){}";
 
 export default async function LocaleLayout({ children, params }: LocaleLayoutProps) {
   const { locale: localeParam } = await params;
@@ -78,13 +86,23 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
     <html
       lang={locale}
       data-scroll-behavior="smooth"
-      className={`${notoSansKr.variable} ${plexMono.variable}`}
+      className={`${bricolage.variable} ${gothicA1.variable} ${notoSansKr.variable} ${plexMono.variable}`}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: stockScript }} />
+        {/* Scroll reveals render at opacity 0 before the script runs. Without
+            this, a failed or disabled script would hide everything below the
+            fold permanently. */}
+        <noscript>
+          <style>{"[data-reveal]{opacity:1!important;transform:none!important}.riso-plate-flo{transform:none!important}"}</style>
+        </noscript>
+      </head>
       <body>
         <a className="skip-link" href="#main-content">
           {locale === "ko" ? "본문으로 바로가기" : "Skip to content"}
         </a>
         <ScrollProgress />
+        <PaperGrain />
         <div className="locale-root" data-locale={locale}>{children}</div>
       </body>
     </html>

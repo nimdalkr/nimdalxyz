@@ -148,7 +148,7 @@ test.describe("localized navigation and metadata", () => {
     expect(response.status()).toBe(200);
 
     await page.setContent(await response.text(), { waitUntil: "domcontentloaded" });
-    await expect(page).toHaveTitle("Nimdal이 블로그를 만든 이유 — Nimdal");
+    await expect(page).toHaveTitle("Nimdal이 블로그를 만든 이유 / Nimdal");
     await expect(page.locator("article article")).toHaveCount(0);
     await expect(page.getByRole("link", { name: "Nimdal 홈" })).toBeVisible();
     await expect(page.getByRole("navigation", { name: "주요 메뉴" })).toBeVisible();
@@ -247,7 +247,7 @@ test.describe("legacy routing and host surfaces", () => {
 
     await page.setContent(await response.text(), { waitUntil: "domcontentloaded" });
     await expect(page.locator("main h1")).toHaveText("만들고 운영하며 남긴 기록");
-    await expect(page).toHaveTitle("만들고 운영하며 남긴 기록 — Nimdal");
+    await expect(page).toHaveTitle("만들고 운영하며 남긴 기록 / Nimdal");
     await expectAlternates(page, {
       canonical: `https://${BLOG_HOST}/ko`,
       ko: `https://${BLOG_HOST}/ko`,
@@ -461,7 +461,7 @@ test.describe("public links and not-found behavior", () => {
   test("invalid project and post slugs return 404", async ({ page, request, baseURL }) => {
     const projectResponse = await page.goto("/ko/projects/not-a-real-project");
     expect(projectResponse?.status()).toBe(404);
-    await expect(page.getByRole("heading", { name: "페이지를 찾을 수 없습니다." })).toBeVisible({
+    await expect(page.getByRole("heading", { name: "이 페이지는 없습니다." })).toBeVisible({
       timeout: 15_000
     });
 
@@ -552,12 +552,17 @@ test.describe("responsive and accessible interaction", () => {
     await page.goto("/ko");
 
     await expect(page.locator(".scroll-progress")).toBeHidden();
-    await expect(page.locator(".pixel-hero")).toBeVisible();
-    await expect(page.locator(".pixel-work-grid")).toBeVisible();
-    await expect(page.locator(".pixel-career-band")).toBeVisible();
-    await expect(page.locator(".pixel-contact-card")).toBeVisible();
+    await expect(page.locator(".cover")).toBeVisible();
+    await expect(page.locator(".feature")).toBeVisible();
+    await expect(page.locator(".band-ink")).toBeVisible();
+    await expect(page.locator(".contact")).toBeVisible();
 
-    const motionStyles = await page.locator(".pixel-marquee > div").evaluate((element) => {
+    // Reveals are pinned to their settled state rather than waiting on scroll.
+    for (const reveal of await page.locator("[data-reveal]").all()) {
+      await expect(reveal).toHaveCSS("opacity", "1");
+    }
+
+    const motionStyles = await page.locator(".btn").first().evaluate((element) => {
       const style = getComputedStyle(element);
       return {
         animationDuration: style.animationDuration,

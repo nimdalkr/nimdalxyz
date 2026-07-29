@@ -1,8 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+
+import { Reveal } from "@/components/riso/Reveal";
+import { RisoPlate } from "@/components/riso/RisoPlate";
 
 interface LabItem {
   slug: string;
@@ -27,12 +29,13 @@ interface LabFilterProps {
     inProgress: string;
     filterLabel: string;
   };
+  empty: { title: string; body: string };
 }
 
 const filterKeys = ["all", "live", "repository", "prototype", "concept", "in-progress"] as const;
 type FilterKey = (typeof filterKeys)[number];
 
-export function LabFilter({ items, labels }: LabFilterProps) {
+export function LabFilter({ items, labels, empty }: LabFilterProps) {
   const [filter, setFilter] = useState<FilterKey>("all");
   const filtered = filter === "all" ? items : items.filter((item) => item.statusKey === filter);
   const availableFilters = filterKeys.filter(
@@ -62,23 +65,35 @@ export function LabFilter({ items, labels }: LabFilterProps) {
           </button>
         ))}
       </div>
-      <div className="lab-grid" aria-live="polite">
-        {filtered.map((item) => (
-          <article className="lab-card" key={item.slug}>
-            <Link href={item.href} className="lab-card-media" aria-label={`${item.label}: ${item.title}`}>
-              <Image src={item.media} alt={item.mediaAlt} fill sizes="(max-width: 760px) 100vw, 33vw" />
-            </Link>
-            <div className="lab-card-copy">
-              <div className="lab-card-topline">
-                <span>{item.status}</span>
-                <span>{item.label}</span>
+
+      {filtered.length ? (
+        <div className="lab-grid" aria-live="polite">
+          {filtered.map((item, index) => (
+            <Reveal key={item.slug} as="article" className="lab-item" index={index}>
+              <Link href={item.href} className="work-link" aria-label={`${item.label}: ${item.title}`}>
+                <RisoPlate
+                  className="lab-plate"
+                  src={item.media}
+                  alt={item.mediaAlt}
+                  sizes="(max-width: 767px) 100vw, (max-width: 1024px) 45vw, 30vw"
+                />
+              </Link>
+              <div>
+                <p className="work-meta">
+                  <span className={item.statusKey === "live" ? "is-live" : undefined}>{item.status}</span>
+                </p>
+                <h3><Link href={item.href}>{item.title}</Link></h3>
+                <p>{item.summary}</p>
               </div>
-              <h3><Link href={item.href}>{item.title}</Link></h3>
-              <p>{item.summary}</p>
-            </div>
-          </article>
-        ))}
-      </div>
+            </Reveal>
+          ))}
+        </div>
+      ) : (
+        <div className="lab-empty" aria-live="polite">
+          <h3>{empty.title}</h3>
+          <p>{empty.body}</p>
+        </div>
+      )}
     </div>
   );
 }

@@ -85,7 +85,7 @@ Requirements:
 2. Preserve Markdown structure, code fences, inline code, HTML, link destinations, and image destinations. Every immutableBodyImagePaths value must appear unchanged and in the same order in bodyEn. You may translate image alt text.
 3. Write a concise Korean summary and an aligned English summary. Do not add promotional language or facts absent from the article.
 4. Choose one concise category in both languages.
-5. Return 3–6 aligned tag pairs when the source supports them. English tags must contain an English letter or number and create distinct URL slugs.
+5. Return 3-6 aligned tag pairs when the source supports them. English tags must contain an English letter or number and create distinct URL slugs.
 6. Do not include reading time; it is calculated by code.
 
 SOURCE_JSON_BEGIN

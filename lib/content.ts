@@ -835,7 +835,7 @@ export const projects = [
 export const careerCases = [
   {
     id: "swiss-j-functional-shoes",
-    period: "2019.09–2022.12",
+    period: "2019.09-2022.12",
     media: {
       role: "career",
       src: "/media/career/joya-logo.jpg",
@@ -906,7 +906,7 @@ export const careerCases = [
   },
   {
     id: "busan-h-animal-hospital",
-    period: "2020.03–2023.10",
+    period: "2020.03-2023.10",
     media: {
       role: "career",
       src: "/media/career/h-animal-logo.jpg",
@@ -939,7 +939,7 @@ export const careerCases = [
         result: "기존 포트폴리오에는 계약 기간 동안 로컬 마케팅을 안정적으로 운영했다고 적혀 있습니다.",
         constraint: "많이 노출하는 것보다 지역 고객의 검색 의도에 맞추고 신뢰를 쌓는 일이 중요했습니다.",
         system: "네이버 블로그를 꾸준히 발행하고 스마트플레이스를 관리하면서, 지역 경쟁 병원과 성과를 정기적으로 확인했습니다.",
-        proof: "기존 커리어 포트폴리오에서 2020.03–2023.10의 작업 기간과 맡은 일을 확인할 수 있습니다.",
+        proof: "기존 커리어 포트폴리오에서 2020.03-2023.10의 작업 기간과 맡은 일을 확인할 수 있습니다.",
         limitation: "현재 저장소에는 키워드 노출 변화, 스마트플레이스 운영 전후, 문의·방문 자료가 없습니다."
       },
       en: {
@@ -951,14 +951,14 @@ export const careerCases = [
         result: "The portfolio records a stable local-marketing operation across the full engagement period.",
         constraint: "Local search intent and trust-building mattered more than broad campaign reach.",
         system: "Naver Blog cadence, Smartplace maintenance, local competitor tracking, and a reporting rhythm.",
-        proof: "The 2020.03–2023.10 period and operating role are recorded in the current career portfolio.",
+        proof: "The 2020.03-2023.10 period and operating role are recorded in the current career portfolio.",
         limitation: "The repository has no shareable keyword exposure, Smartplace before-and-after, inquiry, or visit evidence."
       }
     }
   },
   {
     id: "leica-online-acquisition",
-    period: "2022.07–2024.09",
+    period: "2022.07-2024.09",
     media: {
       role: "career",
       src: "/media/career/leica-logo.jpg",
@@ -982,7 +982,7 @@ export const careerCases = [
     },
     metrics: [
       {
-        value: "KRW 1–2M/mo",
+        value: "KRW 1-2M/mo",
         provenance: "portfolio-claim",
         copy: {
           ko: {
@@ -993,7 +993,7 @@ export const careerCases = [
           },
           en: {
             label: "Pre-marketing monthly sales baseline",
-            context: "The career portfolio records roughly KRW 1–2M in monthly sales before marketing.",
+            context: "The career portfolio records roughly KRW 1-2M in monthly sales before marketing.",
             source: "Current repository career-portfolio copy",
             limitation: "No underlying sales records are present, so this is shown only as a portfolio claim."
           }
@@ -1037,7 +1037,7 @@ export const careerCases = [
         channels: ["Naver Blog", "Homepage"],
         objective: "Build a content and homepage acquisition structure for online inquiries and sales growth.",
         role: "Marketing direction, target research, content production, homepage acquisition design, client communication, and reporting.",
-        result: "The portfolio records a move from roughly KRW 1–2M in monthly sales before marketing to KRW 100M in September 2024.",
+        result: "The portfolio records a move from roughly KRW 1-2M in monthly sales before marketing to KRW 100M in September 2024.",
         constraint: "Online acquisition had to grow without weakening premium-brand perception.",
         system: "Search content, homepage acquisition structure, inquiry-response signals, and a reporting cadence.",
         proof: "The current career portfolio records the period, role, baseline, and outcome figures.",
@@ -1047,7 +1047,7 @@ export const careerCases = [
   },
   {
     id: "mkr-agency-operating-system",
-    period: "2018.06.29–2024.09",
+    period: "2018.06.29-2024.09",
     media: {
       role: "career",
       src: "/media/career/mkr-logo.jpg",
@@ -1094,13 +1094,13 @@ export const careerCases = [
         copy: {
           ko: {
             label: "에이전시 운영 기간",
-            context: "기존 포트폴리오에는 업무 기간이 2018.06.29–2024.09로 적혀 있습니다.",
+            context: "기존 포트폴리오에는 업무 기간이 2018.06.29-2024.09로 적혀 있습니다.",
             source: "기존 커리어 포트폴리오의 작업 기간",
             limitation: "별도의 재직 증명 문서는 공개하지 않았습니다."
           },
           en: {
             label: "Agency operating period",
-            context: "The current portfolio records the work period as 2018.06.29–2024.09.",
+            context: "The current portfolio records the work period as 2018.06.29-2024.09.",
             source: "Career-case period in the current repository",
             limitation: "The repository contains no independent employment-verification document."
           }
@@ -1136,7 +1136,7 @@ export const careerCases = [
   },
   {
     id: "community-kol-campaigns",
-    period: "2025.01–2025.09",
+    period: "2025.01-2025.09",
     media: {
       role: "career",
       src: "/media/career/bitcoin-logo.jpg",
@@ -1188,7 +1188,7 @@ export const careerCases = [
   },
   {
     id: "nevada-korea-marketing-lead",
-    period: "2026.04–2026.06",
+    period: "2026.04-2026.06",
     media: {
       role: "proof",
       src: "/media/career/nevada.jpg",
@@ -1225,7 +1225,7 @@ export const careerCases = [
         limitation: "현재 저장소에는 GA4·UTM 대시보드와 SEO 설정, 실행 리포트 화면이 없습니다."
       },
       en: {
-        title: "Global Client Marketing Lead — NEVADA Korea",
+        title: "Global Client Marketing Lead, NEVADA Korea",
         context: "1six.tech Inc. / NEVADA, a US-based perpDEX",
         channels: ["SEO", "SNS", "KOL", "Blog", "GA4"],
         objective: "Design the Korean marketing-execution system for a US-based perpDEX client.",
@@ -1243,7 +1243,7 @@ export const careerCases = [
 export const siteContent = {
   ko: {
     seo: {
-      title: "Nimdal / 탁찬우 — 리서치, 자동화, 캠페인 운영",
+      title: "Nimdal / 탁찬우: 리서치, 자동화, 캠페인 운영",
       description: "웹3 리서치 도구와 자동화, 게임 프로토타입, 마케팅·캠페인 운영 경험을 모은 Nimdal(탁찬우)의 포트폴리오입니다."
     },
     language: {
@@ -1301,7 +1301,7 @@ export const siteContent = {
         {
           value: "6+ yrs",
           label: "에이전시 경력",
-          context: "기존 커리어 포트폴리오에 적힌 MKR 업무 기간은 2018.06.29–2024.09입니다.",
+          context: "기존 커리어 포트폴리오에 적힌 MKR 업무 기간은 2018.06.29-2024.09입니다.",
           source: "현재 저장소의 MKR 경력 사례",
           limitation: "별도의 재직 증명 문서는 공개하지 않았습니다.",
           provenance: "career-record"
@@ -1410,7 +1410,7 @@ export const siteContent = {
         {
           value: "6+ agency years",
           label: "에이전시 운영",
-          context: "기존 포트폴리오에 적힌 MKR 업무 기간은 2018.06.29–2024.09입니다.",
+          context: "기존 포트폴리오에 적힌 MKR 업무 기간은 2018.06.29-2024.09입니다.",
           source: "MKR 경력 사례 기간",
           limitation: "별도의 재직 증명 문서는 공개하지 않았습니다.",
           provenance: "career-record"
@@ -1440,12 +1440,12 @@ export const siteContent = {
       readMore: "글 읽기"
     },
     footer: {
-      tagline: "Nimdal — 리서치하고, 운영하고, 만듭니다."
+      tagline: "Nimdal: 리서치하고, 운영하고, 만듭니다."
     }
   },
   en: {
     seo: {
-      title: "Nimdal / Tak Chanwoo — Research, Automation, Campaign Operations",
+      title: "Nimdal / Tak Chanwoo: Research, Automation, Campaign Operations",
       description: "A bilingual portfolio of Nimdal and Tak Chanwoo's project Lab, career cases, research notes, and build logs."
     },
     language: {
@@ -1503,7 +1503,7 @@ export const siteContent = {
         {
           value: "6+ yrs",
           label: "Agency operating record",
-          context: "The career portfolio records the MKR work period as 2018.06.29–2024.09.",
+          context: "The career portfolio records the MKR work period as 2018.06.29-2024.09.",
           source: "The MKR career case in the current repository",
           limitation: "The repository contains no independent employment-verification document.",
           provenance: "career-record"
@@ -1612,7 +1612,7 @@ export const siteContent = {
         {
           value: "6+ agency years",
           label: "Agency operations",
-          context: "The current portfolio records the MKR work period as 2018.06.29–2024.09.",
+          context: "The current portfolio records the MKR work period as 2018.06.29-2024.09.",
           source: "MKR career-case period",
           limitation: "The repository contains no independent employment-verification document.",
           provenance: "career-record"
@@ -1642,7 +1642,7 @@ export const siteContent = {
       readMore: "Read note"
     },
     footer: {
-      tagline: "Nimdal — research, operations, and product systems."
+      tagline: "Nimdal: research, operations, and product systems."
     }
   }
 } as const satisfies Record<Locale, SiteLocaleContent>;
