@@ -27,35 +27,32 @@
    -------------------------------------------------------------------------- */
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 
-  /* One world now: the readable pages live in the same water as the stage.
-     The ground is a lifted abyss blue so long-form text still breathes. */
-  --surface: #0b111e;
-  --surface-alt: #101827;
+  /* The Ink Records. Cold-press paper, one ink, one vermilion seal. */
+  --surface: #f4f5f2;
+  --surface-alt: #ebece7;
 
-  /* Ink: light on dark. The only colour that sets type. */
-  --ink: #e6ecf5;
-  --text: #e6ecf5;
-  --text-soft: rgba(230, 236, 245, 0.68);
-  --text-invert: #0b111e;
-  --surface-invert: #e6ecf5;
+  --ink: #141519;
+  --text: #141519;
+  --text-soft: rgba(20, 21, 25, 0.66);
+  --text-invert: #f4f5f2;
+  --surface-invert: #141519;
 
-  /* The dive's accent. Fills and plates, never long-form type. */
-  --accent: #ff4f8b;
-  --text-on-accent: #20263c;
+  /* Vermilion seal paste. Stamps and marks only. */
+  --accent: #c9321f;
+  --text-on-accent: #fdf6f1;
 
-  --rule: rgba(230, 236, 245, 0.2);
-  --rule-strong: rgba(230, 236, 245, 0.42);
+  --rule: rgba(20, 21, 25, 0.16);
+  --rule-strong: rgba(20, 21, 25, 0.4);
 
-  --grain-blend: screen;
-  --grain-opacity: 0.22;
-  --plate-blend: screen;
+  --grain-blend: multiply;
+  --grain-opacity: 0.4;
+  --plate-blend: multiply;
   --plate-gap: var(--surface);
-  --logo-filter: grayscale(1) invert(1) contrast(1.15);
-  --logo-blend: screen;
+  --logo-filter: grayscale(1) contrast(1.2);
+  --logo-blend: multiply;
 
-  /* Shape lock: zero radius, everywhere. */
   --radius: 0;
 
   --gutter: clamp(1.25rem, 4vw, 4rem);
@@ -351,7 +348,7 @@ p {
 
 .band-ink .lede,
 .band-ink .text-soft {
-  color: rgba(11, 17, 30, 0.72);
+  color: rgba(244, 245, 242, 0.74);
 }
 
 /* Section headings stack. The split-header pattern (big headline left, small
@@ -374,7 +371,7 @@ p {
 }
 
 .band-ink .press-mark {
-  color: rgba(11, 17, 30, 0.72);
+  color: rgba(244, 245, 242, 0.72);
 }
 
 .band-flo .press-mark {
@@ -778,7 +775,7 @@ p {
 }
 
 .band-ink .record span {
-  color: rgba(11, 17, 30, 0.72);
+  color: rgba(244, 245, 242, 0.72);
 }
 
 /* -----------------------------------------------------------------------------
@@ -1007,7 +1004,7 @@ a.ledger-row:focus-visible span {
 
 .band-ink .ledger-row time,
 .band-ink .ledger-row span {
-  color: rgba(11, 17, 30, 0.7);
+  color: rgba(244, 245, 242, 0.7);
 }
 
 /* Client marks only. No industry labels underneath. */
@@ -1399,7 +1396,7 @@ a.ledger-row:focus-visible span {
 }
 
 .band-ink .proof-sheet figcaption small {
-  color: rgba(11, 17, 30, 0.72);
+  color: rgba(244, 245, 242, 0.72);
 }
 
 .next-project {
@@ -2398,4 +2395,165 @@ a.ledger-row:focus-visible span {
   .client-wall {
     grid-template-columns: 1fr;
   }
+}
+
+/* =============================================================================
+   INK RECORDS
+   -----------------------------------------------------------------------------
+   The home is a scroll being written. Strokes are calligraphy, never content:
+   every word exists as DOM text; the ink draws around it.
+   ========================================================================== */
+
+.ink-doc {
+  overflow-x: clip;
+}
+
+.chapter {
+  position: relative;
+}
+
+/* Cover */
+.cover-ink {
+  padding-top: clamp(2.5rem, 5vw, 4.5rem);
+  padding-bottom: clamp(3rem, 6vw, 5rem);
+}
+
+.cover-ink h1 {
+  margin: 1rem 0 0;
+  font-size: clamp(3.2rem, 7.2vw, 6.2rem);
+}
+
+.ink-swash {
+  display: block;
+  width: min(52rem, 96%);
+  height: auto;
+  margin: -0.6rem 0 0.4rem;
+}
+
+.ink-underline {
+  display: block;
+  width: clamp(7rem, 12vw, 10.5rem);
+  height: auto;
+  margin-top: 0.7rem;
+}
+
+/* Ink portrait: a photograph committed to the medium. */
+.ink-portrait {
+  position: relative;
+  margin: 0;
+  border: 2px solid var(--ink);
+  background: var(--surface);
+}
+
+.ink-portrait img {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: grayscale(1) contrast(1.2) brightness(1.04);
+  mix-blend-mode: multiply;
+}
+
+.ink-portrait figcaption {
+  padding: 0.55rem 0.8rem;
+  border-top: 2px solid var(--ink);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+/* Work plates: ink until you look at them. */
+.ink-photo {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border: 2px solid var(--ink);
+  background: var(--surface);
+}
+
+.ink-photo img {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: grayscale(1) contrast(1.15) brightness(1.03);
+  mix-blend-mode: multiply;
+  transition: filter 450ms var(--ease), mix-blend-mode 0s 220ms;
+}
+
+.ink-photo:hover img,
+.ink-photo:focus-visible img {
+  filter: none;
+  mix-blend-mode: normal;
+}
+
+/* The seal. Vermilion, pressed, slightly off true. */
+.seal {
+  display: inline-grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  background: var(--accent);
+  color: var(--text-on-accent);
+  font-family: var(--font-display-kr), var(--font-sans), sans-serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1;
+  transform: rotate(-4deg);
+  box-shadow:
+    inset 0 0 0 3px rgba(253, 246, 241, 0.85),
+    inset 0 0 0 5px var(--accent),
+    2px 3px 0 rgba(20, 21, 25, 0.18);
+  user-select: none;
+}
+
+.seal-line {
+  display: flex;
+  align-items: center;
+  gap: 1.4rem;
+  margin-top: clamp(1.5rem, 3vw, 2.5rem);
+}
+
+.band-ink .seal-line p { color: rgba(244, 245, 242, 0.72); }
+
+.seal-line p {
+  margin: 0;
+  color: var(--text-soft);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* Record chapters reuse the ledger vocabulary on paper. */
+.case-sheet {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2.2fr);
+  gap: clamp(1.5rem, 4vw, 4rem);
+  align-items: start;
+}
+
+.case-sheet .case-side {
+  display: grid;
+  gap: 1.2rem;
+  justify-items: start;
+}
+
+.case-logo {
+  width: min(11rem, 100%);
+  border: 2px solid var(--ink);
+  background: #fff;
+}
+
+.case-logo img {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: grayscale(1) contrast(1.1);
+  mix-blend-mode: multiply;
+}
+
+@media (max-width: 767px) {
+  .case-sheet { grid-template-columns: 1fr; }
+  .ink-swash { width: 100%; }
 }

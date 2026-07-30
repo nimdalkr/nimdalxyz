@@ -16,7 +16,7 @@ test.beforeEach(async ({ page }) => {
  */
 test.describe("riso motion", () => {
   test("scroll reveals bring content in", async ({ page }) => {
-    await page.goto("/en");
+    await page.goto("/en/about");
 
     const reveal = page.locator("[data-reveal]").first();
     await expect(reveal).toHaveCSS("opacity", "0");
@@ -26,13 +26,13 @@ test.describe("riso motion", () => {
   });
 
   test("accent plates resolve into registration on scroll", async ({ page }) => {
-    await page.goto("/en");
+    await page.goto("/en/about");
 
-    const plate = page.locator(".feature-plate .riso-plate-flo");
+    const plate = page.locator(".portrait-plate .riso-plate-flo");
     const offsetAtRest = await plate.evaluate((el) => getComputedStyle(el).transform);
     expect(offsetAtRest).not.toBe("none");
 
-    await page.locator(".feature-plate").scrollIntoViewIfNeeded();
+    await page.locator(".portrait-plate").scrollIntoViewIfNeeded();
     await page.mouse.wheel(0, 400);
 
     await expect
@@ -50,12 +50,12 @@ test.describe("riso motion", () => {
   test("reduced motion keeps everything visible and still", async ({ browser }) => {
     const context = await browser.newContext({ reducedMotion: "reduce" });
     const page = await context.newPage();
-    await page.goto("/en");
+    await page.goto("/en/about");
 
     const reveal = page.locator("[data-reveal]").first();
     await expect(reveal).toHaveCSS("opacity", "1");
 
-    const plate = page.locator(".cover-portrait .riso-plate-flo");
+    const plate = page.locator(".portrait-plate .riso-plate-flo");
     const offset = await plate.evaluate((el) => {
       const parts = getComputedStyle(el).transform.match(/-?\d+\.?\d*/g);
       return parts ? Math.abs(Number(parts[4])) + Math.abs(Number(parts[5])) : 0;
@@ -66,9 +66,9 @@ test.describe("riso motion", () => {
   });
 
   test("the primary call to action stays readable", async ({ page }) => {
-    await page.goto("/en");
+    await page.goto("/en/portfolio");
 
-    const cta = page.locator(".cover .btn").first();
+    const cta = page.locator(".btn").first();
     const { color, background } = await cta.evaluate((el) => {
       const cs = getComputedStyle(el);
       let bg = cs.backgroundColor;

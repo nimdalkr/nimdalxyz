@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 
 import { ScrollProgress } from "@/components/motion/ScrollProgress";
-import { PaperGrain } from "@/components/riso/PaperGrain";
+import { PaperGrain } from "@/components/ink/PaperGrain";
 import { bricolage, gothicA1, notoSansKr, plexMono } from "@/lib/fonts";
 import { isLocale, locales, siteContent } from "@/lib/content";
 
@@ -67,8 +67,8 @@ export async function generateMetadata({
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#0b111e",
-  colorScheme: "dark"
+  themeColor: "#f4f5f2",
+  colorScheme: "light"
 };
 
 export default async function LocaleLayout({ children, params }: LocaleLayoutProps) {

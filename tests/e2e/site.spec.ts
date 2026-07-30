@@ -438,7 +438,7 @@ test.describe("public links and not-found behavior", () => {
   }) => {
     await page.goto("/ko");
 
-    await expect(page.locator('a[href="/ko/projects/alphaduo"]')).toBeVisible();
+    await expect(page.locator('a[href="/ko/projects/alphaduo"]').first()).toBeVisible();
     await expect(page.locator('a[href="mailto:0xnimdal@gmail.com"]')).toBeVisible();
     await expect(page.locator('a[href="https://x.com/0xnimdal"]')).toBeVisible();
     await expect(page.locator('a[href="https://t.me/nimdal"]')).toBeVisible();
@@ -561,8 +561,8 @@ test.describe("responsive and accessible interaction", () => {
     await page.goto("/ko");
 
     await expect(page.locator(".scroll-progress")).toBeHidden();
-    await expect(page.locator(".cover")).toBeVisible();
-    await expect(page.locator(".feature")).toBeVisible();
+    await expect(page.locator(".cover-ink")).toBeVisible();
+    await expect(page.locator(".lab-grid")).toBeVisible();
     await expect(page.locator(".band-ink")).toBeVisible();
     await expect(page.locator(".contact")).toBeVisible();
 
