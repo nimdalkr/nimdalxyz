@@ -230,7 +230,7 @@ export function OctopusGuide({
       </instancedMesh>
       <group ref={group}>
         <mesh>
-          <planeGeometry args={[1.6, 1.6]} />
+          <planeGeometry args={[2.15, 2.15]} />
           <shaderMaterial
             ref={spriteMat}
             vertexShader={vertexShader}

@@ -40,7 +40,9 @@ const fishFragment = /* glsl */ `
   uniform float uTime;
 
   void main() {
-    vec2 p = vUv - 0.5;
+    // Snap to a coarse sprite grid: the fish are pixel creatures.
+    vec2 quv = (floor(vUv * vec2(22.0, 12.0)) + 0.5) / vec2(22.0, 12.0);
+    vec2 p = quv - 0.5;
     // Body: a teardrop pointing +x.
     float body = length(vec2(p.x * 1.5, p.y * 3.2 * (1.0 + p.x * 0.9)));
     float m = smoothstep(0.5, 0.44, body);
@@ -61,7 +63,9 @@ const jellyFragment = /* glsl */ `
   uniform vec3 uGlow;
 
   void main() {
-    vec2 p = vUv - vec2(0.5, 0.28);
+    // Snap to a coarse sprite grid: the jellies are pixel creatures.
+    vec2 quv = (floor(vUv * vec2(18.0, 30.0)) + 0.5) / vec2(18.0, 30.0);
+    vec2 p = quv - vec2(0.5, 0.28);
     float a = 0.0;
 
     // Bell: a dome with a bright rim.

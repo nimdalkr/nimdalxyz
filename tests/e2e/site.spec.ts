@@ -13,7 +13,7 @@ import {
 // suites cover the readable portfolio, so they opt into it explicitly.
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
-    try { window.localStorage.setItem("nimdal-atlas-mode", "readable"); } catch {}
+    try { window.sessionStorage.setItem("nimdal-atlas-mode", "readable"); } catch {}
   });
 });
 

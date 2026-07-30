@@ -39,9 +39,11 @@ export function AtlasGate({ locale, landmarks, cases, children }: AtlasGateProps
   const [tier, setTier] = useState<AtlasTier>("off");
 
   useEffect(() => {
+    // Session-scoped on purpose: choosing the readable page is for this visit,
+    // not a permanent exile from the sea.
     let stored: string | null = null;
     try {
-      stored = window.localStorage.getItem(ATLAS_STORAGE_KEY);
+      stored = window.sessionStorage.getItem(ATLAS_STORAGE_KEY);
     } catch {
       // Storage can be blocked; fall through to capability detection.
     }
@@ -58,7 +60,7 @@ export function AtlasGate({ locale, landmarks, cases, children }: AtlasGateProps
 
   const leaveAtlas = () => {
     try {
-      window.localStorage.setItem(ATLAS_STORAGE_KEY, "readable");
+      window.sessionStorage.setItem(ATLAS_STORAGE_KEY, "readable");
     } catch {
       // Non-fatal: the choice simply will not persist.
     }
@@ -67,7 +69,7 @@ export function AtlasGate({ locale, landmarks, cases, children }: AtlasGateProps
 
   const enterAtlas = () => {
     try {
-      window.localStorage.removeItem(ATLAS_STORAGE_KEY);
+      window.sessionStorage.removeItem(ATLAS_STORAGE_KEY);
     } catch {
       // Non-fatal.
     }
