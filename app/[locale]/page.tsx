@@ -3,7 +3,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { InkAuthor } from "@/components/ink/InkAuthor";
+import { InkSeal } from "@/components/ink/InkSeal";
 import { InkStroke } from "@/components/ink/InkStroke";
+import { SealCTA } from "@/components/ink/SealCTA";
 import { LegacyHashBridge } from "@/components/compat/LegacyHashBridge";
 import { StructuredData } from "@/components/seo/StructuredData";
 import { SiteFooter } from "@/components/site/SiteFooter";
@@ -32,6 +35,7 @@ function pageLocale(value: string) {
 /* Hand-authored brush paths. Confident curves; the roughen filter does the ink. */
 const SWASH = "M30 170 C 240 60, 520 250, 780 130 S 1130 90, 1170 150";
 const UNDERLINE = "M8 26 C 90 10, 210 34, 300 18";
+const FRAME = "M10 12 C 140 6, 300 10, 392 8 L 394 120 C 396 190, 392 230, 390 246 L 8 250 C 6 180, 8 90, 10 12 Z";
 
 const RECORD = {
   ko: [
@@ -167,6 +171,16 @@ export default async function HomePage({ params }: HomePageProps) {
               </div>
             </div>
             <figure className="ink-portrait">
+              <InkStroke
+                className="ink-frame"
+                d={FRAME}
+                viewBox="0 0 400 258"
+                strokeWidth={7}
+                preserve="none"
+                mode="load"
+                duration={1.2}
+                delay={0.5}
+              />
               <Image
                 src="/media/operator-portrait.png"
                 alt={content.home.identity.portraitAlt}
@@ -223,7 +237,7 @@ export default async function HomePage({ params }: HomePageProps) {
                       </span>
                     ) : null}
                     <div className="seal-line">
-                      <span className="seal" aria-hidden>{record.numeral}</span>
+                      <InkSeal>{record.numeral}</InkSeal>
                       <p>{record.caseRoom.period}</p>
                     </div>
                   </div>
@@ -258,6 +272,13 @@ export default async function HomePage({ params }: HomePageProps) {
               {works.map((work) => (
                 <article className="lab-item" key={work.slug}>
                   <Link className="ink-photo" href={work.href} aria-label={work.title}>
+                    <InkStroke
+                      className="ink-frame"
+                      d={FRAME}
+                      viewBox="0 0 400 258"
+                      strokeWidth={9}
+                      preserve="none"
+                    />
                     <Image
                       src={work.image}
                       alt={work.imageAlt}
@@ -295,9 +316,13 @@ export default async function HomePage({ params }: HomePageProps) {
             </p>
             <a className="contact-mail" href="mailto:0xnimdal@gmail.com">0xnimdal@gmail.com</a>
             <div className="seal-line">
-              <span className="seal" aria-hidden>님달</span>
+              <InkSeal>님달</InkSeal>
               <p>{korean ? "서명 · 2026" : "Signed · 2026"}</p>
             </div>
+            <SealCTA
+              holdLabel={korean ? "꾹 눌러 방문 도장 찍기" : "Press and hold to leave your seal"}
+              doneLabel={korean ? "다녀가셨습니다" : "You were here"}
+            />
             <nav className="contact-links" aria-label={korean ? "외부 채널" : "Elsewhere"}>
               <a href="https://x.com/0xnimdal" target="_blank" rel="noreferrer">X</a>
               <a href="https://t.me/nimdal" target="_blank" rel="noreferrer">Telegram</a>
@@ -307,6 +332,7 @@ export default async function HomePage({ params }: HomePageProps) {
         </section>
       </main>
 
+      <InkAuthor label={korean ? "저자 문어. 누르면 잉크를 뿌립니다" : "The author octopus. Press to spray ink"} />
       <SiteFooter locale={locale} note={korean ? "문어가 잉크로 남긴 기록" : "Records left in octopus ink"} />
     </div>
   );

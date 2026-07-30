@@ -1508,684 +1508,6 @@ a.ledger-row:focus-visible span {
 }
 
 /* -----------------------------------------------------------------------------
-   15b. THE STAGE (WebGL cinematic experience)
-   -----------------------------------------------------------------------------
-   Fixed viewport, never a scroll. The canvas holds one graded photograph; type
-   sits beside it in a quiet column. Restraint is the whole point: light weight,
-   wide tracking, near-black ground, and the accent used only as a single mark.
-   -------------------------------------------------------------------------- */
-
-.stage {
-  position: fixed;
-  inset: 0;
-  z-index: 1;
-  overflow: hidden;
-  background: #05070f;
-}
-
-.stage canvas { display: block; width: 100%; height: 100%; }
-
-/* Hairlines marking the type column. */
-.stage-grid {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background-image:
-    linear-gradient(to right, rgba(255,255,255,.07) 1px, transparent 1px),
-    linear-gradient(to right, rgba(255,255,255,.07) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255,255,255,.05) 1px, transparent 1px);
-  background-position: 56% 0, 96% 0, 0 82%;
-  background-size: 100% 100%, 100% 100%, 100% 100%;
-  background-repeat: no-repeat;
-}
-
-/* Guarantees a dark ground for the type column regardless of the photograph.
-   Reaches full strength before the panel's left edge so even a white image
-   behind it still clears AA. */
-.stage-scrim {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(
-    90deg,
-    transparent 20%,
-    rgba(5, 7, 15, 0.62) 38%,
-    rgba(5, 7, 15, 0.94) 54%,
-    rgba(5, 7, 15, 0.96) 100%
-  );
-}
-
-.stage-ui {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-  padding: clamp(1.25rem, 2.6vw, 2.25rem) clamp(1.25rem, 3.4vw, 3.5rem);
-  pointer-events: none;
-}
-
-.stage-ui > * { pointer-events: auto; }
-
-/* While a room is open the dive HUD stands down entirely. */
-.stage-ui.is-hidden { opacity: 0; visibility: hidden; transition: opacity 240ms var(--ease); }
-
-.stage-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.stage-top-right {
-  display: flex;
-  align-items: center;
-  gap: 1.4rem;
-}
-
-.stage-mark {
-  color: #f2f5fa;
-  font-family: var(--font-mono), monospace;
-  font-size: .74rem;
-  font-weight: 500;
-  letter-spacing: .34em;
-}
-
-.stage-quiet {
-  min-height: 44px;
-  padding: 0 .25rem;
-  border: 0;
-  background: none;
-  color: rgba(226,234,245,.78);
-  font-family: var(--font-mono), monospace;
-  font-size: .68rem;
-  font-weight: 500;
-  letter-spacing: .22em;
-  text-transform: uppercase;
-  cursor: pointer;
-}
-
-.stage-quiet:hover { color: #f2f5fa; }
-
-/* The type column sits right of centre, matching the grid hairline. */
-.stage-panel {
-  align-self: center;
-  justify-self: end;
-  width: min(37rem, 48%);
-  animation: stage-in 700ms cubic-bezier(.16,1,.3,1);
-}
-
-@keyframes stage-in {
-  from { opacity: 0; transform: translateY(14px); }
-  to { opacity: 1; transform: none; }
-}
-
-.stage-eyebrow {
-  margin: 0 0 1.6rem;
-  color: rgba(226,234,245,.82);
-  font-family: var(--font-mono), monospace;
-  font-size: .68rem;
-  font-weight: 500;
-  letter-spacing: .3em;
-  text-transform: uppercase;
-}
-
-/* Light weight and wide tracking. The restraint is the design. */
-.stage-title {
-  margin: 0;
-  color: #f7f9fc;
-  font-family: var(--font-display), var(--font-sans), sans-serif;
-  font-size: clamp(2.3rem, 4.2vw, 4rem);
-  font-weight: 300;
-  letter-spacing: .1em;
-  line-height: 1.28;
-  text-transform: uppercase;
-}
-
-:lang(ko) .stage-title {
-  font-family: var(--font-display-kr), var(--font-sans), sans-serif;
-  font-weight: 400;
-  letter-spacing: .04em;
-  text-transform: none;
-}
-
-
-/* Station titles arrive word by word, each rising out of its own mask. */
-.stage-title-word {
-  display: inline-block;
-  overflow: hidden;
-  margin-right: 0.32em;
-  vertical-align: top;
-}
-
-.stage-title-word:last-child { margin-right: 0; }
-
-.stage-title-word i {
-  display: inline-block;
-  font-style: normal;
-  transform: translateY(115%);
-  animation: word-rise 640ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  animation-delay: calc(120ms + var(--i) * 80ms);
-}
-
-@keyframes word-rise {
-  to { transform: none; }
-}
-
-/* The single accent on the page: a bar against the call to action. */
-.stage-cta {
-  position: relative;
-  display: inline-flex;
-  min-height: 56px;
-  align-items: center;
-  margin: 2.2rem 0 0;
-  padding: 0 2.2rem 0 2.6rem;
-  border: 0;
-  background: #f7f9fc;
-  color: #05070f;
-  font-family: var(--font-mono), monospace;
-  font-size: .7rem;
-  font-weight: 600;
-  letter-spacing: .26em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: background-color 220ms var(--ease), color 220ms var(--ease);
-}
-
-.stage-cta::before {
-  position: absolute;
-  left: 0; top: 0; bottom: 0;
-  width: 10px;
-  background: var(--accent);
-  content: "";
-}
-
-.stage-cta:hover { background: var(--accent); color: #05070f; }
-
-.stage-body {
-  max-width: 42ch;
-  margin: 2.2rem 0 0;
-  color: rgba(226,234,245,.86);
-  font-size: .93rem;
-  font-weight: 400;
-  line-height: 1.85;
-}
-
-.stage-links {
-  display: flex;
-  gap: 1.6rem;
-  margin-top: 2rem;
-}
-
-.stage-links a {
-  display: inline-flex;
-  min-height: 44px;
-  align-items: center;
-  color: rgba(226,234,245,.84);
-  border-bottom: 1px solid rgba(226,234,245,.4);
-  font-family: var(--font-mono), monospace;
-  font-size: .7rem;
-  letter-spacing: .2em;
-  text-transform: uppercase;
-}
-
-.stage-links a:hover { color: #fff; border-color: var(--accent); }
-
-.stage-bottom {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.5rem;
-  flex-wrap: wrap;
-}
-
-
-
-/* The sonar reading: four verified numbers, set like an instrument panel. */
-.stage-stats {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1.1rem 2rem;
-  max-width: 26rem;
-  margin: 2rem 0 0;
-}
-
-.stage-stats div {
-  border-left: 2px solid var(--accent);
-  padding-left: 0.9rem;
-}
-
-.stage-stats dd {
-  margin: 0;
-  color: #f7f9fc;
-  font-family: var(--font-display), var(--font-sans), sans-serif;
-  font-size: clamp(1.4rem, 2.4vw, 2rem);
-  font-weight: 300;
-  letter-spacing: 0.06em;
-}
-
-.stage-stats dt {
-  color: rgba(226, 234, 245, 0.66);
-  font-family: var(--font-mono), monospace;
-  font-size: 0.62rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-
-/* Story markers: the names that anchor a chapter. */
-.stage-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin: 1.8rem 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.stage-chips li,
-.room-chips li {
-  padding: 0.35rem 0.7rem;
-  border: 1px solid rgba(226, 234, 245, 0.34);
-  color: rgba(226, 234, 245, 0.88);
-  font-family: var(--font-mono), monospace;
-  font-size: 0.64rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-
-.room-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin: 0 0 1.75rem;
-  padding: 0;
-  list-style: none;
-}
-
-/* The arrival card: shown while the water decodes, gone the moment it flows. */
-.stage-boot {
-  position: absolute;
-  inset: 0;
-  z-index: 6;
-  display: grid;
-  place-items: center;
-  background: #05070f;
-  transition: opacity 700ms var(--ease), visibility 0s linear 700ms;
-}
-
-.stage-boot.is-done {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
-
-.stage-boot-inner {
-  display: grid;
-  gap: 1.2rem;
-  justify-items: center;
-}
-
-.stage-boot-octo {
-  width: 72px;
-  height: 72px;
-  border: 2px solid rgba(226, 234, 245, 0.28);
-  image-rendering: pixelated;
-  animation: boot-bob 2.4s ease-in-out infinite;
-}
-
-@keyframes boot-bob {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
-}
-
-.stage-boot-line {
-  position: relative;
-  width: 180px;
-  height: 1px;
-  overflow: hidden;
-  background: rgba(226, 234, 245, 0.16);
-}
-
-.stage-boot-line::before {
-  position: absolute;
-  inset: 0;
-  background: var(--accent);
-  content: "";
-  animation: boot-sweep 1.15s cubic-bezier(0.6, 0, 0.4, 1) infinite;
-}
-
-@keyframes boot-sweep {
-  0% { transform: scaleX(0); transform-origin: 0 50%; }
-  50% { transform: scaleX(1); transform-origin: 0 50%; }
-  51% { transform: scaleX(1); transform-origin: 100% 50%; }
-  100% { transform: scaleX(0); transform-origin: 100% 50%; }
-}
-
-.stage-boot-word {
-  color: rgba(226, 234, 245, 0.6);
-  font-family: var(--font-mono), monospace;
-  font-size: 0.64rem;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-}
-
-/* Depth meter: where you are in the column, and the way to anywhere else. */
-.stage-depth {
-  position: absolute;
-  left: clamp(1.25rem, 2.6vw, 2.25rem);
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  flex-direction: column;
-  gap: .8rem;
-  align-items: flex-start;
-}
-
-.stage-depth-read {
-  color: rgba(226,234,245,.84);
-  font-family: var(--font-mono), monospace;
-  font-size: .68rem;
-  letter-spacing: .22em;
-}
-
-.stage-rail { display: flex; flex-direction: column; gap: .15rem; }
-
-.stage-rail button {
-  width: 44px; height: 26px;
-  padding: 0; border: 0;
-  background: none; cursor: pointer;
-  display: flex; align-items: center;
-}
-
-.stage-rail button::before {
-  display: block; width: 16px; height: 1px;
-  background: rgba(226,234,245,.45);
-  content: "";
-  transition: background-color 260ms var(--ease), width 260ms var(--ease), height 260ms var(--ease);
-}
-
-.stage-rail button:hover::before { background: rgba(226,234,245,.8); width: 26px; }
-.stage-rail button.is-active::before { width: 34px; height: 3px; background: var(--accent); }
-
-.stage-steps {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  color: rgba(226,234,245,.84);
-  font-family: var(--font-mono), monospace;
-  font-size: .72rem;
-  letter-spacing: .18em;
-}
-
-.stage-steps button {
-  min-width: 44px; min-height: 44px;
-  border: 1px solid rgba(226,234,245,.45);
-  background: none;
-  color: inherit;
-  font-family: inherit;
-  cursor: pointer;
-}
-
-.stage-steps button:hover:not(:disabled) { border-color: #f7f9fc; color: #f7f9fc; }
-.stage-steps button:disabled { opacity: .3; cursor: default; }
-
-.stage-keys {
-  margin: 0;
-  color: rgba(226,234,245,.72);
-  font-family: var(--font-mono), monospace;
-  font-size: .64rem;
-  letter-spacing: .2em;
-  white-space: pre;
-}
-
-
-/* -----------------------------------------------------------------------------
-   15c. THE ROOM (station interior)
-   -----------------------------------------------------------------------------
-   Entering a project stays inside the dive: the ocean darkens behind and the
-   room opens over it. DOM, not canvas, so text selects and readers read.
-   -------------------------------------------------------------------------- */
-
-.room {
-  position: absolute;
-  inset: 0;
-  z-index: 5;
-  display: grid;
-  overflow-y: auto;
-  background:
-    linear-gradient(180deg, rgba(4,8,18,.93), rgba(3,6,14,.985) 30%, rgba(2,4,10,.995));
-  /* Waits for the ocean iris to close before arriving. */
-  animation: room-in 460ms cubic-bezier(.16,1,.3,1) 230ms backwards;
-}
-
-@keyframes room-in {
-  from { opacity: 0; transform: translateY(26px); }
-  to { opacity: 1; transform: none; }
-}
-
-.room-inner {
-  width: min(74rem, 100%);
-  margin: 0 auto;
-  padding: clamp(1.5rem, 4vw, 3.5rem) clamp(1.25rem, 3.4vw, 3.5rem) clamp(2.5rem, 5vw, 4rem);
-}
-
-.room-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1.5rem;
-  padding-bottom: clamp(1.25rem, 2.5vw, 2rem);
-  border-bottom: 1px solid rgba(226,234,245,.16);
-}
-
-.room-place {
-  margin: 0 0 .9rem;
-  color: var(--room-accent, #7fe3c4);
-  font-family: var(--font-mono), monospace;
-  font-size: .68rem;
-  font-weight: 600;
-  letter-spacing: .26em;
-  text-transform: uppercase;
-}
-
-.room-title {
-  margin: 0;
-  color: #f7f9fc;
-  font-family: var(--font-display), var(--font-sans), sans-serif;
-  font-size: clamp(1.8rem, 3.6vw, 3rem);
-  font-weight: 300;
-  letter-spacing: .1em;
-  line-height: 1.2;
-  text-transform: uppercase;
-  outline: none;
-}
-
-:lang(ko) .room-title {
-  font-family: var(--font-display-kr), var(--font-sans), sans-serif;
-  font-weight: 400;
-  letter-spacing: .03em;
-  text-transform: none;
-}
-
-.room-ascend {
-  display: inline-flex;
-  min-height: 48px;
-  align-items: center;
-  gap: .8rem;
-  padding: 0 1.2rem;
-  border: 1px solid rgba(226,234,245,.4);
-  background: none;
-  color: rgba(226,234,245,.9);
-  font-family: var(--font-mono), monospace;
-  font-size: .68rem;
-  letter-spacing: .22em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  cursor: pointer;
-}
-
-.room-ascend span { opacity: .5; }
-.room-ascend:hover { border-color: #f7f9fc; color: #fff; }
-
-.room-columns {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: clamp(1.5rem, 3vw, 3rem);
-  padding: clamp(1.75rem, 3.5vw, 3rem) 0;
-}
-
-.room-columns h3,
-.room-proof h3 {
-  margin: 0 0 1rem;
-  color: rgba(226,234,245,.6);
-  font-family: var(--font-mono), monospace;
-  font-size: .66rem;
-  font-weight: 600;
-  letter-spacing: .26em;
-  text-transform: uppercase;
-}
-
-.room-columns h3::before,
-.room-proof h3::before {
-  display: inline-block;
-  width: 14px; height: 2px;
-  margin-right: .7rem;
-  vertical-align: middle;
-  background: var(--room-accent, #7fe3c4);
-  content: "";
-}
-
-.room-columns p {
-  margin: 0;
-  color: rgba(226,234,245,.86);
-  font-size: .94rem;
-  line-height: 1.85;
-}
-
-.room-proof {
-  padding-top: clamp(1.5rem, 3vw, 2.5rem);
-  border-top: 1px solid rgba(226,234,245,.16);
-}
-
-.room-proof > p {
-  max-width: 70ch;
-  margin: 0 0 1.75rem;
-  color: rgba(226,234,245,.86);
-  font-size: .94rem;
-  line-height: 1.85;
-}
-
-.room-shots {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: clamp(1.25rem, 2.5vw, 2rem);
-}
-
-.room-shots figure { margin: 0; }
-
-.room-shot {
-  position: relative;
-  aspect-ratio: 16 / 10;
-  border: 1px solid rgba(226,234,245,.2);
-  background: #05070f;
-}
-
-.room-shot img { object-fit: cover; object-position: top; }
-
-.room-shots figcaption {
-  margin-top: .7rem;
-  color: rgba(226,234,245,.62);
-  font-size: .82rem;
-  line-height: 1.6;
-}
-
-.room-foot {
-  display: flex;
-  flex-wrap: wrap;
-  gap: .9rem;
-  margin-top: clamp(2rem, 4vw, 3rem);
-}
-
-.room-link {
-  display: inline-flex;
-  min-height: 52px;
-  align-items: center;
-  padding: 0 1.6rem;
-  border: 1px solid rgba(226,234,245,.4);
-  color: rgba(226,234,245,.92);
-  font-family: var(--font-mono), monospace;
-  font-size: .7rem;
-  font-weight: 600;
-  letter-spacing: .22em;
-  text-transform: uppercase;
-}
-
-.room-link:hover { border-color: #f7f9fc; color: #fff; }
-
-.room-link.is-primary {
-  border-color: var(--room-accent, #7fe3c4);
-  background: var(--room-accent, #7fe3c4);
-  color: #05070f;
-}
-
-.room-link.is-primary:hover { background: #f7f9fc; border-color: #f7f9fc; }
-
-/* Offered on the readable page to anyone whose device can run the experience. */
-.atlas-return {
-  position: fixed;
-  z-index: 30;
-  right: clamp(1rem, 3vw, 2rem);
-  bottom: clamp(1rem, 3vw, 2rem);
-  min-height: 48px;
-  padding: 0 1.4rem;
-  border: 2px solid var(--ink);
-  background: var(--accent);
-  color: var(--text-on-accent);
-  font-family: var(--font-mono), monospace;
-  font-size: .72rem;
-  font-weight: 600;
-  letter-spacing: .16em;
-  text-transform: uppercase;
-  cursor: pointer;
-}
-
-.atlas-return:hover { background: var(--ink); color: var(--surface); }
-
-.sr-only {
-  position: absolute;
-  width: 1px; height: 1px;
-  padding: 0; margin: -1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-
-@media (max-width: 900px) {
-  .stage-grid { display: none; }
-
-  .stage-depth { left: .6rem; }
-  .stage-depth-read { display: none; }
-  .stage-rail button { width: 30px; height: 22px; }
-
-  .room-columns { grid-template-columns: 1fr; }
-  .room-shots { grid-template-columns: 1fr; }
-  .room-head { flex-direction: column; }
-
-  .stage-scrim {
-    background: linear-gradient(
-      180deg,
-      rgba(5, 7, 15, 0.72) 0%,
-      rgba(5, 7, 15, 0.30) 26%,
-      rgba(5, 7, 15, 0.88) 58%,
-      rgba(5, 7, 15, 0.97) 100%
-    );
-  }
-  .stage-panel { width: 100%; justify-self: stretch; align-self: end; margin-bottom: 1rem; }
-  .stage-keys { display: none; }
-  .stage-title { font-size: clamp(1.6rem, 6vw, 2.2rem); }
-}
-
-/* -----------------------------------------------------------------------------
    16. 404
    -------------------------------------------------------------------------- */
 
@@ -2557,3 +1879,101 @@ a.ledger-row:focus-visible span {
   .case-sheet { grid-template-columns: 1fr; }
   .ink-swash { width: 100%; }
 }
+
+/* Drawn frames replace hard borders: the ink holds the picture. */
+.ink-portrait,
+.ink-photo {
+  border: 0;
+}
+
+.ink-frame {
+  position: absolute;
+  inset: -7px;
+  width: calc(100% + 14px);
+  height: calc(100% + 14px);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.ink-portrait { padding: 8px; }
+.ink-portrait figcaption { border-top: 0; padding-top: 0.8rem; }
+.ink-photo { padding: 8px; background: transparent; }
+
+/* The author in the margin, and the stains it leaves. */
+.ink-stains {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+}
+
+.ink-author {
+  position: fixed;
+  z-index: 41;
+  left: clamp(0.4rem, 1.6vw, 1.6rem);
+  top: 14vh;
+  width: 76px;
+  height: 76px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+/* The bob lives on the image so the button itself is a stable target. */
+.ink-author img {
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  filter: drop-shadow(2px 3px 0 rgba(20, 21, 25, 0.16));
+  animation: author-bob 3.2s ease-in-out infinite;
+}
+
+@keyframes author-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ink-author img { animation: none; }
+}
+
+@media (max-width: 900px) {
+  .ink-author { width: 52px; height: 52px; }
+}
+
+/* The visitor's seal: contact as an act. */
+.seal-cta-row {
+  display: flex;
+  align-items: center;
+  gap: 1.4rem;
+  margin-top: 1.6rem;
+}
+
+.seal-cta {
+  min-height: 52px;
+  padding: 0.85rem 1.5rem;
+  border: 2px dashed rgba(244, 245, 242, 0.55);
+  background: none;
+  color: rgba(244, 245, 242, 0.92);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 120ms var(--ease), border-color 200ms var(--ease);
+}
+
+.seal-cta:active { transform: scale(0.95); border-color: var(--accent); }
+
+.seal-cta.is-stamped {
+  border-style: solid;
+  border-color: rgba(244, 245, 242, 0.35);
+  color: rgba(244, 245, 242, 0.6);
+  cursor: default;
+}
+
+.seal-visitor { transform: rotate(3deg); }

@@ -32,6 +32,7 @@ interface InkStrokeProps {
   /** 0..1 of the stroke to leave undrawn (tapered finish). */
   color?: string;
   rough?: number;
+  preserve?: string;
 }
 
 export function InkStroke({
@@ -43,7 +44,8 @@ export function InkStroke({
   duration = 1.1,
   delay = 0,
   color = "var(--ink)",
-  rough = 5
+  rough = 5,
+  preserve = "xMidYMid meet"
 }: InkStrokeProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const pathRef = useRef<SVGPathElement>(null);
@@ -95,6 +97,7 @@ export function InkStroke({
       ref={svgRef}
       className={className}
       viewBox={viewBox}
+      preserveAspectRatio={preserve}
       fill="none"
       aria-hidden
       focusable="false"
