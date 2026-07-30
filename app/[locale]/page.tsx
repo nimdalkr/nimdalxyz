@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { InkAuthor } from "@/components/ink/InkAuthor";
+import { InkBloom } from "@/components/ink/InkBloom";
 import { InkSeal } from "@/components/ink/InkSeal";
 import { InkStroke } from "@/components/ink/InkStroke";
 import { SealCTA } from "@/components/ink/SealCTA";
@@ -194,6 +195,9 @@ export default async function HomePage({ params }: HomePageProps) {
           </div>
         </section>
 
+        {/* The sea lives inside the ink: the first bloom opens the records. */}
+        <InkBloom height={220} />
+
         {/* 기록 一 · 장부 */}
         <section className="chapter band" id="records" aria-labelledby="ledger-title">
           <div className="wrap">
@@ -303,6 +307,9 @@ export default async function HomePage({ params }: HomePageProps) {
           </div>
         </section>
 
+        {/* The second bloom closes the works and carries the reader down. */}
+        <InkBloom height={200} />
+
         {/* 서명 */}
         <section className="chapter band band-ink contact" id="contact" aria-labelledby="contact-title">
           <div className="wrap">
@@ -332,7 +339,11 @@ export default async function HomePage({ params }: HomePageProps) {
         </section>
       </main>
 
-      <InkAuthor label={korean ? "저자 문어. 누르면 잉크를 뿌립니다" : "The author octopus. Press to spray ink"} />
+      <InkAuthor
+        label={korean ? "저자 문어. 누르면 잉크를 뿌립니다" : "The author octopus. Press to spray ink"}
+        soundOnLabel={korean ? "소리: 켜짐" : "SOUND: ON"}
+        soundOffLabel={korean ? "소리: 꺼짐" : "SOUND: OFF"}
+      />
       <SiteFooter locale={locale} note={korean ? "문어가 잉크로 남긴 기록" : "Records left in octopus ink"} />
     </div>
   );

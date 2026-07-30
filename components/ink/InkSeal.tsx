@@ -30,7 +30,8 @@ export function InkSeal({ children, className }: { children: React.ReactNode; cl
         rotate: -4,
         duration: 0.3,
         ease: "power3.in",
-        scrollTrigger: { trigger: el, start: "top 86%" }
+        scrollTrigger: { trigger: el, start: "top 86%" },
+        onComplete: () => window.dispatchEvent(new Event("ink-stamp"))
       }
     );
     return () => {

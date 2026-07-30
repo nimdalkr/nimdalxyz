@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+import { InkSound } from "@/lib/ink/sound";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -50,10 +52,20 @@ function drawSplat(ctx: CanvasRenderingContext2D, splat: Splat, dpr: number) {
   ctx.restore();
 }
 
-export function InkAuthor({ label }: { label: string }) {
+export function InkAuthor({
+  label,
+  soundOnLabel,
+  soundOffLabel
+}: {
+  label: string;
+  soundOnLabel: string;
+  soundOffLabel: string;
+}) {
   const wrap = useRef<HTMLButtonElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
   const splats = useRef<Splat[]>([]);
+  const sound = useRef<InkSound | null>(null);
+  const [soundOn, setSoundOn] = useState(false);
 
   useEffect(() => {
     const el = wrap.current;
@@ -84,19 +96,60 @@ export function InkAuthor({ label }: { label: string }) {
         scrub: 0.8,
         onUpdate: (self) => {
           el.style.top = `${11 + self.progress * 72}vh`;
-          const lean = Math.max(-14, Math.min(14, self.getVelocity() / 260));
+          const velocity = self.getVelocity();
+          const lean = Math.max(-14, Math.min(14, velocity / 260));
           el.style.transform = `rotate(${lean}deg)`;
+          // The paper whispers only while the pen moves.
+          sound.current?.brush(velocity);
         }
       });
     } else {
       el.style.top = "14vh";
     }
 
+    // Wet ink: dragging the pointer across a freshly drawn stroke smudges it.
+    const onMove = (event: PointerEvent) => {
+      const target = event.target as Element | null;
+      if (!target?.closest?.("svg.is-wet")) return;
+      const ctx2 = cv.getContext("2d");
+      if (!ctx2) return;
+      ctx2.fillStyle = "rgba(20, 21, 25, 0.12)";
+      ctx2.beginPath();
+      ctx2.ellipse(
+        event.clientX * dpr,
+        event.clientY * dpr,
+        (5 + Math.random() * 8) * dpr,
+        (2 + Math.random() * 3) * dpr,
+        Math.random() * Math.PI,
+        0, Math.PI * 2
+      );
+      ctx2.fill();
+    };
+    window.addEventListener("pointermove", onMove, { passive: true });
+
+    // Seals report their landings for the thump.
+    const onStamp = () => sound.current?.thump();
+    window.addEventListener("ink-stamp", onStamp);
+
     return () => {
       trigger?.kill();
       window.removeEventListener("resize", resize);
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("ink-stamp", onStamp);
+      sound.current?.dispose();
     };
   }, []);
+
+  const toggleSound = async () => {
+    if (!sound.current) sound.current = new InkSound();
+    if (soundOn) {
+      sound.current.stop();
+      setSoundOn(false);
+    } else {
+      await sound.current.start();
+      setSoundOn(true);
+    }
+  };
 
   const spray = () => {
     const el = wrap.current;
@@ -113,6 +166,7 @@ export function InkAuthor({ label }: { label: string }) {
     splats.current.push(splat);
     try { window.sessionStorage.setItem(STORE, JSON.stringify(splats.current.slice(-40))); } catch {}
     drawSplat(ctx, splat, dpr);
+    sound.current?.splat();
     // Startle squish.
     gsap.fromTo(el, { scale: 0.82 }, { scale: 1, duration: 0.5, ease: "elastic.out(1, 0.45)" });
   };
@@ -123,6 +177,14 @@ export function InkAuthor({ label }: { label: string }) {
       <button ref={wrap} type="button" className="ink-author" onClick={spray} aria-label={label}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/media/identity-octopus.jpg" alt="" width={72} height={72} />
+      </button>
+      <button
+        type="button"
+        className="ink-sound"
+        onClick={toggleSound}
+        aria-pressed={soundOn}
+      >
+        {soundOn ? soundOnLabel : soundOffLabel}
       </button>
     </>
   );

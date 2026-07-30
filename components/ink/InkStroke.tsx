@@ -66,14 +66,23 @@ export function InkStroke({
 
     path.style.strokeDashoffset = `${length}`;
 
+    // Fresh ink stays wet for a moment: the smudge layer watches this class.
+    let wetTimer = 0;
+    const markWet = () => {
+      svg.classList.add("is-wet");
+      window.clearTimeout(wetTimer);
+      wetTimer = window.setTimeout(() => svg.classList.remove("is-wet"), 2600);
+    };
+
     if (mode === "load") {
       const tween = gsap.to(path, {
         strokeDashoffset: 0,
         duration,
         delay,
-        ease: "power2.inOut"
+        ease: "power2.inOut",
+        onComplete: markWet
       });
-      return () => { tween.kill(); };
+      return () => { window.clearTimeout(wetTimer); tween.kill(); };
     }
 
     const tween = gsap.to(path, {
@@ -83,10 +92,12 @@ export function InkStroke({
         trigger: svg,
         start: "top 88%",
         end: "top 42%",
-        scrub: 0.6
+        scrub: 0.6,
+        onLeave: markWet
       }
     });
     return () => {
+      window.clearTimeout(wetTimer);
       tween.scrollTrigger?.kill();
       tween.kill();
     };

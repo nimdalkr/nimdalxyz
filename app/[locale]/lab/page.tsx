@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { InkStroke } from "@/components/ink/InkStroke";
 import { notFound } from "next/navigation";
 
 import { LabFilter } from "@/components/home/LabFilter";
@@ -84,6 +85,7 @@ export default async function LabPage({ params }: LabPageProps) {
           <div className="wrap">
             <p className="press-mark">{content.lab.eyebrow}</p>
             <h1 id="lab-title">{content.lab.title}</h1>
+              <InkStroke className="ink-underline" d="M8 26 C 90 10, 210 34, 300 18" viewBox="0 0 310 44" strokeWidth={9} />
             <p className="lede">{content.lab.description}</p>
           </div>
         </section>

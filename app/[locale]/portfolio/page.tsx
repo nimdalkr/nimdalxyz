@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { InkStroke } from "@/components/ink/InkStroke";
 import { notFound } from "next/navigation";
 
 import { Reveal } from "@/components/riso/Reveal";
@@ -108,6 +109,7 @@ export default async function CareerPage({ params }: Props) {
               <h1 id="career-title">
                 {korean ? "성장을 만드는 시스템을 설계해요." : "I build the system behind the growth."}
               </h1>
+              <InkStroke className="ink-underline" d="M8 26 C 90 10, 210 34, 300 18" viewBox="0 0 310 44" strokeWidth={9} />
               <p className="lede">
                 {korean
                   ? "캠페인만 운영하지 않았어요. 플랫폼을 시작하고, 에이전시를 키우고, 커뮤니티와 제품을 움직이며 반복 가능한 운영 방식으로 만들었어요."

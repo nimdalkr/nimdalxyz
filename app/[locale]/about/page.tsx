@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { InkStroke } from "@/components/ink/InkStroke";
 import { notFound } from "next/navigation";
 
 import { Reveal } from "@/components/riso/Reveal";
@@ -85,6 +86,7 @@ export default async function AboutPage({ params }: Props) {
               <h1 id="about-title">
                 {korean ? "안녕하세요, 탁찬우입니다." : "Hi, I am Tak Chanwoo."}
               </h1>
+              <InkStroke className="ink-underline" d="M8 26 C 90 10, 210 34, 300 18" viewBox="0 0 310 44" strokeWidth={9} />
               <p className="lede">
                 {korean
                   ? "마케팅 에이전시에서 브랜드와 로컬 비즈니스의 캠페인을 운영했습니다. 채널과 예산이 달라도 결국 판단은 숫자와 현장에서 나왔습니다."

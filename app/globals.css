@@ -1977,3 +1977,31 @@ a.ledger-row:focus-visible span {
 }
 
 .seal-visitor { transform: rotate(3deg); }
+
+/* The sea in the ink: a bloom band between chapters. */
+.ink-bloom {
+  display: block;
+  width: 100%;
+  pointer-events: none;
+}
+
+/* The writing-sound toggle keeps the author company. */
+.ink-sound {
+  position: fixed;
+  z-index: 41;
+  right: clamp(0.6rem, 2vw, 1.6rem);
+  bottom: clamp(0.6rem, 2vw, 1.4rem);
+  min-height: 44px;
+  padding: 0.5rem 0.9rem;
+  border: 2px solid var(--ink);
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.ink-sound:hover { background: var(--ink); color: var(--surface); }
