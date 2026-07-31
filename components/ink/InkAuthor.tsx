@@ -113,11 +113,13 @@ export function InkAuthor({
     }
 
     // Wet ink: dragging the pointer across a freshly drawn stroke smudges it.
+    let smudged = false;
     const onMove = (event: PointerEvent) => {
       const target = event.target as Element | null;
       if (!target?.closest?.("svg.is-wet")) return;
       const ctx2 = cv.getContext("2d");
       if (!ctx2) return;
+      smudged = true;
       ctx2.fillStyle = "rgba(20, 21, 25, 0.12)";
       ctx2.beginPath();
       ctx2.ellipse(
@@ -132,6 +134,19 @@ export function InkAuthor({
     };
     window.addEventListener("pointermove", onMove, { passive: true });
 
+    // Smudges live on a viewport-fixed canvas, so scrolling would carry them
+    // over unrelated content. The moment the page moves, they dry away and
+    // only the sprayed stains are repainted.
+    const onScroll = () => {
+      if (!smudged) return;
+      smudged = false;
+      const ctx3 = cv.getContext("2d");
+      if (!ctx3) return;
+      ctx3.clearRect(0, 0, cv.width, cv.height);
+      splats.current.forEach((s) => drawSplat(ctx3, s, dpr));
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+
     // Seals report their landings for the thump.
     const onStamp = () => sound.current?.thump();
     window.addEventListener("ink-stamp", onStamp);
@@ -140,6 +155,7 @@ export function InkAuthor({
       trigger?.kill();
       window.removeEventListener("resize", resize);
       window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("scroll", onScroll);
       window.removeEventListener("ink-stamp", onStamp);
       sound.current?.dispose();
     };
