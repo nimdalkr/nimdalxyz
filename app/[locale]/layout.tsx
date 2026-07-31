@@ -1,6 +1,9 @@
 import type { Metadata, Viewport } from "next";
 
 import { ScrollProgress } from "@/components/motion/ScrollProgress";
+import { InkBrush } from "@/components/ink/InkBrush";
+import { InkReveals } from "@/components/ink/InkReveals";
+import { InkTransition } from "@/components/ink/InkTransition";
 import { PaperGrain } from "@/components/ink/PaperGrain";
 import { bricolage, gothicA1, notoSansKr, plexMono } from "@/lib/fonts";
 import { isLocale, locales, siteContent } from "@/lib/content";
@@ -95,6 +98,9 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
         </a>
         <ScrollProgress />
         <PaperGrain />
+        <InkBrush />
+        <InkReveals />
+        <InkTransition />
         <div className="locale-root" data-locale={locale}>{children}</div>
       </body>
     </html>

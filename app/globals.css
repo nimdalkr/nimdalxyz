@@ -354,11 +354,13 @@ p {
 /* Section headings stack. The split-header pattern (big headline left, small
    floating paragraph right) is not used anywhere in this system. */
 .head {
-  max-width: 24ch;
   margin: 0 0 clamp(2.5rem, 5vw, 4rem);
 }
 
+/* The measure lives on the heading itself, in its own em, so a display-size
+   line holds ten to twelve hangul glyphs instead of collapsing to a tower. */
 .head h2 {
+  max-width: 12em;
   margin: 0;
   font-size: clamp(2.4rem, 5.4vw, 4.4rem);
 }
@@ -1317,21 +1319,32 @@ a.ledger-row:focus-visible span {
   gap: 1rem;
   padding: 0.85rem 0;
   border-bottom: 1px solid var(--rule);
+  transition: background-color 0.25s ease;
 }
 
+.case dl > div:hover {
+  background: linear-gradient(90deg, rgba(20, 21, 25, 0.045), rgba(20, 21, 25, 0) 70%);
+}
+
+.case dl > div:hover dt { color: var(--accent); }
+
 .case dt {
+  align-self: start;
+  padding-top: 0.3em;
   color: var(--text-soft);
   font-family: var(--font-mono), monospace;
   font-size: 0.68rem;
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+  transition: color 0.25s ease;
 }
 
 .case dd {
   margin: 0;
-  font-size: 0.94rem;
-  line-height: 1.65;
+  max-width: 64ch;
+  font-size: 0.98rem;
+  line-height: 1.72;
 }
 
 .case dl > div.is-outcome dd {
@@ -1855,6 +1868,11 @@ a.ledger-row:focus-visible span {
   align-items: start;
 }
 
+/* Inside a record sheet the case body owns the whole right pane. The
+   two-column case grid is for the project pages, not for the sheet. */
+.case-sheet .case { display: block; }
+.case-sheet .case dl { margin-top: 1.4rem; }
+
 .case-sheet .case-side {
   display: grid;
   gap: 1.2rem;
@@ -1982,7 +2000,7 @@ a.ledger-row:focus-visible span {
 .ink-bloom {
   display: block;
   width: 100%;
-  pointer-events: none;
+  touch-action: pan-y;
 }
 
 /* The writing-sound toggle keeps the author company. */
@@ -2005,3 +2023,123 @@ a.ledger-row:focus-visible span {
 }
 
 .ink-sound:hover { background: var(--ink); color: var(--surface); }
+
+/* The visitor's brush: an ink trail that dries away. */
+.ink-brush {
+  position: fixed;
+  inset: 0;
+  z-index: 39;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+}
+
+/* Ink carries the reader between pages. */
+.ink-veil-wrap {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  pointer-events: none;
+  filter: url(#ink-veil-rough);
+}
+
+.ink-veil {
+  position: fixed;
+  inset: -90px;
+  background: var(--ink);
+}
+
+/* The margin line the author draws on the way down. */
+.ink-margin-line {
+  position: fixed;
+  z-index: 40;
+  top: 0;
+  left: calc(clamp(0.4rem, 1.6vw, 1.6rem) + 37px);
+  width: 2px;
+  height: 14vh;
+  background: var(--ink);
+  opacity: 0.75;
+  pointer-events: none;
+}
+
+@media (max-width: 900px) {
+  .ink-margin-line { left: calc(clamp(0.4rem, 1.6vw, 1.6rem) + 25px); }
+}
+
+/* A phone has no margin to draw in: the line rests and the author shrinks. */
+@media (max-width: 639px) {
+  .ink-margin-line { display: none; }
+  .ink-author { width: 44px; height: 44px; opacity: 0.92; }
+}
+
+/* Seals answer the hand with a small wobble on their own axis. */
+.seal:not(.seal-visitor):hover {
+  animation: seal-wobble 0.55s ease;
+}
+
+@keyframes seal-wobble {
+  0% { transform: rotate(-4deg) scale(1); }
+  35% { transform: rotate(-8deg) scale(1.07); }
+  70% { transform: rotate(-2deg) scale(1.02); }
+  100% { transform: rotate(-4deg) scale(1); }
+}
+
+/* Structural ink: hidden states exist only once the script is awake, so a
+   page without script, or a reader who prefers reduced motion, sees plain
+   finished paper. */
+/* Chrome folds an element's own clip-path into its intersection box, so a
+   fully clipped heading never reports as visible. The observer therefore
+   watches the unclipped parent and the class descends from there. */
+.ink-ready .cover-ink h1,
+.ink-ready .head h2 {
+  clip-path: inset(-0.25em 101% -0.25em -0.1em);
+  transition: clip-path 1s cubic-bezier(0.65, 0, 0.25, 1) var(--ink-delay, 0s);
+}
+
+.ink-ready .cover-ink.ink-in h1,
+.ink-ready .head.ink-in h2 {
+  clip-path: inset(-0.25em -3% -0.25em -0.1em);
+}
+
+.ink-ready .case dl > div { position: relative; border-bottom-color: transparent; }
+
+.ink-ready .case dl > div::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: var(--rule);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.9s cubic-bezier(0.65, 0, 0.25, 1) var(--ink-delay, 0s);
+}
+
+.ink-ready .case dl > div.ink-in::after { transform: scaleX(1); }
+
+.ink-ready .case dt {
+  opacity: 0;
+  transform: translateX(-8px);
+  transition: opacity 0.5s ease var(--ink-delay, 0s), transform 0.5s ease var(--ink-delay, 0s), color 0.25s ease;
+}
+
+.ink-ready .case dl > div.ink-in dt { opacity: 1; transform: none; }
+
+.ink-ready .case dd {
+  opacity: 0;
+  transition: opacity 0.7s ease calc(var(--ink-delay, 0s) + 0.15s);
+}
+
+.ink-ready .case dl > div.ink-in dd { opacity: 1; }
+
+.ink-ready .record > div {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 0.6s ease var(--ink-delay, 0s),
+    transform 0.6s cubic-bezier(0.2, 0.9, 0.3, 1.2) var(--ink-delay, 0s);
+}
+
+.ink-ready .record > div.ink-in { opacity: 1; transform: none; }

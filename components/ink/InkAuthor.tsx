@@ -63,6 +63,7 @@ export function InkAuthor({
 }) {
   const wrap = useRef<HTMLButtonElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
+  const line = useRef<HTMLSpanElement>(null);
   const splats = useRef<Splat[]>([]);
   const sound = useRef<InkSound | null>(null);
   const [soundOn, setSoundOn] = useState(false);
@@ -95,7 +96,10 @@ export function InkAuthor({
         end: "bottom bottom",
         scrub: 0.8,
         onUpdate: (self) => {
-          el.style.top = `${11 + self.progress * 72}vh`;
+          const top = 11 + self.progress * 72;
+          el.style.top = `${top}vh`;
+          // The author draws the margin line on the way down.
+          if (line.current) line.current.style.height = `calc(${top}vh + 38px)`;
           const velocity = self.getVelocity();
           const lean = Math.max(-14, Math.min(14, velocity / 260));
           el.style.transform = `rotate(${lean}deg)`;
@@ -105,6 +109,7 @@ export function InkAuthor({
       });
     } else {
       el.style.top = "14vh";
+      if (line.current) line.current.style.height = "calc(14vh + 38px)";
     }
 
     // Wet ink: dragging the pointer across a freshly drawn stroke smudges it.
@@ -173,6 +178,7 @@ export function InkAuthor({
 
   return (
     <>
+      <span ref={line} className="ink-margin-line" aria-hidden />
       <canvas ref={canvas} className="ink-stains" aria-hidden />
       <button ref={wrap} type="button" className="ink-author" onClick={spray} aria-label={label}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
