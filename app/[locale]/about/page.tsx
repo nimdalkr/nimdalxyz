@@ -144,7 +144,7 @@ export default async function AboutPage({ params }: Props) {
         <section className="band band-tight band-flo contact" aria-labelledby="about-contact-title">
           <div className="wrap">
             <h2 id="about-contact-title">
-              {korean ? "이야기 나눌 문제를 보내주세요." : "Send over the problem worth talking about."}
+              {korean ? "같이 고민해 볼 문제가 있다면 보내주세요." : "Send over the problem worth talking about."}
             </h2>
             <a className="contact-mail" href="mailto:admin@fiveovertwo.xyz">admin@fiveovertwo.xyz</a>
           </div>

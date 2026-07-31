@@ -43,8 +43,8 @@ const FRAME = "M10 12 C 140 6, 300 10, 392 8 L 394 120 C 396 190, 392 230, 390 2
 
 const RECORD = {
   ko: [
-    { value: "14 yrs", label: "2012년부터 이어진 운영" },
-    { value: "200+", label: "공공 및 상업 프로젝트" },
+    { value: "14 yrs", label: "2012년부터 이어 온 일" },
+    { value: "200+", label: "진행한 공공·상업 프로젝트" },
     { value: "3,000+", label: "크리에이터 네트워크" },
     { value: "15x", label: "활성 커뮤니티 성장" }
   ],
@@ -62,37 +62,37 @@ const ERAS = {
     {
       year: "2012",
       org: "Makorang Lab",
-      title: "사회적 가치에서 시작했습니다",
-      body: "기업, 비영리단체, 소비자를 참여형 캠페인으로 연결하는 CSR 플랫폼을 만들고 운영했습니다.",
+      title: "시작은 CSR 플랫폼이었습니다",
+      body: "기업과 비영리단체, 소비자를 참여형 캠페인으로 잇는 플랫폼을 만들어 운영했습니다.",
       signal: "CSR · 플랫폼 · 파트너십"
     },
     {
       year: "2018",
       org: "MKR",
-      title: "실행을 확장하는 법을 배웠습니다",
-      body: "에이전시를 설립해 200건 이상의 공공, 상업 프로젝트와 3,000명 규모의 크리에이터 네트워크를 운영했습니다.",
+      title: "에이전시를 차려 판을 키웠습니다",
+      body: "마케팅 에이전시 MKR을 세워 공공·상업 프로젝트를 200건 넘게 진행했고, 3,000명 규모의 크리에이터 네트워크를 운영했습니다.",
       signal: "200+ 프로젝트 · 3,000+ 네트워크"
     },
     {
       year: "2025",
       org: "071Labs",
-      title: "관심을 관계로 바꿨습니다",
-      body: "글로벌 Web3 프로젝트와 한국 사용자를 연결하며 활성 커뮤니티를 약 200명에서 3,000명 이상으로 키웠습니다.",
+      title: "Web3에서 커뮤니티를 키웠습니다",
+      body: "글로벌 Web3 프로젝트의 한국 커뮤니티를 맡아 활성 인원을 약 200명에서 3,000명 이상으로 키웠습니다.",
       signal: "활성 커뮤니티 15배 성장"
     },
     {
       year: "2026",
       org: "1six.tech · NEVADA",
-      title: "캠페인에서 제품으로 옮겨갔습니다",
-      body: "SEO, KOL 파이프라인, 현지화, 대시보드까지 제품의 한국 시장 진입을 함께 운영했습니다.",
+      title: "일의 무게중심이 제품으로 왔습니다",
+      body: "한국 시장에 들어오는 제품의 SEO, KOL 섭외, 현지화, 대시보드 구축까지 함께 맡았습니다.",
       signal: "SEO · KOL · 현지화"
     },
     {
       year: "NOW",
       org: "FIVE OVER TWO",
-      title: "운영 방식을 제품으로 만들고 있습니다",
-      body: "반복 가능한 컨설팅 워크플로를 SaaS와 MVP로 바꾸는 중입니다. 이 사이트도 그 기록의 일부입니다.",
-      signal: "서비스에서 시스템, 그리고 제품으로"
+      title: "이제는 일하는 방식 자체를 제품으로 만듭니다",
+      body: "반복되는 컨설팅 업무를 SaaS와 MVP로 만들어 가는 중입니다. 이 사이트도 그 과정의 하나입니다.",
+      signal: "서비스를 시스템으로, 시스템을 제품으로"
     }
   ],
   en: [
@@ -147,7 +147,7 @@ const KIT = {
     "자동화 파이프라인",
     "대시보드",
     "QA · 베타 운영",
-    "Next.js 제작",
+    "Next.js 개발",
     "AI 워크플로"
   ],
   en: [
@@ -231,7 +231,7 @@ export default async function HomePage({ params }: HomePageProps) {
       numeral: "四",
       id: "web3",
       mark: korean ? "기록 四 · 전환" : "Record IV · The crossing",
-      title: korean ? "한국 시장의 다리가 되었습니다" : "Became the bridge into Korea",
+      title: korean ? "글로벌과 한국 사이를 이었습니다" : "Became the bridge into Korea",
       body: korean
         ? "글로벌 프로젝트의 한국 GTM을 이끌며 활성 커뮤니티를 15배로 키웠고, NEVADA의 마케팅 리드를 맡았습니다."
         : "Led Korean GTM for global projects, grew an active community fifteenfold, and ran marketing for NEVADA.",
@@ -276,7 +276,7 @@ export default async function HomePage({ params }: HomePageProps) {
               />
               <p className="lede">
                 {korean
-                  ? "2012년부터 캠페인을 운영했고, 지금은 리서치 도구와 자동화 제품을 직접 만듭니다. 문어가 잉크로 남긴 14년의 기록을 아래로 풀어 보세요."
+                  ? "2012년부터 캠페인을 운영했고, 지금은 리서치 도구와 자동화 제품을 직접 만듭니다. 아래로 내려가면 문어가 잉크로 적어 둔 14년의 기록이 펼쳐집니다."
                   : "Running campaigns since 2012, now building research tools and automation. Fourteen years of records, written in ink. Unroll them below."}
               </p>
               <div className="actions">
@@ -316,7 +316,7 @@ export default async function HomePage({ params }: HomePageProps) {
           <div className="wrap">
             <div className="head">
               <p className="press-mark">{korean ? "기록 一 · 장부" : "Record I · The ledger"}</p>
-              <h2 id="ledger-title">{korean ? "숫자가 먼저 도착합니다" : "The numbers arrive first"}</h2>
+              <h2 id="ledger-title">{korean ? "말보다 숫자가 먼저입니다" : "The numbers arrive first"}</h2>
               <InkStroke className="ink-underline" d={UNDERLINE} viewBox="0 0 310 44" strokeWidth={9} />
             </div>
             <div className="record">
@@ -335,12 +335,12 @@ export default async function HomePage({ params }: HomePageProps) {
           <div className="wrap">
             <div className="head">
               <p className="press-mark">{korean ? "연표" : "The timeline"}</p>
-              <h2 id="timeline-title">{korean ? "열네 해, 한 획" : "Fourteen years, one stroke"}</h2>
+              <h2 id="timeline-title">{korean ? "14년을 한 획으로" : "Fourteen years, one stroke"}</h2>
               <InkStroke className="ink-underline" d={UNDERLINE} viewBox="0 0 310 44" strokeWidth={9} />
             </div>
             <InkTimeline
               eras={ERAS[locale]}
-              label={korean ? "시기를 골라 그 해의 기록 보기" : "Pick an era to read its record"}
+              label={korean ? "잉크 방울을 눌러 시기별 기록 보기" : "Pick an era to read its record"}
             />
           </div>
         </section>
@@ -472,7 +472,7 @@ export default async function HomePage({ params }: HomePageProps) {
             </h2>
             <p className="lede">
               {korean
-                ? "제품, 시장, 지금 막힌 지점을 보내주세요."
+                ? "만들고 있는 제품, 노리는 시장, 막혀 있는 지점. 무엇이든 편하게 보내주세요."
                 : "Send the product, the market, and the point where it is stuck."}
             </p>
             <a className="contact-mail" href="mailto:admin@fiveovertwo.xyz">admin@fiveovertwo.xyz</a>
@@ -485,8 +485,8 @@ export default async function HomePage({ params }: HomePageProps) {
               doneLabel={korean ? "다녀가셨습니다" : "You were here"}
             />
             <InkPad
-              title={korean ? "붓을 들어 흔적을 남겨보세요" : "Pick up the brush, leave a mark"}
-              hint={korean ? "이 종이는 이번 방문 동안 기억됩니다" : "The paper remembers for this visit"}
+              title={korean ? "붓 가는 대로 낙서 하나 남겨보세요" : "Pick up the brush, leave a mark"}
+              hint={korean ? "낙서는 이번 방문 동안 남아 있습니다" : "The paper remembers for this visit"}
               clearLabel={korean ? "지우기" : "Clear"}
             />
             <nav className="contact-links" aria-label={korean ? "외부 채널" : "Elsewhere"}>
