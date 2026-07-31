@@ -146,7 +146,7 @@ export default async function AboutPage({ params }: Props) {
             <h2 id="about-contact-title">
               {korean ? "이야기 나눌 문제를 보내주세요." : "Send over the problem worth talking about."}
             </h2>
-            <a className="contact-mail" href="mailto:0xnimdal@gmail.com">0xnimdal@gmail.com</a>
+            <a className="contact-mail" href="mailto:admin@fiveovertwo.xyz">admin@fiveovertwo.xyz</a>
           </div>
         </section>
       </main>

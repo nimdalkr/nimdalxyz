@@ -5,8 +5,11 @@ import { notFound } from "next/navigation";
 
 import { InkAuthor } from "@/components/ink/InkAuthor";
 import { InkBloom } from "@/components/ink/InkBloom";
+import { InkCount } from "@/components/ink/InkCount";
+import { InkPad } from "@/components/ink/InkPad";
 import { InkSeal } from "@/components/ink/InkSeal";
 import { InkStroke } from "@/components/ink/InkStroke";
+import { InkTimeline } from "@/components/ink/InkTimeline";
 import { SealCTA } from "@/components/ink/SealCTA";
 import { LegacyHashBridge } from "@/components/compat/LegacyHashBridge";
 import { StructuredData } from "@/components/seo/StructuredData";
@@ -50,6 +53,116 @@ const RECORD = {
     { value: "200+", label: "Public and commercial projects" },
     { value: "3,000+", label: "Creator network" },
     { value: "15x", label: "Active community growth" }
+  ]
+} as const;
+
+/* The eras along the one stroke. Condensed from the verified career record. */
+const ERAS = {
+  ko: [
+    {
+      year: "2012",
+      org: "Makorang Lab",
+      title: "사회적 가치에서 시작했습니다",
+      body: "기업, 비영리단체, 소비자를 참여형 캠페인으로 연결하는 CSR 플랫폼을 만들고 운영했습니다.",
+      signal: "CSR · 플랫폼 · 파트너십"
+    },
+    {
+      year: "2018",
+      org: "MKR",
+      title: "실행을 확장하는 법을 배웠습니다",
+      body: "에이전시를 설립해 200건 이상의 공공, 상업 프로젝트와 3,000명 규모의 크리에이터 네트워크를 운영했습니다.",
+      signal: "200+ 프로젝트 · 3,000+ 네트워크"
+    },
+    {
+      year: "2025",
+      org: "071Labs",
+      title: "관심을 관계로 바꿨습니다",
+      body: "글로벌 Web3 프로젝트와 한국 사용자를 연결하며 활성 커뮤니티를 약 200명에서 3,000명 이상으로 키웠습니다.",
+      signal: "활성 커뮤니티 15배 성장"
+    },
+    {
+      year: "2026",
+      org: "1six.tech · NEVADA",
+      title: "캠페인에서 제품으로 옮겨갔습니다",
+      body: "SEO, KOL 파이프라인, 현지화, 대시보드까지 제품의 한국 시장 진입을 함께 운영했습니다.",
+      signal: "SEO · KOL · 현지화"
+    },
+    {
+      year: "NOW",
+      org: "FIVE OVER TWO",
+      title: "운영 방식을 제품으로 만들고 있습니다",
+      body: "반복 가능한 컨설팅 워크플로를 SaaS와 MVP로 바꾸는 중입니다. 이 사이트도 그 기록의 일부입니다.",
+      signal: "서비스에서 시스템, 그리고 제품으로"
+    }
+  ],
+  en: [
+    {
+      year: "2012",
+      org: "Makorang Lab",
+      title: "Started with social value",
+      body: "Built and operated a CSR platform connecting companies, nonprofits, and consumers through participation-led campaigns.",
+      signal: "CSR · platform · partnerships"
+    },
+    {
+      year: "2018",
+      org: "MKR",
+      title: "Learned to scale execution",
+      body: "Founded an agency, led more than 200 public and commercial projects, and ran a creator network 3,000 strong.",
+      signal: "200+ projects · 3,000+ network"
+    },
+    {
+      year: "2025",
+      org: "071Labs",
+      title: "Turned attention into belonging",
+      body: "Connected global Web3 projects with Korean users and grew an active community from roughly 200 to more than 3,000.",
+      signal: "15x active community growth"
+    },
+    {
+      year: "2026",
+      org: "1six.tech · NEVADA",
+      title: "Moved from campaigns into products",
+      body: "Ran SEO, KOL pipelines, localization, and dashboards for a product entering the Korean market.",
+      signal: "SEO · KOL · localization"
+    },
+    {
+      year: "NOW",
+      org: "FIVE OVER TWO",
+      title: "Productizing the way of working",
+      body: "Turning repeatable consulting workflows into SaaS and MVP products. This site is part of that record.",
+      signal: "Services into systems into products"
+    }
+  ]
+} as const;
+
+/* The circled tools. Every entry appears somewhere in the verified record. */
+const KIT = {
+  ko: [
+    "캠페인 운영",
+    "Korea GTM",
+    "SEO",
+    "KOL 파이프라인",
+    "커뮤니티 운영",
+    "파트너십",
+    "리서치 도구",
+    "자동화 파이프라인",
+    "대시보드",
+    "QA · 베타 운영",
+    "Next.js 제작",
+    "AI 워크플로"
+  ],
+  en: [
+    "Campaign ops",
+    "Korea GTM",
+    "SEO",
+    "KOL pipelines",
+    "Community ops",
+    "Partnerships",
+    "Research tools",
+    "Automation pipelines",
+    "Dashboards",
+    "QA and beta ops",
+    "Building with Next.js",
+    "AI workflows"
   ]
 } as const;
 
@@ -133,7 +246,7 @@ export default async function HomePage({ params }: HomePageProps) {
     alternateName: "Nimdal",
     url: absoluteCanonicalUrl(locale),
     image: "https://nimdal.xyz/media/operator-portrait.png",
-    email: "mailto:0xnimdal@gmail.com",
+    email: "mailto:admin@fiveovertwo.xyz",
     sameAs: ["https://x.com/0xnimdal", "https://t.me/nimdal", "https://linkedin.com/in/chanwoo-tak-132b281a4"]
   };
 
@@ -209,11 +322,26 @@ export default async function HomePage({ params }: HomePageProps) {
             <div className="record">
               {RECORD[locale].map((item) => (
                 <div key={item.value}>
-                  <strong>{item.value}</strong>
+                  <strong><InkCount value={item.value} /></strong>
                   <span>{item.label}</span>
                 </div>
               ))}
             </div>
+          </div>
+        </section>
+
+        {/* 연표: 열네 해가 한 획으로 */}
+        <section className="chapter band" id="timeline" aria-labelledby="timeline-title">
+          <div className="wrap">
+            <div className="head">
+              <p className="press-mark">{korean ? "연표" : "The timeline"}</p>
+              <h2 id="timeline-title">{korean ? "열네 해, 한 획" : "Fourteen years, one stroke"}</h2>
+              <InkStroke className="ink-underline" d={UNDERLINE} viewBox="0 0 310 44" strokeWidth={9} />
+            </div>
+            <InkTimeline
+              eras={ERAS[locale]}
+              label={korean ? "시기를 골라 그 해의 기록 보기" : "Pick an era to read its record"}
+            />
           </div>
         </section>
 
@@ -263,6 +391,32 @@ export default async function HomePage({ params }: HomePageProps) {
             </div>
           </section>
         ))}
+
+        {/* 도구함: 여백에 동그라미 쳐 둔 것들 */}
+        <section className="chapter band" id="toolkit" aria-labelledby="toolkit-title">
+          <div className="wrap">
+            <div className="head">
+              <p className="press-mark">{korean ? "도구함" : "The toolkit"}</p>
+              <h2 id="toolkit-title">{korean ? "손에 익은 것들" : "What the hands know"}</h2>
+              <InkStroke className="ink-underline" d={UNDERLINE} viewBox="0 0 310 44" strokeWidth={9} />
+            </div>
+            <ul className="ink-kit">
+              {KIT[locale].map((item) => (
+                <li key={item}>
+                  <span className="ink-kit-chip">
+                    <svg className="ink-kit-ring" viewBox="0 0 120 44" preserveAspectRatio="none" aria-hidden>
+                      <path
+                        d="M62 4 C 100 2, 117 11, 116 22 C 115 35, 90 41, 58 40 C 24 39, 4 32, 5 20 C 6 9, 34 3, 88 5"
+                        pathLength={100}
+                      />
+                    </svg>
+                    {item}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
 
         {/* 작품 三点 */}
         <section className="chapter band" id="work" aria-labelledby="work-title">
@@ -321,7 +475,7 @@ export default async function HomePage({ params }: HomePageProps) {
                 ? "제품, 시장, 지금 막힌 지점을 보내주세요."
                 : "Send the product, the market, and the point where it is stuck."}
             </p>
-            <a className="contact-mail" href="mailto:0xnimdal@gmail.com">0xnimdal@gmail.com</a>
+            <a className="contact-mail" href="mailto:admin@fiveovertwo.xyz">admin@fiveovertwo.xyz</a>
             <div className="seal-line">
               <InkSeal>님달</InkSeal>
               <p>{korean ? "서명 · 2026" : "Signed · 2026"}</p>
@@ -329,6 +483,11 @@ export default async function HomePage({ params }: HomePageProps) {
             <SealCTA
               holdLabel={korean ? "꾹 눌러 방문 도장 찍기" : "Press and hold to leave your seal"}
               doneLabel={korean ? "다녀가셨습니다" : "You were here"}
+            />
+            <InkPad
+              title={korean ? "붓을 들어 흔적을 남겨보세요" : "Pick up the brush, leave a mark"}
+              hint={korean ? "이 종이는 이번 방문 동안 기억됩니다" : "The paper remembers for this visit"}
+              clearLabel={korean ? "지우기" : "Clear"}
             />
             <nav className="contact-links" aria-label={korean ? "외부 채널" : "Elsewhere"}>
               <a href="https://x.com/0xnimdal" target="_blank" rel="noreferrer">X</a>

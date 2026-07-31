@@ -169,7 +169,7 @@ export type SiteLocaleContent = {
   };
 };
 
-const email = "0xnimdal@gmail.com";
+const email = "admin@fiveovertwo.xyz";
 const undated = "undated";
 
 export const projectSlugs = [

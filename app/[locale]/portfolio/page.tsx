@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { InkCount } from "@/components/ink/InkCount";
 import { InkStroke } from "@/components/ink/InkStroke";
 import { notFound } from "next/navigation";
 
@@ -139,7 +140,7 @@ export default async function CareerPage({ params }: Props) {
             <div className="record">
               {signals[locale].map((signal) => (
                 <div key={signal.value}>
-                  <strong>{signal.value}</strong>
+                  <strong><InkCount value={signal.value} /></strong>
                   <span>{signal.label}</span>
                 </div>
               ))}
@@ -243,7 +244,7 @@ export default async function CareerPage({ params }: Props) {
             <h2 id="career-contact-title">
               {korean ? "함께 만들 일을 이야기해요." : "Let us talk about what needs building."}
             </h2>
-            <a className="contact-mail" href="mailto:0xnimdal@gmail.com">0xnimdal@gmail.com</a>
+            <a className="contact-mail" href="mailto:admin@fiveovertwo.xyz">admin@fiveovertwo.xyz</a>
             <div className="actions">
               <a className="btn" href="/media/career/tak-chanwoo-nimdal-portfolio-v2.pdf" download>
                 {korean ? "PDF 내려받기" : "Download PDF"}

@@ -4,7 +4,7 @@ export const siteConfig = {
   name: "Nimdal",
   blogName: "Nimdal BLOG",
   author: "Tak Chanwoo / Nimdal",
-  email: "0xnimdal@gmail.com",
+  email: "admin@fiveovertwo.xyz",
   description:
     "Notes from Nimdal on Web3 research, product systems, campaign operations, automation, and personal builds."
 } as const;

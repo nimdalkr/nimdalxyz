@@ -439,7 +439,7 @@ test.describe("public links and not-found behavior", () => {
     await page.goto("/ko");
 
     await expect(page.locator('a[href="/ko/projects/alphaduo"]').first()).toBeVisible();
-    await expect(page.locator('a[href="mailto:0xnimdal@gmail.com"]')).toBeVisible();
+    await expect(page.locator('a[href="mailto:admin@fiveovertwo.xyz"]')).toBeVisible();
     await expect(page.locator('a[href="https://x.com/0xnimdal"]')).toBeVisible();
     await expect(page.locator('a[href="https://t.me/nimdal"]')).toBeVisible();
     await expect(
@@ -448,7 +448,7 @@ test.describe("public links and not-found behavior", () => {
     await expect(page.locator('a[href^="tel:"]')).toHaveCount(0);
 
     await page.goto("/en/portfolio");
-    await expect(page.locator('a[href="mailto:0xnimdal@gmail.com"]')).toBeVisible();
+    await expect(page.locator('a[href="mailto:admin@fiveovertwo.xyz"]')).toBeVisible();
     await expect(page.locator('a[href^="tel:"]')).toHaveCount(0);
   });
 
