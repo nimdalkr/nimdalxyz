@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 
-import { notoSansKr, plexMono } from "@/lib/fonts";
+import { notoSerifKr, plexMono } from "@/lib/fonts";
 
 import styles from "./write.module.css";
 
@@ -29,7 +29,7 @@ export const viewport: Viewport = {
 
 export default function WriteLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="ko" className={`${notoSansKr.variable} ${plexMono.variable}`}>
+    <html lang="ko" className={`${notoSerifKr.variable} ${plexMono.variable}`}>
       <body className={styles.body}>{children}</body>
     </html>
   );

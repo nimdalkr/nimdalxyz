@@ -5,7 +5,7 @@ import { InkBrush } from "@/components/ink/InkBrush";
 import { InkReveals } from "@/components/ink/InkReveals";
 import { InkTransition } from "@/components/ink/InkTransition";
 import { PaperGrain } from "@/components/ink/PaperGrain";
-import { bricolage, gothicA1, notoSansKr, plexMono } from "@/lib/fonts";
+import { bricolage, nanumMyeongjo, notoSerifKr, plexMono } from "@/lib/fonts";
 import { isLocale, locales, siteContent } from "@/lib/content";
 
 import "../globals.css";
@@ -82,7 +82,7 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
     <html
       lang={locale}
       data-scroll-behavior="smooth"
-      className={`${bricolage.variable} ${gothicA1.variable} ${notoSansKr.variable} ${plexMono.variable}`}
+      className={`${bricolage.variable} ${nanumMyeongjo.variable} ${notoSerifKr.variable} ${plexMono.variable}`}
     >
       <head>
         {/* Scroll reveals render at opacity 0 before the script runs. Without

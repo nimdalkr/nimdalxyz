@@ -85,9 +85,9 @@ body {
   min-width: 320px;
   background: var(--surface);
   color: var(--text);
-  font-family: var(--font-sans), system-ui, sans-serif;
-  font-size: 1rem;
-  line-height: 1.7;
+  font-family: var(--font-sans), Georgia, serif;
+  font-size: 1.02rem;
+  line-height: 1.78;
   overflow-x: clip;
   -webkit-font-smoothing: antialiased;
 }
@@ -137,14 +137,15 @@ h4 {
 }
 
 /* Hangul has no Bricolage cut, so Korean display switches face rather than
-   silently dropping to the body weight. */
+   silently dropping to the body weight. Myeongjo carries its own thick-thin
+   contrast, so it needs air where the gothic wanted tightening. */
 :lang(ko) h1,
 :lang(ko) h2,
 :lang(ko) h3,
 :lang(ko) h4 {
-  font-family: var(--font-display-kr), var(--font-sans), system-ui, sans-serif;
-  letter-spacing: -0.03em;
-  line-height: 1.18;
+  font-family: var(--font-display-kr), var(--font-sans), Georgia, serif;
+  letter-spacing: -0.005em;
+  line-height: 1.26;
   word-break: keep-all;
 }
 
@@ -2069,10 +2070,20 @@ a.ledger-row:focus-visible span {
   .ink-margin-line { left: calc(clamp(0.4rem, 1.6vw, 1.6rem) + 25px); }
 }
 
-/* A phone has no margin to draw in: the line rests and the author shrinks. */
+/* A phone has no margin to draw in, so the line rests and the author docks in
+   the corner opposite the sound toggle instead of travelling down through the
+   reading column. The !important overrides the scroll-driven inline top. */
 @media (max-width: 639px) {
   .ink-margin-line { display: none; }
-  .ink-author { width: 44px; height: 44px; opacity: 0.92; }
+
+  .ink-author {
+    top: auto !important;
+    bottom: clamp(0.6rem, 2vw, 1.4rem);
+    left: clamp(0.6rem, 2vw, 1.4rem);
+    width: 46px;
+    height: 46px;
+    transform: none !important;
+  }
 }
 
 /* Seals answer the hand with a small wobble on their own axis. */

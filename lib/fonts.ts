@@ -1,11 +1,13 @@
-import { Bricolage_Grotesque, Gothic_A1, IBM_Plex_Mono, Noto_Sans_KR } from "next/font/google";
+import { Bricolage_Grotesque, IBM_Plex_Mono, Nanum_Myeongjo, Noto_Serif_KR } from "next/font/google";
 
 /**
- * Riso Press type system.
+ * The Ink Records type system.
  *
- * Display is a grotesque with print-era character rather than a UI neutral. Korean
- * display gets its own face because Bricolage carries no Hangul, and a bilingual
- * headline must not silently drop to the body weight.
+ * The page is a document written in ink, so Korean is set in myeongjo rather
+ * than a UI gothic: the thick-thin contrast and the entasis on every stem are
+ * what a brush leaves behind, and they answer the drawn strokes on the page.
+ * Nanum Myeongjo carries the headlines, Noto Serif KR the reading text, and
+ * the mono stays for stamped labels and figures.
  */
 export const bricolage = Bricolage_Grotesque({
   variable: "--font-display",
@@ -14,7 +16,7 @@ export const bricolage = Bricolage_Grotesque({
   subsets: ["latin"]
 });
 
-export const gothicA1 = Gothic_A1({
+export const nanumMyeongjo = Nanum_Myeongjo({
   variable: "--font-display-kr",
   weight: ["700", "800"],
   display: "swap",
@@ -22,9 +24,9 @@ export const gothicA1 = Gothic_A1({
   subsets: ["latin"]
 });
 
-export const notoSansKr = Noto_Sans_KR({
+export const notoSerifKr = Noto_Serif_KR({
   variable: "--font-sans",
-  weight: ["400", "500", "700", "900"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
   preload: true,
   subsets: ["latin"]

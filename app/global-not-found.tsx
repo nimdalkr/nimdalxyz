@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { bricolage, notoSansKr, plexMono } from "@/lib/fonts";
+import { bricolage, notoSerifKr, plexMono } from "@/lib/fonts";
 
 import "./globals.css";
 
@@ -11,7 +11,7 @@ export const metadata = {
 
 export default function GlobalNotFound() {
   return (
-    <html lang="en" className={`${bricolage.variable} ${notoSansKr.variable} ${plexMono.variable}`}>
+    <html lang="en" className={`${bricolage.variable} ${notoSerifKr.variable} ${plexMono.variable}`}>
       <body>
         <main className="not-found-page" id="main-content">
           <p className="press-mark">404</p>
