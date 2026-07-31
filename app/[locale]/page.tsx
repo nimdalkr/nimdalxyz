@@ -69,7 +69,7 @@ const ERAS = {
     {
       year: "2018",
       org: "MKR",
-      title: "에이전시를 차려 판을 키웠습니다",
+      title: "에이전시를 세워 6년 넘게 운영했습니다",
       body: "마케팅 에이전시 MKR을 세워 공공·상업 프로젝트를 200건 넘게 진행했고, 3,000명 규모의 크리에이터 네트워크를 운영했습니다.",
       signal: "200+ 프로젝트 · 3,000+ 네트워크"
     },
@@ -83,14 +83,14 @@ const ERAS = {
     {
       year: "2026",
       org: "1six.tech · NEVADA",
-      title: "일의 무게중심이 제품으로 왔습니다",
+      title: "제품의 한국 진출을 맡았습니다",
       body: "한국 시장에 들어오는 제품의 SEO, KOL 섭외, 현지화, 대시보드 구축까지 함께 맡았습니다.",
       signal: "SEO · KOL · 현지화"
     },
     {
       year: "NOW",
       org: "FIVE OVER TWO",
-      title: "이제는 일하는 방식 자체를 제품으로 만듭니다",
+      title: "지금은 일하는 방식을 제품으로 만들고 있습니다",
       body: "반복되는 컨설팅 업무를 SaaS와 MVP로 만들어 가는 중입니다. 이 사이트도 그 과정의 하나입니다.",
       signal: "서비스를 시스템으로, 시스템을 제품으로"
     }
@@ -472,7 +472,7 @@ export default async function HomePage({ params }: HomePageProps) {
             </h2>
             <p className="lede">
               {korean
-                ? "만들고 있는 제품, 노리는 시장, 막혀 있는 지점. 무엇이든 편하게 보내주세요."
+                ? "만들고 있는 제품, 들어가려는 시장, 지금 막힌 지점. 무엇이든 편하게 보내주세요."
                 : "Send the product, the market, and the point where it is stuck."}
             </p>
             <a className="contact-mail" href="mailto:admin@fiveovertwo.xyz">admin@fiveovertwo.xyz</a>

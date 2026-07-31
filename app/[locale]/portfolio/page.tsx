@@ -25,8 +25,8 @@ const careerChapters = {
   ko: [
     { period: "2012-2016", title: "시작은 CSR 플랫폼이었어요.", body: "기업, 비영리단체, 소비자를 참여형 캠페인으로 연결하는 CSR 디지털 플랫폼을 만들고 운영했어요.", signal: "CSR / 플랫폼 / 파트너십" },
     { period: "2018-2024", title: "실행의 규모를 키웠어요.", body: "마케팅 에이전시 MKR을 설립하고 200건 이상의 공공, 상업 프로젝트와 3,000명 이상의 크리에이터 네트워크를 운영했어요.", signal: "200+ 프로젝트 / 3,000+ 네트워크" },
-    { period: "2025", title: "관심을 관계로 만들었어요.", body: "글로벌 Web3 프로젝트와 한국 사용자를 연결하며 활성 커뮤니티를 약 200명에서 3,000명 이상으로 성장시켰어요.", signal: "활성 커뮤니티 15배 성장" },
-    { period: "2025-2026", title: "무게중심을 제품으로 옮겼어요.", body: "웹, 앱, 게임, Web3 제품의 QA, 비공개 베타, SEO, KOL 파이프라인, 대시보드와 시장 진입을 함께 운영했어요.", signal: "QA / 베타 / GTM / 애널리틱스" },
+    { period: "2025", title: "Web3 커뮤니티를 키웠어요.", body: "글로벌 Web3 프로젝트와 한국 사용자를 연결하며 활성 커뮤니티를 약 200명에서 3,000명 이상으로 성장시켰어요.", signal: "활성 커뮤니티 15배 성장" },
+    { period: "2025-2026", title: "캠페인에서 제품 운영으로 넓혔어요.", body: "웹, 앱, 게임, Web3 제품의 QA, 비공개 베타, SEO, KOL 파이프라인, 대시보드와 시장 진입을 함께 운영했어요.", signal: "QA / 베타 / GTM / 애널리틱스" },
     { period: "2026-NOW", title: "운영 방식을 제품으로 만들고 있어요.", body: "한국 진출과 Growth Ops 서비스를 설계하고, 반복 가능한 컨설팅 워크플로를 SaaS와 MVP로 전환하고 있어요.", signal: "서비스를 시스템으로, 시스템을 제품으로" }
   ],
   en: [
@@ -113,7 +113,7 @@ export default async function CareerPage({ params }: Props) {
               <InkStroke className="ink-underline" d="M8 26 C 90 10, 210 34, 300 18" viewBox="0 0 310 44" strokeWidth={9} />
               <p className="lede">
                 {korean
-                  ? "캠페인만 돌리던 사람은 아니에요. 플랫폼을 만들고, 에이전시를 키우고, 커뮤니티와 제품을 움직이면서 반복 가능한 운영 방식을 쌓아 왔어요."
+                  ? "캠페인 운영만 하지는 않았어요. 플랫폼을 만들고, 에이전시를 키우고, 커뮤니티와 제품을 운영하면서 반복 가능한 방식으로 정리해 왔어요."
                   : "I have built platforms, scaled an agency, moved communities, and operated products, turning each lesson into a repeatable way of working."}
               </p>
               <ul className="chip-row">
