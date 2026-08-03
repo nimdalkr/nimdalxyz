@@ -2462,22 +2462,46 @@ a.ledger-row:focus-visible span {
 }
 
 .ink-roster-names li {
-  padding: 0.45rem 0 0.45rem 1.1rem;
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 0.7rem;
+  align-items: start;
+  padding: 0.5rem 0;
   border-bottom: 1px solid var(--rule);
   font-size: 0.95rem;
   line-height: 1.5;
-  text-indent: -1.1rem;
   animation: roster-ink 0.45s ease both;
 }
 
-.ink-roster-names li::before {
-  content: "·";
-  display: inline-block;
-  margin-right: 0.6rem;
-  color: var(--accent);
-  font-weight: 700;
+/* Every line carries a mark: a real logo where one is on file, otherwise a
+   seal cut from the first letter. Only the mark fades, so the name itself is
+   never caught halfway through an opacity animation. */
+.ink-roster-mark {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  margin-top: 0.12rem;
+  background: var(--ink);
+  color: var(--surface);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.66rem;
+  font-weight: 600;
+  line-height: 1;
   animation: roster-dot 0.45s ease both;
-  animation-delay: inherit;
+}
+
+.ink-roster-mark.is-logo {
+  padding: 2px;
+  background: #fff;
+  border: 1px solid var(--rule-strong);
+  object-fit: contain;
+  filter: grayscale(1) contrast(1.15);
+  mix-blend-mode: multiply;
+}
+
+.ink-roster-name {
+  min-width: 0;
 }
 
 /* The names slide rather than fade: text caught mid-fade fails contrast, so
@@ -2494,7 +2518,7 @@ a.ledger-row:focus-visible span {
 
 @media (prefers-reduced-motion: reduce) {
   .ink-roster-names li,
-  .ink-roster-names li::before { animation: none; }
+  .ink-roster-mark { animation: none; }
 }
 
 .ink-roster-count {

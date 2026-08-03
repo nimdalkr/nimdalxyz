@@ -5,15 +5,21 @@ import { useState } from "react";
 /**
  * The roster.
  *
- * Fourteen years of clients written out by hand. Each category is a tab cut
- * into the paper; choosing one stamps it and the names underneath are inked
- * in one after another, the way a clerk copies a list into a fresh ledger.
+ * A selection of the clients from fourteen years, not the whole ledger. Each
+ * category is a tab cut into the paper; choosing one stamps it and the names
+ * underneath are inked in one after another, the way a clerk copies a list
+ * into a fresh page.
+ *
+ * Every line carries a mark at its left: a real logo where one is on file,
+ * otherwise a small seal cut from the first letter of the name.
  */
+
+export type RosterName = string | { name: string; logo: string };
 
 export type RosterGroup = {
   id: string;
   label: string;
-  names: ReadonlyArray<string>;
+  names: ReadonlyArray<RosterName>;
 };
 
 /**
@@ -61,11 +67,23 @@ export function InkRoster({
         aria-labelledby={`roster-tab-${group.id}`}
       >
         <ul className="ink-roster-names" key={group.id}>
-          {group.names.map((name, index) => (
-            <li key={name} style={{ animationDelay: `${Math.min(index, 14) * 45}ms` }}>
-              {name}
-            </li>
-          ))}
+          {group.names.map((item, index) => {
+            const entry = typeof item === "string" ? { name: item, logo: undefined } : item;
+            const delay = `${Math.min(index, 14) * 45}ms`;
+            return (
+              <li key={entry.name} style={{ animationDelay: delay }}>
+                {entry.logo ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img className="ink-roster-mark is-logo" src={entry.logo} alt="" style={{ animationDelay: delay }} />
+                ) : (
+                  <span className="ink-roster-mark" aria-hidden style={{ animationDelay: delay }}>
+                    {entry.name.trim().charAt(0)}
+                  </span>
+                )}
+                <span className="ink-roster-name">{entry.name}</span>
+              </li>
+            );
+          })}
         </ul>
         <p className="ink-roster-count">
           {countTemplate.replace("{n}", String(group.names.length))}

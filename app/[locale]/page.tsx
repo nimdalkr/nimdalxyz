@@ -171,8 +171,9 @@ const KIT = {
   ]
 } as const;
 
-/* The roster. Names recorded in the career portfolio, grouped as they were
-   worked: public bodies first, then the brands, then the Web3 clients. */
+/* The roster. A selection from the career portfolio, not the whole ledger,
+   grouped as the work came: public programs, brands, then the Web3 clients.
+   Logos are attached where a file exists; the rest take a letter seal. */
 const ROSTER = {
   ko: [
     {
@@ -187,18 +188,16 @@ const ROSTER = {
         "자사몰 신규 구축 지원사업",
         "MICE · 여행업 디지털 전환 지원사업",
         "수출 마케팅 바우처",
-        "성산장기려기념사업회",
-        "사단법인 나눔과나눔",
-        "희망래일",
-        "군산사랑나눔봉사단"
+        "바보클럽",
+        "부산마약퇴치운동본부"
       ]
     },
     {
       id: "brand",
       label: "글로벌 · 리테일",
       names: [
-        "라이카 카메라 코리아",
-        "스위스제이 · 조야 슈즈",
+        { name: "라이카 카메라 코리아", logo: "/media/partners/leica.png" },
+        { name: "스위스제이 · 조야 슈즈", logo: "/media/partners/joya.png" },
         "압구정 직영 1호점",
         "대치 직영 2호점",
         "부천 직영 3호점"
@@ -207,7 +206,10 @@ const ROSTER = {
     {
       id: "care",
       label: "의료 · 헬스케어",
-      names: ["부산 H 동물의료센터", "김해 드림플란트 치과"]
+      names: [
+        { name: "부산 H 동물의료센터", logo: "/media/partners/h-animal.png" },
+        "김해 드림플란트 치과"
+      ]
     },
     {
       id: "food",
@@ -267,18 +269,16 @@ const ROSTER = {
         "Own-mall build program",
         "MICE and travel digital transition program",
         "Export marketing voucher",
-        "Sungsan Jang Kiryeo Memorial Foundation",
-        "Nanum and Nanum",
-        "Hope Rail",
-        "Gunsan Sarang Nanum volunteer corps"
+        "Babo Club",
+        "Korea Association Against Drug Abuse, Busan"
       ]
     },
     {
       id: "brand",
       label: "Global and retail",
       names: [
-        "Leica Camera Korea",
-        "Swiss J and Joya Shoes",
+        { name: "Leica Camera Korea", logo: "/media/partners/leica.png" },
+        { name: "Swiss J and Joya Shoes", logo: "/media/partners/joya.png" },
         "Apgujeong flagship store",
         "Daechi second store",
         "Bucheon third store"
@@ -287,7 +287,10 @@ const ROSTER = {
     {
       id: "care",
       label: "Medical and care",
-      names: ["Busan H Animal Medical Center", "Gimhae Dream Plant Dental"]
+      names: [
+        { name: "Busan H Animal Medical Center", logo: "/media/partners/h-animal.png" },
+        "Gimhae Dream Plant Dental"
+      ]
     },
     {
       id: "food",
@@ -581,22 +584,22 @@ export default async function HomePage({ params }: HomePageProps) {
           <div className="wrap">
             <div className="head">
               <p className="press-mark">{korean ? "명부" : "The roster"}</p>
-              <h2 id="roster-title">{korean ? "이름을 적어 온 곳들" : "Names in the ledger"}</h2>
+              <h2 id="roster-title">{korean ? "함께한 주요 파트너" : "Selected partners"}</h2>
               <InkStroke className="ink-underline" d={UNDERLINE} viewBox="0 0 310 44" strokeWidth={9} />
             </div>
             <p className="lede">
               {korean
-                ? "공기업과 지자체 지원사업부터 글로벌 브랜드, 동네 가게, Web3 프로젝트까지. 분야를 눌러 그 장을 펼쳐 보세요."
-                : "Public programs, global brands, neighbourhood shops, Web3 teams. Press a category to open that page."}
+                ? "200건이 넘는 프로젝트 가운데 일부만 옮겨 적었습니다. 공기업과 지자체 지원사업부터 글로벌 브랜드, 동네 가게, Web3 프로젝트까지. 분야를 눌러 그 장을 펼쳐 보세요."
+                : "A selection from more than two hundred projects. Public programs, global brands, neighbourhood shops, Web3 teams. Press a category to open that page."}
             </p>
             <InkRoster
               groups={ROSTER[locale]}
-              countTemplate={korean ? "이 장에 적힌 {n}곳" : "{n} names on this page"}
+              countTemplate={korean ? "이 장에 옮겨 적은 {n}곳" : "{n} of them on this page"}
             />
             <p className="ink-roster-note">
               {korean
-                ? "기존 커리어 포트폴리오에 기재된 수행 이력이며, 계약 형태와 참여 범위는 건마다 다릅니다."
-                : "Recorded in the career portfolio. Contract type and depth of involvement vary by engagement."}
+                ? "전체 목록이 아니라 기존 커리어 포트폴리오에서 발췌한 일부이며, 계약 형태와 참여 범위는 건마다 다릅니다."
+                : "An excerpt from the career portfolio rather than the full list. Contract type and depth of involvement vary by engagement."}
             </p>
           </div>
         </section>
