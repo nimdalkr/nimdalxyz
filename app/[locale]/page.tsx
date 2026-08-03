@@ -181,12 +181,11 @@ const ROSTER = {
       label: "공공 · 기관",
       names: [
         { name: "한국정보통신기술협회 TTA", logo: "/media/partners/tta.png" },
-        "CJ대한통운 물류사업부",
         "부산 콘텐츠 코리아랩",
         "부산경제진흥원 청년창업 지원사업",
-        "소상공인 라이브커머스 지원사업",
-        "자사몰 신규 구축 지원사업",
-        "MICE · 여행업 디지털 전환 지원사업",
+        { name: "소상공인 라이브커머스 지원사업", logo: "/media/partners/semas.png" },
+        { name: "자사몰 신규 구축 지원사업", logo: "/media/partners/semas.png" },
+        { name: "MICE · 여행업 디지털 전환 지원사업", logo: "/media/partners/kto.png" },
         "수출 마케팅 바우처",
         "바보클럽",
         "부산마약퇴치운동본부"
@@ -262,12 +261,11 @@ const ROSTER = {
       label: "Public bodies",
       names: [
         { name: "TTA, Telecommunications Technology Association", logo: "/media/partners/tta.png" },
-        "CJ Logistics",
         "Busan Content Korea Lab",
         "Busan Economic Promotion Agency startup program",
-        "Small-business live commerce program",
-        "Own-mall build program",
-        "MICE and travel digital transition program",
+        { name: "Small-business live commerce program", logo: "/media/partners/semas.png" },
+        { name: "Own-mall build program", logo: "/media/partners/semas.png" },
+        { name: "MICE and travel digital transition program", logo: "/media/partners/kto.png" },
         "Export marketing voucher",
         "Babo Club",
         "Korea Association Against Drug Abuse, Busan"
