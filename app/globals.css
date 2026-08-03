@@ -2395,3 +2395,122 @@ a.ledger-row:focus-visible span {
 .ink-pad-foot button:hover {
   background: rgba(244, 245, 242, 0.12);
 }
+
+/* The roster: categories cut into the paper, names inked in underneath. */
+.ink-roster {
+  margin-top: clamp(1.6rem, 3vw, 2.4rem);
+}
+
+.ink-roster-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 0.8rem;
+  border-bottom: 2px solid var(--ink);
+  padding-bottom: 0.9rem;
+}
+
+.ink-roster-tabs button {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0.5rem 0.9rem;
+  border: 2px solid var(--rule-strong);
+  background: none;
+  color: var(--text);
+  font-family: var(--font-mono), monospace;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.ink-roster-tabs button i {
+  font-style: normal;
+  font-size: 0.62rem;
+  opacity: 0.62;
+}
+
+.ink-roster-tabs button:hover {
+  border-color: var(--ink);
+}
+
+.ink-roster-tabs button.is-active {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--text-on-accent);
+}
+
+/* Full strength on seal paste: the count is 10px, so it has no contrast to
+   spare for a dimming opacity. */
+.ink-roster-tabs button.is-active i {
+  opacity: 1;
+}
+
+.ink-roster-panel {
+  padding-top: 1.4rem;
+}
+
+.ink-roster-names {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 0.55rem 2rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ink-roster-names li {
+  padding: 0.45rem 0 0.45rem 1.1rem;
+  border-bottom: 1px solid var(--rule);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  text-indent: -1.1rem;
+  animation: roster-ink 0.45s ease both;
+}
+
+.ink-roster-names li::before {
+  content: "·";
+  display: inline-block;
+  margin-right: 0.6rem;
+  color: var(--accent);
+  font-weight: 700;
+  animation: roster-dot 0.45s ease both;
+  animation-delay: inherit;
+}
+
+/* The names slide rather than fade: text caught mid-fade fails contrast, so
+   only the decorative dot changes opacity. */
+@keyframes roster-ink {
+  from { transform: translateY(7px); }
+  to { transform: none; }
+}
+
+@keyframes roster-dot {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ink-roster-names li,
+  .ink-roster-names li::before { animation: none; }
+}
+
+.ink-roster-count {
+  margin: 1.4rem 0 0;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+}
+
+.ink-roster-note {
+  max-width: 62ch;
+  margin: 1.6rem 0 0;
+  color: var(--text-soft);
+  font-size: 0.86rem;
+  line-height: 1.7;
+}

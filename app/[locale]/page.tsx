@@ -7,6 +7,7 @@ import { InkAuthor } from "@/components/ink/InkAuthor";
 import { InkBloom } from "@/components/ink/InkBloom";
 import { InkCount } from "@/components/ink/InkCount";
 import { InkPad } from "@/components/ink/InkPad";
+import { InkRoster } from "@/components/ink/InkRoster";
 import { InkSeal } from "@/components/ink/InkSeal";
 import { InkStroke } from "@/components/ink/InkStroke";
 import { InkTimeline } from "@/components/ink/InkTimeline";
@@ -63,36 +64,36 @@ const ERAS = {
       year: "2012",
       org: "Makorang Lab",
       title: "시작은 CSR 플랫폼이었습니다",
-      body: "기업과 비영리단체, 소비자를 참여형 캠페인으로 잇는 플랫폼을 만들어 운영했습니다.",
-      signal: "CSR · 플랫폼 · 파트너십"
+      body: "부산경제진흥원 청년창업 지원사업에 선정되어 시작했습니다. 기업의 사회공헌 예산을 소상공인 홍보와 지역 비영리 프로젝트로 잇는 캠페인 구조를 만들었습니다.",
+      signal: "청년창업 지원사업 선정"
     },
     {
       year: "2018",
       org: "MKR",
       title: "에이전시를 세워 6년 넘게 운영했습니다",
-      body: "마케팅 에이전시 MKR을 세워 공공·상업 프로젝트를 200건 넘게 진행했고, 3,000명 규모의 크리에이터 네트워크를 운영했습니다.",
+      body: "공기업과 지자체 지원사업부터 글로벌 브랜드, 의료, F&B, 모빌리티까지 200건 넘는 프로젝트를 집행했고, 3,000명 규모의 크리에이터 네트워크를 운영했습니다.",
       signal: "200+ 프로젝트 · 3,000+ 네트워크"
     },
     {
       year: "2025",
       org: "071Labs",
       title: "Web3에서 커뮤니티를 키웠습니다",
-      body: "글로벌 Web3 프로젝트의 한국 커뮤니티를 맡아 활성 인원을 약 200명에서 3,000명 이상으로 키웠습니다.",
-      signal: "활성 커뮤니티 15배 성장"
+      body: "글로벌 Web3 프로젝트의 한국 커뮤니티를 맡아 활성 인원을 약 200명에서 3,000명 이상으로 키웠고, Korea Blockchain Week 2025 공식 사이드 이벤트를 공동 주최했습니다.",
+      signal: "활성 커뮤니티 15배 성장 · KBW 2025"
     },
     {
       year: "2026",
       org: "1six.tech · NEVADA",
       title: "제품의 한국 진출을 맡았습니다",
-      body: "한국 시장에 들어오는 제품의 SEO, KOL 섭외, 현지화, 대시보드 구축까지 함께 맡았습니다.",
-      signal: "SEO · KOL · 현지화"
+      body: "마케팅 전략 기준 문서를 직접 세우고, SEO와 KOL 앰버서더 프로그램, 현지화, 대시보드까지 실행 체계를 만들었습니다.",
+      signal: "전략 기준 문서 · KOL 앰버서더"
     },
     {
       year: "NOW",
       org: "FIVE OVER TWO",
       title: "지금은 일하는 방식을 제품으로 만들고 있습니다",
-      body: "반복되는 컨설팅 업무를 SaaS와 MVP로 만들어 가는 중입니다. 이 사이트도 그 과정의 하나입니다.",
-      signal: "서비스를 시스템으로, 시스템을 제품으로"
+      body: "한국 진출을 돕는 GTM 하우스를 공동 창업했습니다. AI로 시장 반응을 분석하는 Korea Market Entry OS를 만들고 있고, 1억 원 규모의 시드 라운드를 유치했습니다.",
+      signal: "Korea Market Entry OS · 시드 라운드"
     }
   ],
   en: [
@@ -100,36 +101,36 @@ const ERAS = {
       year: "2012",
       org: "Makorang Lab",
       title: "Started with social value",
-      body: "Built and operated a CSR platform connecting companies, nonprofits, and consumers through participation-led campaigns.",
-      signal: "CSR · platform · partnerships"
+      body: "Selected for the Busan Economic Promotion Agency startup program, then built a CSR platform routing corporate giving into small-business promotion and local nonprofit projects.",
+      signal: "Selected for a public startup program"
     },
     {
       year: "2018",
       org: "MKR",
       title: "Learned to scale execution",
-      body: "Founded an agency, led more than 200 public and commercial projects, and ran a creator network 3,000 strong.",
+      body: "Ran more than 200 projects across public programs, global brands, medical, food, and mobility, with a creator network 3,000 strong.",
       signal: "200+ projects · 3,000+ network"
     },
     {
       year: "2025",
       org: "071Labs",
       title: "Turned attention into belonging",
-      body: "Connected global Web3 projects with Korean users and grew an active community from roughly 200 to more than 3,000.",
-      signal: "15x active community growth"
+      body: "Grew an active Korean community from roughly 200 to more than 3,000 and co-hosted an official Korea Blockchain Week 2025 side event.",
+      signal: "15x community growth and KBW 2025"
     },
     {
       year: "2026",
       org: "1six.tech · NEVADA",
       title: "Moved from campaigns into products",
-      body: "Ran SEO, KOL pipelines, localization, and dashboards for a product entering the Korean market.",
-      signal: "SEO · KOL · localization"
+      body: "Wrote the marketing strategy of record, then built the execution system around it: SEO, a KOL ambassador program, localization, and dashboards.",
+      signal: "Strategy of record and a KOL program"
     },
     {
       year: "NOW",
       org: "FIVE OVER TWO",
       title: "Productizing the way of working",
-      body: "Turning repeatable consulting workflows into SaaS and MVP products. This site is part of that record.",
-      signal: "Services into systems into products"
+      body: "Co-founded a GTM house for teams entering Korea. Building Korea Market Entry OS, an AI read on market response, and closed a KRW 100M seed round.",
+      signal: "Korea Market Entry OS and a seed round"
     }
   ]
 } as const;
@@ -148,7 +149,9 @@ const KIT = {
     "대시보드",
     "QA · 베타 운영",
     "Next.js 개발",
-    "AI 워크플로"
+    "AI 워크플로",
+    "공공 지원사업 수행",
+    "IR · 파이낸셜 모델"
   ],
   en: [
     "Campaign ops",
@@ -162,7 +165,188 @@ const KIT = {
     "Dashboards",
     "QA and beta ops",
     "Building with Next.js",
-    "AI workflows"
+    "AI workflows",
+    "Public programs",
+    "IR and financial models"
+  ]
+} as const;
+
+/* The roster. Names recorded in the career portfolio, grouped as they were
+   worked: public bodies first, then the brands, then the Web3 clients. */
+const ROSTER = {
+  ko: [
+    {
+      id: "public",
+      label: "공공 · 기관",
+      names: [
+        "한국정보통신기술협회 TTA",
+        "CJ대한통운 물류사업부",
+        "부산 콘텐츠 코리아랩",
+        "부산경제진흥원 청년창업 지원사업",
+        "소상공인 라이브커머스 지원사업",
+        "자사몰 신규 구축 지원사업",
+        "MICE · 여행업 디지털 전환 지원사업",
+        "수출 마케팅 바우처",
+        "성산장기려기념사업회",
+        "사단법인 나눔과나눔",
+        "희망래일",
+        "군산사랑나눔봉사단"
+      ]
+    },
+    {
+      id: "brand",
+      label: "글로벌 · 리테일",
+      names: [
+        "라이카 카메라 코리아",
+        "스위스제이 · 조야 슈즈",
+        "압구정 직영 1호점",
+        "대치 직영 2호점",
+        "부천 직영 3호점"
+      ]
+    },
+    {
+      id: "care",
+      label: "의료 · 헬스케어",
+      names: ["부산 H 동물의료센터", "김해 드림플란트 치과"]
+    },
+    {
+      id: "food",
+      label: "F&B · 프랜차이즈",
+      names: [
+        "와와샤브 대신점 · 대연점",
+        "구스토파파",
+        "까치횟집",
+        "서가네오리",
+        "김해집",
+        "농장갈비",
+        "김순분 할매회국수",
+        "제임스시카고피자",
+        "마당쇠왕소금구이",
+        "지리산 식육식당"
+      ]
+    },
+    {
+      id: "city",
+      label: "모빌리티 · 건설 · 교육",
+      names: [
+        "봉카 · 띵카 · 미쓰봉카",
+        "굿타임 렌트카",
+        "사하 힐스테이트",
+        "센텀 계룡리슈빌",
+        "코섹 테솔교육원",
+        "도트커피 바리스타학원",
+        "모카클래스",
+        "원룸24"
+      ]
+    },
+    {
+      id: "web3",
+      label: "Web3",
+      names: [
+        "NEVADA DEX",
+        "UXLINK",
+        "SaharaAI",
+        "edgeX",
+        "Theoriq",
+        "BLESS",
+        "Dolomite",
+        "MVL"
+      ]
+    }
+  ],
+  en: [
+    {
+      id: "public",
+      label: "Public bodies",
+      names: [
+        "TTA, Telecommunications Technology Association",
+        "CJ Logistics",
+        "Busan Content Korea Lab",
+        "Busan Economic Promotion Agency startup program",
+        "Small-business live commerce program",
+        "Own-mall build program",
+        "MICE and travel digital transition program",
+        "Export marketing voucher",
+        "Sungsan Jang Kiryeo Memorial Foundation",
+        "Nanum and Nanum",
+        "Hope Rail",
+        "Gunsan Sarang Nanum volunteer corps"
+      ]
+    },
+    {
+      id: "brand",
+      label: "Global and retail",
+      names: [
+        "Leica Camera Korea",
+        "Swiss J and Joya Shoes",
+        "Apgujeong flagship store",
+        "Daechi second store",
+        "Bucheon third store"
+      ]
+    },
+    {
+      id: "care",
+      label: "Medical and care",
+      names: ["Busan H Animal Medical Center", "Gimhae Dream Plant Dental"]
+    },
+    {
+      id: "food",
+      label: "Food and franchise",
+      names: [
+        "Wawa Shabu, two branches",
+        "Gusto Papa",
+        "Kkachi Hoetjip",
+        "Seoganae Ori",
+        "Gimhaejip",
+        "Nongjang Galbi",
+        "Kim Sunbun Halmae Hoe Guksu",
+        "James Chicago Pizza",
+        "Madangsoe Wang Sogeum Gui",
+        "Jirisan Meat Restaurant"
+      ]
+    },
+    {
+      id: "city",
+      label: "Mobility, housing, education",
+      names: [
+        "Bongka, Ddingka, Missbongka",
+        "Goodtime Rent-a-car",
+        "Saha Hillstate",
+        "Centum Gyeryong Leesuville",
+        "Cosec TESOL",
+        "Dot Coffee barista school",
+        "Mocha Class",
+        "Oneroom24"
+      ]
+    },
+    {
+      id: "web3",
+      label: "Web3",
+      names: [
+        "NEVADA DEX",
+        "UXLINK",
+        "SaharaAI",
+        "edgeX",
+        "Theoriq",
+        "BLESS",
+        "Dolomite",
+        "MVL"
+      ]
+    }
+  ]
+} as const;
+
+/* Off the record: the volunteering and civic work that never bills a client. */
+const MARGIN = {
+  ko: [
+    ["2008-2024", "바보클럽 자원봉사단", "누적 2,000시간 이상 봉사, 사단법인 설립 추진"],
+    ["2021-2024", "북부산 청년회의소 JCI", "홍보분과위원장 · 총무이사 · 지역교류분과 위원장"],
+    ["2023", "부산광역시의회의장 표창", "지역 사회 활동으로 받은 표창입니다"]
+  ],
+  en: [
+    ["2008-2024", "Babo Club volunteer corps", "Over 2,000 recorded hours, and work toward incorporation"],
+    ["2021-2024", "JCI North Busan", "PR chair, treasurer, and regional exchange chair"],
+    ["2023", "Busan Metropolitan Council Chair commendation", "Awarded for the community work"]
   ]
 } as const;
 
@@ -392,6 +576,31 @@ export default async function HomePage({ params }: HomePageProps) {
           </section>
         ))}
 
+        {/* 명부: 14년 동안 이름을 적어 둔 곳들 */}
+        <section className="chapter band" id="roster" aria-labelledby="roster-title">
+          <div className="wrap">
+            <div className="head">
+              <p className="press-mark">{korean ? "명부" : "The roster"}</p>
+              <h2 id="roster-title">{korean ? "이름을 적어 온 곳들" : "Names in the ledger"}</h2>
+              <InkStroke className="ink-underline" d={UNDERLINE} viewBox="0 0 310 44" strokeWidth={9} />
+            </div>
+            <p className="lede">
+              {korean
+                ? "공기업과 지자체 지원사업부터 글로벌 브랜드, 동네 가게, Web3 프로젝트까지. 분야를 눌러 그 장을 펼쳐 보세요."
+                : "Public programs, global brands, neighbourhood shops, Web3 teams. Press a category to open that page."}
+            </p>
+            <InkRoster
+              groups={ROSTER[locale]}
+              countTemplate={korean ? "이 장에 적힌 {n}곳" : "{n} names on this page"}
+            />
+            <p className="ink-roster-note">
+              {korean
+                ? "기존 커리어 포트폴리오에 기재된 수행 이력이며, 계약 형태와 참여 범위는 건마다 다릅니다."
+                : "Recorded in the career portfolio. Contract type and depth of involvement vary by engagement."}
+            </p>
+          </div>
+        </section>
+
         {/* 도구함: 여백에 동그라미 쳐 둔 것들 */}
         <section className="chapter band" id="toolkit" aria-labelledby="toolkit-title">
           <div className="wrap">
@@ -456,6 +665,26 @@ export default async function HomePage({ params }: HomePageProps) {
                     <p>{work.summary}</p>
                   </div>
                 </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* 여백의 기록: 청구서가 나가지 않은 일들 */}
+        <section className="chapter band band-alt" id="margin" aria-labelledby="margin-title">
+          <div className="wrap">
+            <div className="head">
+              <p className="press-mark">{korean ? "여백의 기록" : "In the margin"}</p>
+              <h2 id="margin-title">{korean ? "청구서가 없는 일들" : "The work no one was billed for"}</h2>
+              <InkStroke className="ink-underline" d={UNDERLINE} viewBox="0 0 310 44" strokeWidth={9} />
+            </div>
+            <div className="ledger">
+              {MARGIN[locale].map(([period, title, description]) => (
+                <div className="ledger-row" key={period}>
+                  <time>{period}</time>
+                  <strong>{title}</strong>
+                  <span>{description}</span>
+                </div>
               ))}
             </div>
           </div>
