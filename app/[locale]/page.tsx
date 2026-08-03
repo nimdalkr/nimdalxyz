@@ -180,7 +180,7 @@ const ROSTER = {
       id: "public",
       label: "공공 · 기관",
       names: [
-        "한국정보통신기술협회 TTA",
+        { name: "한국정보통신기술협회 TTA", logo: "/media/partners/tta.png" },
         "CJ대한통운 물류사업부",
         "부산 콘텐츠 코리아랩",
         "부산경제진흥원 청년창업 지원사업",
@@ -198,9 +198,9 @@ const ROSTER = {
       names: [
         { name: "라이카 카메라 코리아", logo: "/media/partners/leica.png" },
         { name: "스위스제이 · 조야 슈즈", logo: "/media/partners/joya.png" },
-        "압구정 직영 1호점",
-        "대치 직영 2호점",
-        "부천 직영 3호점"
+        { name: "압구정 직영 1호점", logo: "/media/partners/joya.png" },
+        { name: "대치 직영 2호점", logo: "/media/partners/joya.png" },
+        { name: "부천 직영 3호점", logo: "/media/partners/joya.png" }
       ]
     },
     {
@@ -233,8 +233,8 @@ const ROSTER = {
       names: [
         "봉카 · 띵카 · 미쓰봉카",
         "굿타임 렌트카",
-        "사하 힐스테이트",
-        "센텀 계룡리슈빌",
+        { name: "사하 힐스테이트", logo: "/media/partners/hillstate.png" },
+        { name: "센텀 계룡리슈빌", logo: "/media/partners/leesuville.png" },
         "코섹 테솔교육원",
         "도트커피 바리스타학원",
         "모카클래스",
@@ -246,13 +246,13 @@ const ROSTER = {
       label: "Web3",
       names: [
         "NEVADA DEX",
-        "UXLINK",
-        "SaharaAI",
-        "edgeX",
-        "Theoriq",
-        "BLESS",
-        "Dolomite",
-        "MVL"
+        { name: "UXLINK", logo: "/media/partners/uxlink.png" },
+        { name: "SaharaAI", logo: "/media/partners/sahara.png" },
+        { name: "edgeX", logo: "/media/partners/edgex.png" },
+        { name: "Theoriq", logo: "/media/partners/theoriq.png" },
+        { name: "BLESS", logo: "/media/partners/bless.png" },
+        { name: "Dolomite", logo: "/media/partners/dolomite.png" },
+        { name: "MVL", logo: "/media/partners/mvl.png" }
       ]
     }
   ],
@@ -261,7 +261,7 @@ const ROSTER = {
       id: "public",
       label: "Public bodies",
       names: [
-        "TTA, Telecommunications Technology Association",
+        { name: "TTA, Telecommunications Technology Association", logo: "/media/partners/tta.png" },
         "CJ Logistics",
         "Busan Content Korea Lab",
         "Busan Economic Promotion Agency startup program",
@@ -279,9 +279,9 @@ const ROSTER = {
       names: [
         { name: "Leica Camera Korea", logo: "/media/partners/leica.png" },
         { name: "Swiss J and Joya Shoes", logo: "/media/partners/joya.png" },
-        "Apgujeong flagship store",
-        "Daechi second store",
-        "Bucheon third store"
+        { name: "Apgujeong flagship store", logo: "/media/partners/joya.png" },
+        { name: "Daechi second store", logo: "/media/partners/joya.png" },
+        { name: "Bucheon third store", logo: "/media/partners/joya.png" }
       ]
     },
     {
@@ -314,8 +314,8 @@ const ROSTER = {
       names: [
         "Bongka, Ddingka, Missbongka",
         "Goodtime Rent-a-car",
-        "Saha Hillstate",
-        "Centum Gyeryong Leesuville",
+        { name: "Saha Hillstate", logo: "/media/partners/hillstate.png" },
+        { name: "Centum Gyeryong Leesuville", logo: "/media/partners/leesuville.png" },
         "Cosec TESOL",
         "Dot Coffee barista school",
         "Mocha Class",
@@ -327,13 +327,13 @@ const ROSTER = {
       label: "Web3",
       names: [
         "NEVADA DEX",
-        "UXLINK",
-        "SaharaAI",
-        "edgeX",
-        "Theoriq",
-        "BLESS",
-        "Dolomite",
-        "MVL"
+        { name: "UXLINK", logo: "/media/partners/uxlink.png" },
+        { name: "SaharaAI", logo: "/media/partners/sahara.png" },
+        { name: "edgeX", logo: "/media/partners/edgex.png" },
+        { name: "Theoriq", logo: "/media/partners/theoriq.png" },
+        { name: "BLESS", logo: "/media/partners/bless.png" },
+        { name: "Dolomite", logo: "/media/partners/dolomite.png" },
+        { name: "MVL", logo: "/media/partners/mvl.png" }
       ]
     }
   ]

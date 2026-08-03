@@ -2491,13 +2491,14 @@ a.ledger-row:focus-visible span {
   animation: roster-dot 0.45s ease both;
 }
 
+/* Partner marks keep their own colour. Greyscaling them costs recognition at
+   24px, and the page already carries one full-colour exception in the author
+   octopus. The white tile and rule keep them sitting on the paper. */
 .ink-roster-mark.is-logo {
   padding: 2px;
   background: #fff;
   border: 1px solid var(--rule-strong);
   object-fit: contain;
-  filter: grayscale(1) contrast(1.15);
-  mix-blend-mode: multiply;
 }
 
 .ink-roster-name {
