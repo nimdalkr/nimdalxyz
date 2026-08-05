@@ -6,3 +6,17 @@ out
 .env*
 !.env.example
 .vercel
+
+# QA output and local working notes.
+#
+# Screenshots and audit runs are regenerated on demand and are worth tens of
+# megabytes a session. Carrying them in the repository made every QA pass a
+# commit, and every commit a remote build. They belong in a CI artifact or an
+# object store instead; docs/releases.md records where.
+#
+# History is left alone: these paths were tracked before, so old blobs stay in
+# the object database. This only stops new ones arriving.
+audits/
+artifacts/
+tmp/
+wiki/

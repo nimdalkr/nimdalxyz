@@ -1,14 +1,25 @@
-# Local-only working directories. These are untracked, so a git-based build
-# never sees them, but a CLI deploy uploads the working tree and Next traces
-# whatever it finds at the root into every serverless function. tmp/ alone is
-# ~263mb of old audit artifacts, which is enough to blow the 250mb function
-# limit on its own.
+# Keeps the deployment source small.
+#
+# A CLI deploy uploads the working tree, and Next traces whatever it finds at
+# the root into every serverless function. tmp/ alone is ~263mb of old audit
+# artifacts, which is enough to blow the 250mb function limit on its own.
+#
+# This file controls what gets uploaded. It does not stop a build from being
+# triggered in the first place: Vercel decides that from the push, before it
+# reads anything here. The trigger filter is vercel.json's ignoreCommand, in
+# scripts/vercel-ignore-build.mjs. The two are separate and both are needed.
+#
+# audits/ and artifacts/ are also gitignored now, so a git-based build never
+# sees them either; they stay listed here for CLI deploys from a working tree
+# that still has them on disk.
 tmp
 audits
 artifacts
 wiki
 docs
+tests
 .next
+.github
 *.docx
 *.pdf
 *.jpg
