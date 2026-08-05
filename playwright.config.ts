@@ -1,8 +1,13 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const runsContentTestOnly = process.argv.some((argument) =>
-  argument.endsWith("tests/content.test.ts")
-);
+// Tests that assert on modules rather than on a running site. Naming them here
+// keeps a targeted run from booting a dev server it will never call.
+const NODE_ONLY_TESTS = ["tests/content.test.ts", "tests/vercel-ignore-build.test.ts"];
+
+const runsNodeOnlyTests =
+  process.argv.some((argument) =>
+    NODE_ONLY_TESTS.some((file) => argument.endsWith(file) || argument.endsWith(file.replace(/\//g, "\\")))
+  ) && !process.argv.some((argument) => argument.endsWith("tests/e2e"));
 
 export default defineConfig({
   testDir: "./tests",
@@ -23,7 +28,7 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"] }
     }
   ],
-  webServer: runsContentTestOnly
+  webServer: runsNodeOnlyTests
     ? undefined
     : {
         command: "npm run dev",
