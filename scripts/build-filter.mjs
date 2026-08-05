@@ -1,0 +1,246 @@
+/**
+ * Which commits can change what we ship.
+ *
+ * Vercel starts a remote build for every push, whatever the push contained, so
+ * a billing cycle fills up with builds for audit screenshots and release notes
+ * that cannot change a single byte of the output. This module answers one
+ * question about a commit range: could anything in it change the site?
+ *
+ * Everything here fails toward building. A path nobody has classified, a diff
+ * that will not resolve, a git binary that is missing: all of them build. The
+ * cost of a needless build is a few minutes of quota; the cost of a wrongly
+ * skipped build is a production deploy that silently never happened.
+ *
+ * Pure and side-effect free so the tests can import it. The Vercel entry point
+ * lives in vercel-ignore-build.mjs.
+ */
+
+import { execFileSync } from "node:child_process";
+
+/** Paths that can change what the site serves. */
+export const BUILD_PATTERNS = [
+  "app/**",
+  "components/**",
+  "lib/**",
+  "public/**",
+  // Content sources: MDX posts, project data, shared types.
+  "content/**",
+  "data/**",
+  "types/**",
+  // Build-time tooling. Fails toward building: a script added here later may
+  // well generate content, and this filter living under scripts/ only costs a
+  // build on the rare commit that edits the filter itself.
+  "scripts/**",
+  "package.json",
+  "package-lock.json",
+  "pnpm-lock.yaml",
+  "yarn.lock",
+  "bun.lockb",
+  "next.config.mjs",
+  "next.config.js",
+  "next.config.ts",
+  "tsconfig.json",
+  "vercel.json",
+  "postcss.config.mjs",
+  "postcss.config.js",
+  "tailwind.config.js",
+  "tailwind.config.mjs",
+  "tailwind.config.ts",
+  "keystatic.config.ts",
+  "proxy.ts",
+  "middleware.ts",
+  "middleware.js",
+  "mdx.d.ts",
+  ".npmrc",
+  ".nvmrc",
+  ".node-version"
+];
+
+/** Paths that provably cannot change the output. */
+export const SKIP_PATTERNS = [
+  // QA output and written records.
+  "audits/**",
+  "artifacts/**",
+  "docs/**",
+  "wiki/**",
+  "tmp/**",
+  // Test sources. next build never compiles these, and a commit that changes
+  // behaviour alongside a test also touches a build path, which wins.
+  "tests/**",
+  "playwright.config.ts",
+  "eslint.config.mjs",
+  // Tooling that runs outside the build.
+  ".github/**",
+  ".claude/**",
+  ".vscode/**",
+  ".idea/**",
+  // Loose files at the repository root only: the patterns below do not cross a
+  // slash, so content/blog/post.md stays a build path.
+  "*.md",
+  "*.mdx",
+  "*.docx",
+  "*.pdf",
+  "*.jpg",
+  "*.jpeg",
+  "*.png",
+  "*.webp",
+  ".gitignore",
+  ".vercelignore",
+  ".gitattributes",
+  ".editorconfig",
+  "LICENSE",
+  "skills-lock.json"
+];
+
+/**
+ * Translate a glob into an anchored regular expression.
+ * `**` crosses directory separators, `*` does not.
+ */
+function toRegExp(pattern) {
+  let body = "";
+  for (let index = 0; index < pattern.length; index += 1) {
+    const char = pattern[index];
+    if (char === "*") {
+      const isDouble = pattern[index + 1] === "*";
+      if (isDouble && pattern[index + 2] === "/") {
+        body += "(?:.*/)?";
+        index += 2;
+      } else if (isDouble) {
+        body += ".*";
+        index += 1;
+      } else {
+        body += "[^/]*";
+      }
+    } else if (".+^${}()|[]\\?".includes(char)) {
+      body += `\\${char}`;
+    } else {
+      body += char;
+    }
+  }
+  return new RegExp(`^${body}$`);
+}
+
+const BUILD_MATCHERS = BUILD_PATTERNS.map(toRegExp);
+const SKIP_MATCHERS = SKIP_PATTERNS.map(toRegExp);
+
+/**
+ * Classify one repository-relative path.
+ * Build wins over skip, and anything unrecognised is unknown, which the caller
+ * resolves as a build.
+ */
+export function classifyPath(file) {
+  const path = String(file ?? "").trim().replace(/^\.\//, "");
+  if (!path) return "unknown";
+  if (BUILD_MATCHERS.some((matcher) => matcher.test(path))) return "build";
+  if (SKIP_MATCHERS.some((matcher) => matcher.test(path))) return "skip";
+  return "unknown";
+}
+
+/**
+ * Decide for a whole changed-file list.
+ * An empty list only skips when the caller knows the range was a no-op; the
+ * default is to build, because an empty diff is usually a broken diff.
+ */
+export function decide(files, options = {}) {
+  const list = (files ?? []).map((file) => String(file).trim()).filter(Boolean);
+
+  if (list.length === 0) {
+    if (options.emptyRangeIsNoop) {
+      return {
+        build: false,
+        reason: "the commit range is empty",
+        buildFiles: [],
+        skipFiles: [],
+        unknownFiles: []
+      };
+    }
+    return {
+      build: true,
+      reason: "no changed files were reported",
+      buildFiles: [],
+      skipFiles: [],
+      unknownFiles: []
+    };
+  }
+
+  const buildFiles = [];
+  const skipFiles = [];
+  const unknownFiles = [];
+  for (const file of list) {
+    const verdict = classifyPath(file);
+    if (verdict === "build") buildFiles.push(file);
+    else if (verdict === "skip") skipFiles.push(file);
+    else unknownFiles.push(file);
+  }
+
+  if (buildFiles.length > 0) {
+    return {
+      build: true,
+      reason: `${buildFiles.length} runtime path(s) changed`,
+      buildFiles,
+      skipFiles,
+      unknownFiles
+    };
+  }
+  if (unknownFiles.length > 0) {
+    return {
+      build: true,
+      reason: `${unknownFiles.length} unclassified path(s) changed`,
+      buildFiles,
+      skipFiles,
+      unknownFiles
+    };
+  }
+  return {
+    build: false,
+    reason: "only non-shipping paths changed",
+    buildFiles,
+    skipFiles,
+    unknownFiles
+  };
+}
+
+function git(args) {
+  return execFileSync("git", args, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
+}
+
+function resolves(ref) {
+  try {
+    git(["rev-parse", "--verify", `${ref}^{commit}`]);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Collect the changed files for this deployment.
+ * Returns null when no range resolves, which the caller reads as "build, we
+ * cannot tell". Vercel clones shallowly, so neither the previous deployment's
+ * commit nor HEAD^ is guaranteed to be present.
+ */
+export function changedFiles(env = process.env) {
+  const current = env.VERCEL_GIT_COMMIT_SHA || "HEAD";
+  const previous = env.VERCEL_GIT_PREVIOUS_SHA;
+
+  if (previous && current && previous === current) {
+    return { files: [], emptyRangeIsNoop: true, range: `${previous} (redeploy of the same commit)` };
+  }
+
+  const ranges = [];
+  if (previous && resolves(previous) && resolves(current)) ranges.push([previous, current]);
+  if (resolves(`${current}^`)) ranges.push([`${current}^`, current]);
+
+  for (const [from, to] of ranges) {
+    try {
+      const out = git(["diff", "--name-only", from, to]);
+      return {
+        files: out.split("\n").map((line) => line.trim()).filter(Boolean),
+        range: `${from}..${to}`
+      };
+    } catch {
+      continue;
+    }
+  }
+  return null;
+}
