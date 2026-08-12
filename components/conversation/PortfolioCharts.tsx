@@ -7,91 +7,138 @@ import type { Locale } from "@/lib/content";
 
 import styles from "./NimdalDialogue.module.css";
 
-type TimelineItem = {
+export type CareerArcItem = {
   id: string;
   period: string;
-  title: string;
+  organization: string;
+  role: string;
+  summary: string;
+  signal: string;
 };
 
+const present = 2026 + 8 / 12;
+
+function periodValue(token: string, isEnd = false) {
+  if (/^(now|present)$/i.test(token)) return present;
+  const [yearPart, monthPart] = token.split(".");
+  const year = Number(yearPart);
+  if (!Number.isFinite(year)) return 2012;
+  if (monthPart) return year + (Math.max(1, Math.min(12, Number(monthPart))) - 1) / 12;
+  return year + (isEnd ? 11 / 12 : 0);
+}
+
 function periodBounds(period: string) {
-  const years = period.match(/\d{4}/g)?.map(Number) ?? [];
-  const start = years[0] ?? 2012;
-  return { start, end: years[1] ?? 2026 };
+  const tokens = period.match(/\d{4}(?:\.\d{1,2})?|NOW|PRESENT/gi) ?? [];
+  const start = periodValue(tokens[0] ?? "2012");
+  const end = tokens[1]
+    ? periodValue(tokens[1], true)
+    : Math.max(start + 8 / 12, present);
+  return { start, end: Math.max(start + 0.18, end) };
 }
 
 export function CareerTimelineChart({
   items,
-  locale,
-  onSelect
+  locale
 }: {
-  items: TimelineItem[];
+  items: CareerArcItem[];
   locale: Locale;
-  onSelect: (id: string, title: string) => void;
 }) {
   const [activeId, setActiveId] = useState(items[0]?.id ?? "");
   const dimensions = useMemo(() => {
     const rows = items.map((item) => ({ ...item, ...periodBounds(item.period) }));
-    const min = Math.min(...rows.map((item) => item.start), 2012);
-    const max = Math.max(...rows.map((item) => item.end), 2026);
-    const x = scaleLinear().domain([min, max]).range([118, 696]);
-    return { rows, min, max, x, height: 58 + rows.length * 42 };
+    const min = 2012;
+    const max = 2027;
+    const x = scaleLinear().domain([min, max]).range([226, 732]);
+    return { rows, min, max, x, height: 54 + rows.length * 44 };
   }, [items]);
 
   const active = dimensions.rows.find((item) => item.id === activeId) ?? dimensions.rows[0];
-  const ticks = dimensions.x.ticks(Math.min(7, dimensions.max - dimensions.min));
+  const ticks = [2012, 2015, 2018, 2021, 2024, 2026];
 
   return (
     <figure className={`${styles.dataViz} mt-6 overflow-hidden`} aria-labelledby="career-timeline-title">
       <figcaption className="flex flex-wrap items-end justify-between gap-3 border-b border-[var(--rule)] px-4 py-3">
         <span>
-          <small>{locale === "ko" ? "D3 경력 지도" : "D3 career map"}</small>
-          <strong id="career-timeline-title">{locale === "ko" ? "동시에 운영한 프로젝트의 시간축" : "Career cases across time"}</strong>
+          <small>{locale === "ko" ? "인터랙티브 커리어 연대기" : "Interactive career chronology"}</small>
+          <strong id="career-timeline-title">{locale === "ko" ? "2012년부터 현재까지의 커리어 아크" : "Career arc since 2012"}</strong>
         </span>
-        <em>{active ? `${active.period} · ${active.title}` : ""}</em>
+        <em>{active ? `${active.period} · ${active.organization}` : ""}</em>
       </figcaption>
-      <svg
-        className="block h-auto w-full"
-        viewBox={`0 0 720 ${dimensions.height}`}
-        role="img"
-        aria-label={locale === "ko" ? "경력 사례의 시작과 종료 연도를 보여주는 인터랙티브 타임라인" : "Interactive timeline showing the start and end years of career cases"}
-      >
-        {ticks.map((tick) => (
-          <g key={tick} aria-hidden>
-            <line x1={dimensions.x(tick)} x2={dimensions.x(tick)} y1={24} y2={dimensions.height - 16} className={styles.chartGridLine} />
-            <text x={dimensions.x(tick)} y={17} textAnchor="middle" className={styles.chartTick}>{tick}</text>
-          </g>
-        ))}
-        {dimensions.rows.map((item, index) => {
-          const y = 35 + index * 42;
+      <div className={styles.timelineCanvas}>
+        <svg
+          className="block h-auto w-full"
+          viewBox={`0 0 760 ${dimensions.height}`}
+          role="img"
+          aria-label={locale === "ko" ? "2012년부터 현재까지 조직과 역할의 변화를 보여주는 인터랙티브 타임라인" : "Interactive timeline showing organizations and role changes from 2012 to the present"}
+        >
+          {ticks.map((tick) => (
+            <g key={tick} aria-hidden>
+              <line x1={dimensions.x(tick)} x2={dimensions.x(tick)} y1={25} y2={dimensions.height - 12} className={styles.chartGridLine} />
+              <text x={dimensions.x(tick)} y={17} textAnchor="middle" className={styles.chartTick}>{tick}</text>
+            </g>
+          ))}
+          {dimensions.rows.map((item, index) => {
+            const y = 33 + index * 44;
+            const isActive = item.id === activeId;
+            return (
+              <g key={item.id}>
+                <line x1={18} x2={742} y1={y + 31} y2={y + 31} className={styles.chartRowLine} aria-hidden />
+                <text x={18} y={y + 15} className={isActive ? styles.chartCompanyLabelActive : styles.chartCompanyLabel}>{item.organization}</text>
+                <rect
+                  x={dimensions.x(item.start)}
+                  y={y}
+                  width={Math.max(8, dimensions.x(item.end) - dimensions.x(item.start))}
+                  height={22}
+                  rx={3}
+                  className={isActive ? styles.chartBarActive : styles.chartBar}
+                  role="button"
+                  tabIndex={0}
+                  aria-pressed={isActive}
+                  aria-label={`${item.organization}, ${item.role}, ${item.period}`}
+                  onPointerEnter={() => setActiveId(item.id)}
+                  onFocus={() => setActiveId(item.id)}
+                  onClick={() => setActiveId(item.id)}
+                  onKeyDown={(event) => {
+                    if (event.key !== "Enter" && event.key !== " ") return;
+                    event.preventDefault();
+                    setActiveId(item.id);
+                  }}
+                />
+              </g>
+            );
+          })}
+        </svg>
+      </div>
+      <div className={styles.timelineMobileList} aria-label={locale === "ko" ? "모바일 커리어 연대기" : "Mobile career chronology"}>
+        {dimensions.rows.map((item) => {
           const isActive = item.id === activeId;
           return (
-            <g key={item.id}>
-              <text x={98} y={y + 16} textAnchor="end" className={styles.chartLabel}>{String(index + 1).padStart(2, "0")}</text>
-              <rect
-                x={dimensions.x(item.start)}
-                y={y}
-                width={Math.max(8, dimensions.x(item.end) - dimensions.x(item.start))}
-                height={22}
-                rx={3}
-                className={isActive ? styles.chartBarActive : styles.chartBar}
-                role="button"
-                tabIndex={0}
-                aria-label={`${item.title}, ${item.period}`}
-                onPointerEnter={() => setActiveId(item.id)}
-                onFocus={() => setActiveId(item.id)}
-                onClick={() => onSelect(item.id, item.title)}
-                onKeyDown={(event) => {
-                  if (event.key !== "Enter" && event.key !== " ") return;
-                  event.preventDefault();
-                  onSelect(item.id, item.title);
-                }}
-              />
-            </g>
+            <button
+              key={item.id}
+              type="button"
+              aria-pressed={isActive}
+              onClick={() => setActiveId(item.id)}
+            >
+              <span>{item.period}</span>
+              <strong>{item.organization}</strong>
+              <small>{item.role}</small>
+            </button>
           );
         })}
-      </svg>
+      </div>
+      {active ? (
+        <div className={styles.timelineSelection} aria-live="polite">
+          <span>{active.period}</span>
+          <div>
+            <strong>{active.organization}</strong>
+            <small>{active.role}</small>
+          </div>
+          <p>{active.summary}</p>
+          <em>{active.signal}</em>
+        </div>
+      ) : null}
       <p className="border-t border-[var(--rule)] px-4 py-3">
-        {locale === "ko" ? "막대를 선택하면 해당 경력 사례를 이 대화에서 확인할 수 있어요." : "Select a bar to open that career case in this conversation."}
+        {locale === "ko" ? "창업, 커뮤니티, 에이전시와 제품 운영이 병행된 기간은 의도적으로 겹쳐 표시했어요." : "Overlaps are intentional: venture, community, agency, and product roles sometimes ran in parallel."}
       </p>
     </figure>
   );

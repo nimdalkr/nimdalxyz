@@ -5,7 +5,14 @@ import { notFound } from "next/navigation";
 import { LegacyHashBridge } from "@/components/compat/LegacyHashBridge";
 import { NimdalDialogue } from "@/components/conversation/NimdalDialogue";
 import { StructuredData } from "@/components/seo/StructuredData";
-import { careerCases, isLocale, type Project, projects as projectRecords, siteContent } from "@/lib/content";
+import {
+  careerCases,
+  careerChapters,
+  isLocale,
+  type Project,
+  projects as projectRecords,
+  siteContent
+} from "@/lib/content";
 import { absoluteCanonicalUrl, metadataAlternates, openGraphLocaleByLocale } from "@/lib/seo";
 
 interface HomePageProps {
@@ -113,6 +120,11 @@ export default async function HomePage({ params }: HomePageProps) {
       }))
     };
   });
+  const careerArc = careerChapters.map((chapter) => ({
+    id: chapter.id,
+    period: chapter.period,
+    ...chapter.copy[locale]
+  }));
 
   const schema = {
     "@context": "https://schema.org",
@@ -138,6 +150,7 @@ export default async function HomePage({ params }: HomePageProps) {
         locale={locale}
         projects={projects}
         career={career}
+        careerArc={careerArc}
         initialTheme={initialTheme}
         aiEnabled={Boolean(process.env.GEMINI_API_KEY)}
       />

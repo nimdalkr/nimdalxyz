@@ -529,8 +529,12 @@ test.describe("public links and not-found behavior", () => {
     await expect(page).toHaveURL(/\/ko#ask-projects$/);
 
     await page.getByRole("link", { name: "어떤 경력을 쌓았나요?" }).click();
-    await page.getByRole("button", { name: "관련 경력 사례를 모두 보여주세요" }).click();
-    await expect(page.getByText("동시에 운영한 프로젝트의 시간축", { exact: true }).last()).toBeVisible();
+    await page.getByRole("button", { name: "2012년부터의 전체 커리어를 보여주세요" }).click();
+    await expect(page.getByText("2012년부터 현재까지의 커리어 아크", { exact: true }).last()).toBeVisible();
+    const timeline = page.locator('svg[aria-label*="조직과 역할의 변화"]').last();
+    await expect(timeline.getByText("Makorang Lab", { exact: true })).toBeVisible();
+    await expect(timeline.getByText("Baboclub", { exact: true })).toBeVisible();
+    await expect(timeline.getByText("FIVE OVER TWO", { exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: /Leica 온라인 유입 및 매출 성장/ })).toBeVisible();
     await expect(page).toHaveURL(/\/ko#ask-career$/);
   });
@@ -596,6 +600,24 @@ test.describe("responsive and accessible interaction", () => {
 
     await page.getByRole("navigation", { name: "언어 선택" }).getByRole("link", { name: "EN", exact: true }).click();
     await expect(page).toHaveURL(/\/en$/);
+  });
+
+  test("390px career chronology exposes every chapter without a horizontal chart", async ({
+    page
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/en");
+    await page.getByRole("button", { name: /What has he done\?/ }).click();
+
+    const chronology = page.getByLabel("Mobile career chronology");
+    await expect(chronology).toBeVisible();
+    await expect(chronology.getByRole("button")).toHaveCount(8);
+    await expect(chronology.getByRole("button", { name: /Makorang Lab/ })).toBeVisible();
+    await expect(chronology.getByRole("button", { name: /Baboclub/ })).toBeVisible();
+    await expect(chronology.getByRole("button", { name: /FIVE OVER TWO/ })).toBeVisible();
+
+    await chronology.getByRole("button", { name: /FIVE OVER TWO/ }).click();
+    await expect(page.getByText("Turning services into systems and products", { exact: true })).toBeVisible();
   });
 
   test("390px BLOG links keep 44px touch targets", async ({ page }) => {

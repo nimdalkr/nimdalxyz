@@ -82,6 +82,21 @@ export type CareerCase = {
   copy: Localized<CareerCaseCopy>;
 };
 
+export type CareerChapterCopy = {
+  organization: string;
+  role: string;
+  summary: string;
+  signal: string;
+  evidence: string;
+  limitation: string;
+};
+
+export type CareerChapter = {
+  id: string;
+  period: string;
+  copy: Localized<CareerChapterCopy>;
+};
+
 export type SiteMetricCopy = {
   value: string;
   label: string;
@@ -831,6 +846,185 @@ export const projects = [
     }
   }
 ] as const satisfies readonly Project[];
+
+export const careerChapters = [
+  {
+    id: "makorang-lab",
+    period: "2012.12-2016.07",
+    copy: {
+      ko: {
+        organization: "Makorang Lab",
+        role: "Founder · CSR Platform & Partnerships",
+        summary: "기업, 비영리단체, 소비자를 참여형 캠페인으로 연결하는 CSR 디지털 플랫폼을 창업하고 운영했어요.",
+        signal: "CSR 플랫폼 창업과 파트너십 운영",
+        evidence: "2012-2016 포트폴리오 보고서와 근거 목록에 창업 및 운영 기간이 기록되어 있어요.",
+        limitation: "개별 캠페인의 원본 산출물은 모두 공개되어 있지 않아요."
+      },
+      en: {
+        organization: "Makorang Lab",
+        role: "Founder · CSR Platform & Partnerships",
+        summary: "Founded and operated a CSR platform connecting companies, nonprofits, and consumers through participation-led campaigns.",
+        signal: "Founded a CSR platform and partnership system",
+        evidence: "The 2012-2016 portfolio report and evidence inventory record the founder role and operating period.",
+        limitation: "The original deliverables for every campaign are not publicly available."
+      }
+    }
+  },
+  {
+    id: "baboclub-community",
+    period: "2012.01-2024.12",
+    copy: {
+      ko: {
+        organization: "Baboclub",
+        role: "Nonprofit & Community Operator",
+        summary: "비영리 활동과 커뮤니티 운영을 장기간 이어가며 사람, 파트너, 참여 프로그램을 연결했어요.",
+        signal: "12년 이상 이어진 커뮤니티 운영",
+        evidence: "경력 보고서와 근거 목록에 2012-2024 운영 이력이 확인되어 있어요.",
+        limitation: "기간 전체의 활동을 대표하는 모든 운영 자료는 공개되어 있지 않아요."
+      },
+      en: {
+        organization: "Baboclub",
+        role: "Nonprofit & Community Operator",
+        summary: "Sustained nonprofit and community operations, connecting people, partners, and participation programs over the long term.",
+        signal: "More than 12 years of community operations",
+        evidence: "The career report and evidence inventory confirm an operating record spanning 2012-2024.",
+        limitation: "Not every operating artifact from the full period is public."
+      }
+    }
+  },
+  {
+    id: "mkr",
+    period: "2018.06-2024.11",
+    copy: {
+      ko: {
+        organization: "MKR",
+        role: "Founder · Agency Operator",
+        summary: "마케팅 에이전시를 설립해 200건 이상의 공공 및 상업 프로젝트와 3,000명 이상의 크리에이터 네트워크를 운영했어요.",
+        signal: "200+ 프로젝트 · 3,000+ 네트워크",
+        evidence: "포트폴리오 보고서와 근거 인덱스가 프로젝트 수행 및 에이전시 운영 기록을 뒷받침해요.",
+        limitation: "고객사별 계약 및 성과 원본은 비공개 자료를 포함해요."
+      },
+      en: {
+        organization: "MKR",
+        role: "Founder · Agency Operator",
+        summary: "Founded a marketing agency, led more than 200 public and commercial projects, and operated a network of over 3,000 creators.",
+        signal: "200+ projects · 3,000+ creator network",
+        evidence: "The portfolio report and evidence index support the project-delivery and agency-operating record.",
+        limitation: "Client-level contracts and source performance records include non-public material."
+      }
+    }
+  },
+  {
+    id: "071labs",
+    period: "2025.01-2025.09",
+    copy: {
+      ko: {
+        organization: "071Labs",
+        role: "Community & Korea GTM",
+        summary: "글로벌 Web3 프로젝트와 한국 사용자를 연결하고 활성 커뮤니티를 약 200명에서 3,000명 이상으로 성장시켰어요.",
+        signal: "활성 커뮤니티 약 15배 성장",
+        evidence: "커뮤니티 운영 기록과 KBW 2025 공식 사이드 이벤트 공동 주최 이력이 남아 있어요.",
+        limitation: "성장 곡선의 중간 구간별 원시 데이터는 공개되어 있지 않아요."
+      },
+      en: {
+        organization: "071Labs",
+        role: "Community & Korea GTM",
+        summary: "Connected a global Web3 project with Korean users and grew the active community from roughly 200 to more than 3,000.",
+        signal: "Approximately 15x active-community growth",
+        evidence: "Community operating records and the co-hosted official KBW 2025 side event support the role.",
+        limitation: "The intermediate raw data points across the growth curve are not public."
+      }
+    }
+  },
+  {
+    id: "alpha-duo-operations",
+    period: "2025-2026",
+    copy: {
+      ko: {
+        organization: "Alpha Duo",
+        role: "Product Planning · QA · Community",
+        summary: "Web3 제품의 기획, QA, 비공개 베타와 커뮤니티 피드백을 연결하며 캠페인에서 제품 운영으로 역할을 확장했어요.",
+        signal: "캠페인 운영에서 제품 운영으로 확장",
+        evidence: "제품 기획, QA 및 커뮤니티 운영 기록이 포트폴리오 근거 목록에 정리되어 있어요.",
+        limitation: "비공개 베타 데이터와 내부 제품 지표는 공개 범위에 포함되지 않아요."
+      },
+      en: {
+        organization: "Alpha Duo",
+        role: "Product Planning · QA · Community",
+        summary: "Expanded from campaign execution into product operations by connecting planning, QA, private beta, and community feedback for a Web3 product.",
+        signal: "Expanded from campaigns into product operations",
+        evidence: "Product-planning, QA, and community-operating records are indexed in the portfolio evidence inventory.",
+        limitation: "Private-beta data and internal product metrics are outside the public scope."
+      }
+    }
+  },
+  {
+    id: "mylol-operations",
+    period: "2026",
+    copy: {
+      ko: {
+        organization: "myLoL",
+        role: "Product & Android Beta Operations",
+        summary: "LCK 실제 데이터를 활용한 팀 경영 시뮬레이션의 제품 기획, QA와 Android 베타 운영을 맡았어요.",
+        signal: "게임 제품 기획과 Android 베타 운영",
+        evidence: "게임 빌드, 베타 운영 및 공개 커뮤니티 기록이 포트폴리오에 연결되어 있어요.",
+        limitation: "스토어 성과와 전체 사용자 지표는 공개 자료로 확인할 수 없어요."
+      },
+      en: {
+        organization: "myLoL",
+        role: "Product & Android Beta Operations",
+        summary: "Led product planning, QA, and Android beta operations for an LCK-data-driven team-management simulation.",
+        signal: "Game product planning and Android beta operations",
+        evidence: "Game builds, beta operations, and public community records are connected in the portfolio.",
+        limitation: "Store performance and complete user metrics are not publicly verifiable."
+      }
+    }
+  },
+  {
+    id: "nevada",
+    period: "2026.04-2026.06",
+    copy: {
+      ko: {
+        organization: "NEVADA",
+        role: "Marketing Lead · Korea GTM",
+        summary: "SEO, KOL 앰배서더, 현지화, GA4와 UTM 측정을 하나의 한국 시장 진입 체계로 설계하고 운영했어요.",
+        signal: "SEO · KOL · Localization · Analytics",
+        evidence: "공개 사이트 캡처와 포트폴리오 운영 기록이 역할 및 실행 범위를 뒷받침해요.",
+        limitation: "내부 전환 데이터와 파트너별 성과 자료는 공개되어 있지 않아요."
+      },
+      en: {
+        organization: "NEVADA",
+        role: "Marketing Lead · Korea GTM",
+        summary: "Designed and operated one Korean market-entry system across SEO, KOL ambassadors, localization, GA4, and UTM measurement.",
+        signal: "SEO · KOL · Localization · Analytics",
+        evidence: "Public site captures and portfolio operating records support the role and execution scope.",
+        limitation: "Internal conversion data and partner-level performance records are not public."
+      }
+    }
+  },
+  {
+    id: "five-over-two",
+    period: "2026.08-NOW",
+    copy: {
+      ko: {
+        organization: "FIVE OVER TWO",
+        role: "Co-Founder · Venture Operator",
+        summary: "Web2와 Web3의 Korea Launch, Growth Ops와 제품 구축을 연결하고 반복 가능한 컨설팅 방식을 SaaS와 MVP로 전환하고 있어요.",
+        signal: "서비스를 시스템과 제품으로 전환",
+        evidence: "현재 공개 프로필과 사업 포트폴리오에 공동 창업 및 운영 역할이 기록되어 있어요.",
+        limitation: "현재 진행 중인 사업이므로 장기 성과는 아직 판단할 수 없어요."
+      },
+      en: {
+        organization: "FIVE OVER TWO",
+        role: "Co-Founder · Venture Operator",
+        summary: "Connects Korea Launch, Growth Ops, and product building across Web2 and Web3 while turning repeatable consulting methods into SaaS and MVP products.",
+        signal: "Turning services into systems and products",
+        evidence: "The current public profile and business portfolio record the co-founder and operating role.",
+        limitation: "The venture is in progress, so long-term outcomes cannot yet be assessed."
+      }
+    }
+  }
+] as const satisfies readonly CareerChapter[];
 
 export const careerCases = [
   {

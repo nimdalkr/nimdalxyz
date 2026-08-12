@@ -55,6 +55,7 @@ import {
 } from "../lib/blog-editor/persistence-policy";
 import {
   careerCases,
+  careerChapters,
   locales,
   projects,
   siteContent
@@ -193,12 +194,25 @@ test("content inventory keeps the baseline content and unique public posts", asy
 
   expect(projects).toHaveLength(9);
   expect(careerCases).toHaveLength(6);
+  expect(careerChapters).toHaveLength(8);
   expect(blogPosts.length).toBeGreaterThanOrEqual(baselineBlogSlugs.length);
   baselineBlogSlugs.forEach((slug) => expect(blogSlugs).toContain(slug));
 
   expect(new Set(projects.map(({ slug }) => slug)).size).toBe(projects.length);
   expect(new Set(careerCases.map(({ id }) => id)).size).toBe(careerCases.length);
+  expect(new Set(careerChapters.map(({ id }) => id)).size).toBe(careerChapters.length);
   expect(new Set(blogSlugs).size).toBe(blogPosts.length);
+});
+
+test("career chronology covers the full operating arc from 2012 to the present", () => {
+  const ids = careerChapters.map(({ id }) => id);
+  const periods = careerChapters.map(({ period }) => period);
+
+  expect(ids).toContain("makorang-lab");
+  expect(ids).toContain("baboclub-community");
+  expect(ids).toContain("five-over-two");
+  expect(periods.some((period) => period.startsWith("2012"))).toBe(true);
+  expect(periods.some((period) => period.endsWith("NOW"))).toBe(true);
 });
 
 test("all public content has complete KO/EN entries", async () => {
@@ -213,6 +227,9 @@ test("all public content has complete KO/EN entries", async () => {
   projects.forEach((project) => expectLocalizedEntry(project.copy, `projects.${project.slug}.copy`));
   careerCases.forEach((career) =>
     expectLocalizedEntry(career.copy, `careerCases.${career.id}.copy`)
+  );
+  careerChapters.forEach((chapter) =>
+    expectLocalizedEntry(chapter.copy, `careerChapters.${chapter.id}.copy`)
   );
   expect(koPosts.map(({ slug }) => slug).sort()).toEqual(enPosts.map(({ slug }) => slug).sort());
 

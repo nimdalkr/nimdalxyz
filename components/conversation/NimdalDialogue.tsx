@@ -30,7 +30,11 @@ import {
 import type { Locale } from "@/lib/content";
 
 import { NimdalAtmosphere, type VisualTheme } from "./NimdalAtmosphere";
-import { CareerTimelineChart, CommunityGrowthChart } from "./PortfolioCharts";
+import {
+  CareerTimelineChart,
+  CommunityGrowthChart,
+  type CareerArcItem
+} from "./PortfolioCharts";
 import styles from "./NimdalDialogue.module.css";
 
 type TopicId = "intro" | "career" | "projects" | "web3" | "method" | "contact";
@@ -146,7 +150,6 @@ type DialogueCopy = {
   prompts: Prompt[];
   answers: Record<TopicId, Answer>;
   metrics: Array<[string, string]>;
-  eras: Array<[string, string, string]>;
   method: Array<[string, string, string]>;
   web3Signals: Array<[string, string]>;
   detail: {
@@ -154,6 +157,8 @@ type DialogueCopy = {
     projectsBody: string;
     careerTitle: string;
     careerBody: string;
+    careerCasesTitle: string;
+    careerCasesBody: string;
     web3Title: string;
     web3Body: string;
     introTitle: string;
@@ -175,6 +180,7 @@ interface NimdalDialogueProps {
   locale: Locale;
   projects: ProjectPreview[];
   career: CareerPreview[];
+  careerArc: CareerArcItem[];
   initialTheme: VisualTheme;
   aiEnabled: boolean;
 }
@@ -248,7 +254,7 @@ const copy: Record<Locale, DialogueCopy> = {
           "CSR 플랫폼 창업에서 출발해 에이전시 운영, Web3 커뮤니티와 한국 GTM, 제품 운영을 거쳐 현재의 벤처까지 이어졌어요.",
           "산업은 달라졌지만 사람을 연결하고 실행 구조를 만들며 결과를 다음 의사결정에 축적하는 방식은 계속 이어져 왔어요."
         ],
-        source: "관련 경력 사례를 모두 보여주세요"
+        source: "2012년부터의 전체 커리어를 보여주세요"
       },
       projects: {
         title: "리서치 도구, 자동화, 게임을 직접 만들었어요.",
@@ -287,13 +293,6 @@ const copy: Record<Locale, DialogueCopy> = {
       ["3,000+", "크리에이터 네트워크"],
       ["15x", "활성 커뮤니티 성장"]
     ],
-    eras: [
-      ["2012", "Makorang Lab", "CSR 플랫폼 창업"],
-      ["2018", "MKR", "에이전시 설립·운영"],
-      ["2025", "071Labs", "Community & Korea GTM"],
-      ["2026", "NEVADA", "Marketing Lead"],
-      ["NOW", "FIVE OVER TWO", "Co-Founder"]
-    ],
     method: [
       ["01", "DECODE", "시장과 사용자의 진짜 마찰을 찾아요."],
       ["02", "FRAME", "역할, 채널, 지표를 실행 구조로 묶어요."],
@@ -308,8 +307,10 @@ const copy: Record<Locale, DialogueCopy> = {
     detail: {
       projectsTitle: "개인 프로젝트 아카이브를 대화 안에 불러왔어요.",
       projectsBody: "아래 아홉 개 프로젝트 중 하나를 선택하면 문제, 결정, 시스템, 증거와 한계까지 이 대화에서 이어서 설명해 드릴게요.",
-      careerTitle: "대표 경력 사례를 시간과 역할로 정리했어요.",
-      careerBody: "각 사례는 목적과 담당 범위, 운영 구조, 결과뿐 아니라 현재 공개 자료로 확인할 수 없는 부분까지 함께 표시해요.",
+      careerTitle: "2012년부터 현재까지 이어진 커리어 전체를 정리했어요.",
+      careerBody: "창업, 비영리 커뮤니티, 에이전시, Korea GTM과 제품 운영이 겹치며 진화한 흐름을 먼저 보여드려요.",
+      careerCasesTitle: "대표 실행 사례와 공개 근거",
+      careerCasesBody: "아래 사례는 전체 경력 중 역할, 운영 방식과 결과를 더 구체적으로 확인할 수 있는 기록이에요.",
       web3Title: "Korea GTM과 Web3에 직접 연결된 사례예요.",
       web3Body: "커뮤니티 성장과 한국 시장 진입 체계를 각각 선택해 세부 실행과 근거를 확인할 수 있어요.",
       introTitle: "소개를 숫자와 역할까지 확장하면 이렇습니다.",
@@ -392,7 +393,7 @@ const copy: Record<Locale, DialogueCopy> = {
           "The arc runs from a CSR platform and agency ownership to Web3 communities, Korean GTM, product operations, and a new venture.",
           "The industries changed, but the method kept compounding: connect people, structure execution, and preserve outcomes for the next decision."
         ],
-        source: "Show every relevant career case"
+        source: "Show the complete career arc since 2012"
       },
       projects: {
         title: "Research tools, automation, and games built firsthand.",
@@ -431,13 +432,6 @@ const copy: Record<Locale, DialogueCopy> = {
       ["3,000+", "Creator network"],
       ["15x", "Active community growth"]
     ],
-    eras: [
-      ["2012", "Makorang Lab", "CSR platform founder"],
-      ["2018", "MKR", "Agency founder and operator"],
-      ["2025", "071Labs", "Community and Korea GTM"],
-      ["2026", "NEVADA", "Marketing Lead"],
-      ["NOW", "FIVE OVER TWO", "Co-Founder"]
-    ],
     method: [
       ["01", "DECODE", "Find the real market and user friction."],
       ["02", "FRAME", "Connect roles, channels, and metrics."],
@@ -452,8 +446,10 @@ const copy: Record<Locale, DialogueCopy> = {
     detail: {
       projectsTitle: "The complete personal-project archive is now in the conversation.",
       projectsBody: "Choose any of the nine projects to continue with its problem, decision, system, evidence, limitations, and next step without leaving this page.",
-      careerTitle: "Representative career cases, organized by time and operating role.",
-      careerBody: "Each case includes the goal, ownership, operating system, outcome, evidence, and what the current public material cannot verify.",
+      careerTitle: "The complete career arc, from 2012 to the present.",
+      careerBody: "The chronology shows how founder, nonprofit-community, agency, Korea GTM, and product roles evolved and sometimes overlapped.",
+      careerCasesTitle: "Representative execution cases and public evidence",
+      careerCasesBody: "These selected records provide a closer look at ownership, operating systems, outcomes, evidence, and limitations within the broader career.",
       web3Title: "The cases directly connected to Web3 and Korea GTM.",
       web3Body: "Open either community growth or Korean market entry to inspect the execution and evidence in this conversation.",
       introTitle: "The fuller profile connects roles with recorded signals.",
@@ -654,12 +650,14 @@ function AssistantAnswer({
   target,
   projects,
   career,
+  careerArc,
   onAsk
 }: {
   locale: Locale;
   target: AssistantTarget;
   projects: ProjectPreview[];
   career: CareerPreview[];
+  careerArc: CareerArcItem[];
   onAsk: (target: AssistantTarget, question: string) => void;
 }) {
   const text = copy[locale];
@@ -705,7 +703,11 @@ function AssistantAnswer({
       return (
         <>
           <h2>{text.detail.careerTitle}</h2><p>{text.detail.careerBody}</p>
-          <CareerTimelineChart items={career} locale={locale} onSelect={(id, title) => onAsk({ kind: "career", id }, text.detail.careerQuestion(title))} />
+          <CareerTimelineChart items={careerArc} locale={locale} />
+          <div className={styles.careerCaseIntro}>
+            <h3>{text.detail.careerCasesTitle}</h3>
+            <p>{text.detail.careerCasesBody}</p>
+          </div>
           <CareerCards cases={career} locale={locale} onAsk={onAsk} />
         </>
       );
@@ -743,7 +745,7 @@ function AssistantAnswer({
       ) : null}
 
       {topic === "career" ? (
-        <><ol className={styles.timelineEvidence}>{text.eras.map(([year, company, role]) => <li key={year}><time>{year}</time><span><strong>{company}</strong><small>{role}</small></span></li>)}</ol><CareerTimelineChart items={career} locale={locale} onSelect={(id, title) => onAsk({ kind: "career", id }, text.detail.careerQuestion(title))} /></>
+        <CareerTimelineChart items={careerArc} locale={locale} />
       ) : null}
 
       {topic === "projects" ? <ProjectCards projects={projects} locale={locale} onAsk={onAsk} limit={3} /> : null}
@@ -771,7 +773,7 @@ function AssistantAnswer({
   );
 }
 
-export function NimdalDialogue({ locale, projects, career, initialTheme, aiEnabled }: NimdalDialogueProps) {
+export function NimdalDialogue({ locale, projects, career, careerArc, initialTheme, aiEnabled }: NimdalDialogueProps) {
   const text = copy[locale];
   const reducedMotion = useReducedMotion();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -1015,7 +1017,7 @@ export function NimdalDialogue({ locale, projects, career, initialTheme, aiEnabl
                   ) : (
                     <motion.article key={message.id} className={`${styles.message} ${styles.assistantMessage}`} aria-label={text.shell.assistantLabel} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: reducedMotion ? 0 : 0.36 }}>
                       <Image className={styles.messageAvatar} src="/media/identity-octopus.jpg" alt="" width={36} height={36} />
-                      <div className={styles.messageBody}><div className={styles.messageMeta}><strong>Nimdal</strong><span>{text.shell.model}</span></div><AssistantAnswer locale={locale} target={message.target} projects={projects} career={career} onAsk={ask} /></div>
+                      <div className={styles.messageBody}><div className={styles.messageMeta}><strong>Nimdal</strong><span>{text.shell.model}</span></div><AssistantAnswer locale={locale} target={message.target} projects={projects} career={career} careerArc={careerArc} onAsk={ask} /></div>
                     </motion.article>
                   ))}
                 </AnimatePresence>

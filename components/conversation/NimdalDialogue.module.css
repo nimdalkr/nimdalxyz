@@ -875,6 +875,28 @@
   font-size: 9px;
 }
 
+.careerCaseIntro {
+  display: grid;
+  gap: 7px;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--rule);
+}
+
+.careerCaseIntro h3 {
+  color: var(--paper);
+  font-family: var(--font-answer);
+  font-size: 16px;
+  font-weight: 650;
+}
+
+.careerCaseIntro p {
+  max-width: 68ch;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.6;
+}
+
 .projectEvidence {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1436,6 +1458,16 @@
   line-height: 1.45;
 }
 
+.timelineCanvas {
+  overflow-x: auto;
+  scrollbar-color: var(--rule-strong) transparent;
+  scrollbar-width: thin;
+}
+
+.timelineMobileList {
+  display: none;
+}
+
 .chartGridLine {
   stroke: var(--chart-grid);
   stroke-width: 1;
@@ -1451,6 +1483,24 @@
 
 .chartLabel {
   fill: var(--muted);
+}
+
+.chartRowLine {
+  stroke: var(--rule);
+  stroke-width: 1;
+}
+
+.chartCompanyLabel,
+.chartCompanyLabelActive {
+  fill: var(--muted);
+  font-family: var(--font-mono), monospace;
+  font-size: 9px;
+  font-weight: 650;
+  transition: fill 150ms ease;
+}
+
+.chartCompanyLabelActive {
+  fill: var(--paper);
 }
 
 .chartBar,
@@ -1471,6 +1521,52 @@
 .chartBarActive:focus {
   stroke: var(--paper);
   stroke-width: 2;
+}
+
+.timelineSelection {
+  display: grid;
+  grid-template-columns: 78px minmax(140px, 0.7fr) minmax(0, 1.3fr);
+  gap: 8px 16px;
+  align-items: start;
+  padding: 15px 16px;
+  border-top: 1px solid var(--rule);
+  background: var(--panel-solid);
+}
+
+.timelineSelection > span {
+  color: var(--pink);
+  font-family: var(--font-mono), monospace;
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.timelineSelection > div {
+  display: grid;
+  gap: 4px;
+}
+
+.timelineSelection strong {
+  color: var(--paper);
+  font-size: 10px;
+}
+
+.timelineSelection small,
+.timelineSelection > p,
+.timelineSelection > em {
+  color: var(--quiet);
+  font-size: 8px;
+  line-height: 1.5;
+}
+
+.timelineSelection > p {
+  margin: 0;
+}
+
+.timelineSelection > em {
+  grid-column: 2 / -1;
+  color: var(--cyan);
+  font-family: var(--font-mono), monospace;
+  font-style: normal;
 }
 
 .chartLine {
@@ -2029,6 +2125,68 @@
   .chartTick,
   .chartLabel {
     font-size: 9px;
+  }
+
+  .timelineSelection {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .timelineCanvas {
+    display: none;
+  }
+
+  .timelineMobileList {
+    display: grid;
+  }
+
+  .timelineMobileList button {
+    display: grid;
+    min-width: 0;
+    min-height: 62px;
+    grid-template-columns: 92px minmax(0, 1fr);
+    gap: 3px 10px;
+    align-content: center;
+    padding: 11px 14px;
+    border: 0;
+    border-bottom: 1px solid var(--rule);
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+    text-align: left;
+  }
+
+  .timelineMobileList button[aria-pressed="true"] {
+    background: var(--active-surface);
+    box-shadow: inset 3px 0 0 var(--chart-bar-active);
+  }
+
+  .timelineMobileList span {
+    grid-row: 1 / span 2;
+    align-self: center;
+    color: var(--pink);
+    font-family: var(--font-mono), monospace;
+    font-size: 7px;
+  }
+
+  .timelineMobileList strong {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    color: var(--paper);
+    font-size: 10px;
+  }
+
+  .timelineMobileList small {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    color: var(--quiet);
+    font-size: 8px;
+    line-height: 1.35;
+  }
+
+  .timelineSelection > em {
+    grid-column: 1;
   }
 
   .followUps {

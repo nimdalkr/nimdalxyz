@@ -1,4 +1,11 @@
-import { careerCases, type Locale, type Project, projects, siteContent } from "@/lib/content";
+import {
+  careerCases,
+  careerChapters,
+  type Locale,
+  type Project,
+  projects,
+  siteContent
+} from "@/lib/content";
 
 export function buildAssistantCorpus(locale: Locale) {
   const labels = siteContent[locale];
@@ -21,6 +28,11 @@ export function buildAssistantCorpus(locale: Locale) {
       limitation: metric.limitation
     })),
     operatingMethod: labels.home.process.steps,
+    careerArc: careerChapters.map((chapter) => ({
+      id: chapter.id,
+      period: chapter.period,
+      ...chapter.copy[locale]
+    })),
     projects: projects.map((projectRecord) => {
       const project: Project = projectRecord;
       const copy = project.copy[locale];
