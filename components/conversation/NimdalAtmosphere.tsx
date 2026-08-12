@@ -22,33 +22,24 @@ const PALETTES: Record<VisualTheme, {
   signals: readonly string[];
 }> = {
   chatgpt: {
-    background: "#0d0d0d",
-    trail: "rgba(13, 13, 13, 0.18)",
-    particles: [
-      "rgba(122, 235, 207, 0.54)",
-      "rgba(160, 174, 192, 0.32)",
-      "rgba(236, 238, 235, 0.2)"
-    ],
-    signals: [
-      "rgba(122, 235, 207, 0.1)",
-      "rgba(160, 174, 192, 0.07)",
-      "rgba(236, 238, 235, 0.045)",
-      "rgba(122, 235, 207, 0.04)"
-    ]
+    background: "#ffffff",
+    trail: "#ffffff",
+    particles: ["transparent"],
+    signals: ["transparent", "transparent", "transparent", "transparent"]
   },
   claude: {
-    background: "#f7f4ed",
-    trail: "rgba(247, 244, 237, 0.2)",
+    background: "#f7f5ef",
+    trail: "rgba(247, 245, 239, 0.34)",
     particles: [
-      "rgba(197, 91, 63, 0.34)",
-      "rgba(112, 94, 78, 0.2)",
-      "rgba(206, 154, 105, 0.24)"
+      "rgba(79, 70, 61, 0.055)",
+      "rgba(151, 87, 63, 0.05)",
+      "rgba(109, 94, 80, 0.04)"
     ],
     signals: [
-      "rgba(197, 91, 63, 0.075)",
-      "rgba(112, 94, 78, 0.055)",
-      "rgba(206, 154, 105, 0.065)",
-      "rgba(53, 46, 40, 0.035)"
+      "rgba(79, 70, 61, 0.028)",
+      "rgba(151, 87, 63, 0.025)",
+      "rgba(109, 94, 80, 0.022)",
+      "rgba(53, 46, 40, 0.018)"
     ]
   }
 };
@@ -69,11 +60,11 @@ export function NimdalAtmosphere({ theme }: { theme: VisualTheme }) {
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const palette = PALETTES[theme];
-    const particles: Particle[] = Array.from({ length: 54 }, (_, index) => ({
+    const particles: Particle[] = Array.from({ length: theme === "claude" ? 28 : 0 }, (_, index) => ({
       x: seeded(index, 1),
       y: seeded(index, 2),
       size: 1 + Math.floor(seeded(index, 3) * 3),
-      speed: 0.000012 + seeded(index, 4) * 0.000025,
+      speed: 0.000004 + seeded(index, 4) * 0.000009,
       phase: seeded(index, 5) * Math.PI * 2,
       color: palette.particles[index % palette.particles.length]
     }));
@@ -126,10 +117,12 @@ export function NimdalAtmosphere({ theme }: { theme: VisualTheme }) {
       context.fillStyle = reducedMotion ? palette.background : palette.trail;
       context.fillRect(0, 0, width, height);
 
-      drawSignal(time, 0, palette.signals[0], 34);
-      drawSignal(time, 1, palette.signals[1], 54);
-      drawSignal(time, 2, palette.signals[2], 29);
-      drawSignal(time, 3, palette.signals[3], 42);
+      if (theme === "claude") {
+        drawSignal(time, 0, palette.signals[0], 24);
+        drawSignal(time, 1, palette.signals[1], 38);
+        drawSignal(time, 2, palette.signals[2], 21);
+        drawSignal(time, 3, palette.signals[3], 31);
+      }
 
       for (const particle of particles) {
         const progress = reducedMotion ? particle.x : (particle.x + time * particle.speed) % 1.08;
@@ -141,19 +134,18 @@ export function NimdalAtmosphere({ theme }: { theme: VisualTheme }) {
         context.fillRect(Math.round(x), Math.round(y), particle.size, particle.size);
       }
 
-      if (!reducedMotion) frame = window.requestAnimationFrame(draw);
+      if (!reducedMotion && theme === "claude") frame = window.requestAnimationFrame(draw);
     };
 
     resize();
     window.addEventListener("resize", resize);
-    window.addEventListener("pointermove", onPointerMove, { passive: true });
+    if (theme === "claude") window.addEventListener("pointermove", onPointerMove, { passive: true });
     draw(0);
-    if (!reducedMotion) frame = window.requestAnimationFrame(draw);
 
     return () => {
       window.cancelAnimationFrame(frame);
       window.removeEventListener("resize", resize);
-      window.removeEventListener("pointermove", onPointerMove);
+      if (theme === "claude") window.removeEventListener("pointermove", onPointerMove);
     };
   }, [theme]);
 

@@ -545,11 +545,15 @@ test.describe("public links and not-found behavior", () => {
     await page.goto("/ko");
     const home = page.getByTestId("dialogue-home");
     await expect(home).toHaveAttribute("data-theme", "chatgpt");
+    await expect(page.getByTestId("prompt-dock")).toHaveAttribute("data-placement", "hero");
+    await expect(page.getByText("공개 포트폴리오 문맥 사용 중", { exact: true })).toBeHidden();
 
     await page.getByRole("button", { name: "Nimdal은 누구인가요?" }).click();
     await expect(page.getByRole("heading", { name: "Nimdal은 탁찬우의 퍼블릭 아이덴티티예요." })).toBeVisible();
+    await expect(page.getByTestId("prompt-dock")).toHaveAttribute("data-placement", "dock");
     await page.getByTestId("theme-claude").click();
     await expect(home).toHaveAttribute("data-theme", "claude");
+    await expect(page.getByText("공개 포트폴리오 문맥 사용 중", { exact: true })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Nimdal은 탁찬우의 퍼블릭 아이덴티티예요." })).toBeVisible();
 
     await page.reload();

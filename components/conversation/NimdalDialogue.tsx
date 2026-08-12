@@ -721,7 +721,7 @@ function AssistantAnswer({
         <>
           <h2>{text.detail.introTitle}</h2><p>{text.detail.introBody}</p>
           <figure className={styles.profileEvidence}>
-            <div className={styles.profilePhoto}><Image src="/media/operator-portrait.png" alt={locale === "ko" ? "탁찬우 프로필 사진" : "Portrait of Tak Chanwoo"} fill sizes="(max-width: 700px) 88vw, 290px" /></div>
+            <div className={styles.profilePhoto}><Image src="/media/operator-portrait.png" alt={locale === "ko" ? "탁찬우 프로필 사진" : "Portrait of Tak Chanwoo"} fill sizes="(max-width: 700px) 88vw, 290px" loading="eager" /></div>
             <figcaption><span>TAK CHANWOO / NIMDAL</span><strong>Founder · Growth Operator · Product Builder</strong><div className={styles.metricGrid}>{text.metrics.map(([value, label]) => <div key={value}><b>{value}</b><small>{label}</small></div>)}</div></figcaption>
           </figure>
         </>
@@ -739,7 +739,7 @@ function AssistantAnswer({
 
       {topic === "intro" ? (
         <figure className={styles.profileEvidence}>
-          <div className={styles.profilePhoto}><Image src="/media/operator-portrait.png" alt={locale === "ko" ? "탁찬우 프로필 사진" : "Portrait of Tak Chanwoo"} fill sizes="(max-width: 700px) 88vw, 290px" /></div>
+          <div className={styles.profilePhoto}><Image src="/media/operator-portrait.png" alt={locale === "ko" ? "탁찬우 프로필 사진" : "Portrait of Tak Chanwoo"} fill sizes="(max-width: 700px) 88vw, 290px" loading="eager" /></div>
           <figcaption><span>TAK CHANWOO / NIMDAL</span><strong>Founder · Growth Operator · Product Builder</strong><div className={styles.metricGrid}>{text.metrics.map(([value, label]) => <div key={value}><b>{value}</b><small>{label}</small></div>)}</div></figcaption>
         </figure>
       ) : null}
@@ -798,8 +798,8 @@ export function NimdalDialogue({ locale, projects, career, careerArc, initialThe
 
   useEffect(() => {
     document.cookie = `nimdal-theme=${theme}; Path=/; Max-Age=31536000; SameSite=Lax`;
-    document.documentElement.style.colorScheme = theme === "claude" ? "light" : "dark";
-    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "claude" ? "#f7f4ed" : "#0d0d0d");
+    document.documentElement.style.colorScheme = "light";
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "claude" ? "#f7f5ef" : "#ffffff");
   }, [theme]);
 
   useEffect(() => {
@@ -930,15 +930,45 @@ export function NimdalDialogue({ locale, projects, career, careerArc, initialThe
 
   const chooseTheme = (nextTheme: VisualTheme) => setTheme(nextTheme);
 
+  const renderComposer = (placement: "hero" | "dock") => (
+    <div
+      className={`${styles.composerDock} ${placement === "hero" ? styles.heroComposer : ""}`}
+      data-testid="prompt-dock"
+      data-placement={placement}
+    >
+      <form className={styles.composer} onSubmit={submit}>
+        <textarea
+          ref={textareaRef}
+          value={input}
+          rows={1}
+          maxLength={600}
+          onChange={onInputChange}
+          onKeyDown={onInputKeyDown}
+          placeholder={text.shell.placeholder}
+          aria-label={text.shell.placeholder}
+          disabled={thinking}
+        />
+        <div className={styles.composerMeta} aria-hidden>
+          <span><i />{locale === "ko" ? "공개 포트폴리오 문맥 사용 중" : "Using public portfolio context"}</span>
+          <small>{locale === "ko" ? "리서치" : "RESEARCH"}</small>
+        </div>
+        <button type="submit" disabled={!input.trim() || thinking} aria-label={text.shell.send} title={text.shell.send}>
+          <ArrowUp size={19} weight="bold" aria-hidden />
+        </button>
+      </form>
+      <p>{text.shell.disclaimer}</p>
+    </div>
+  );
+
   return (
-    <div className={`${styles.experience} relative min-h-svh overflow-hidden`} data-dialogue-home data-testid="dialogue-home" data-theme={theme} data-ai-enabled={aiEnabled ? "true" : "false"}>
+    <div className={`${styles.experience} relative min-h-svh overflow-hidden`} data-dialogue-home data-testid="dialogue-home" data-theme={theme} data-empty={isEmpty ? "true" : "false"} data-ai-enabled={aiEnabled ? "true" : "false"}>
       <NimdalAtmosphere theme={theme} />
       <div className={styles.atmosphereVeil} aria-hidden />
 
       <aside className={`${styles.sidebar} fixed inset-y-0 left-0 flex flex-col`} aria-label={locale === "ko" ? "Nimdal 대화 탐색" : "Nimdal conversation navigation"}>
         <Link className={styles.brand} href={`/${locale}`} aria-label={locale === "ko" ? "Nimdal 홈" : "Nimdal home"}>
           <Image src="/media/identity-octopus.jpg" alt="" width={38} height={38} priority />
-          <span><strong>Nimdal</strong><small>PUBLIC MODEL</small></span>
+          <span><strong>Nimdal</strong><small>{theme === "chatgpt" ? "PORTFOLIO AI" : "KNOWLEDGE SPACE"}</small></span>
         </Link>
 
         <button className={styles.newChat} type="button" onClick={resetConversation}><Plus size={18} aria-hidden />{text.nav.newChat}</button>
@@ -967,12 +997,15 @@ export function NimdalDialogue({ locale, projects, career, careerArc, initialThe
         </button>
         <div className={styles.modelLabel}>
           <Image src="/media/identity-octopus.jpg" alt="" width={30} height={30} />
-          <span><strong>{text.shell.assistant}</strong><small>{aiEnabled ? text.shell.aiOnline : text.shell.localIndex}</small></span>
+          <span>
+            <strong>{theme === "chatgpt" ? text.shell.assistant : `${text.shell.assistant} desk`}</strong>
+            <small>{theme === "chatgpt" ? (aiEnabled ? text.shell.aiOnline : text.shell.localIndex) : (locale === "ko" ? "기록 · 근거 · 아티팩트" : "RECORDS · EVIDENCE · ARTIFACTS")}</small>
+          </span>
         </div>
         <div className={styles.topbarActions}>
           <div className={`${styles.themeSwitch} inline-flex items-center`} role="group" aria-label={text.shell.themeLabel}>
-            <button type="button" data-testid="theme-chatgpt" aria-pressed={theme === "chatgpt"} onClick={() => chooseTheme("chatgpt")}>{text.shell.chatgptTheme}</button>
-            <button type="button" data-testid="theme-claude" aria-pressed={theme === "claude"} onClick={() => chooseTheme("claude")}>{text.shell.claudeTheme}</button>
+            <button type="button" data-testid="theme-chatgpt" aria-pressed={theme === "chatgpt"} onClick={() => chooseTheme("chatgpt")}><span>{text.shell.chatgptTheme}</span><small>CHAT</small></button>
+            <button type="button" data-testid="theme-claude" aria-pressed={theme === "claude"} onClick={() => chooseTheme("claude")}><span>{text.shell.claudeTheme}</span><small>ARTIFACT</small></button>
           </div>
           <button className={styles.mobileNewChat} type="button" onClick={resetConversation} aria-label={text.nav.newChat} title={text.nav.newChat}><Plus size={19} aria-hidden /></button>
           <nav aria-label={locale === "ko" ? "언어 선택" : "Language selection"}><Link href={`/${oppositeLocale}`} hrefLang={oppositeLocale}>{text.nav.language}</Link></nav>
@@ -999,9 +1032,10 @@ export function NimdalDialogue({ locale, projects, career, careerArc, initialThe
           <div className={styles.thread} data-testid="evidence-visual">
             {isEmpty ? (
               <motion.section className={styles.emptyState} initial={false} animate={{ opacity: 1 }}>
-                <div className={styles.emptyAvatar} aria-hidden><Image src="/media/identity-octopus.jpg" alt="" width={76} height={76} priority /><i /><i /><i /></div>
+                <div className={styles.emptyAvatar} aria-hidden><Image src="/media/identity-octopus.jpg" alt="" width={76} height={76} priority /></div>
                 <p className={styles.statusLine}><i aria-hidden />{text.shell.status}</p>
                 <h1>{text.shell.greeting}</h1><p>{text.shell.intro}</p>
+                {renderComposer("hero")}
                 <div className={styles.starterGrid}>
                   {text.prompts.map((prompt) => {
                     const Icon = topicIcons[prompt.id];
@@ -1033,13 +1067,7 @@ export function NimdalDialogue({ locale, projects, career, careerArc, initialThe
           </div>
         </div>
 
-        <div className={styles.composerDock} data-testid="prompt-dock">
-          <form className={styles.composer} onSubmit={submit}>
-            <textarea ref={textareaRef} value={input} rows={1} maxLength={600} onChange={onInputChange} onKeyDown={onInputKeyDown} placeholder={text.shell.placeholder} aria-label={text.shell.placeholder} disabled={thinking} />
-            <button type="submit" disabled={!input.trim() || thinking} aria-label={text.shell.send} title={text.shell.send}><ArrowUp size={19} weight="bold" aria-hidden /></button>
-          </form>
-          <p>{text.shell.disclaimer}</p>
-        </div>
+        {!isEmpty ? renderComposer("dock") : null}
       </main>
     </div>
   );

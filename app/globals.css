@@ -4,12 +4,12 @@ html:has([data-dialogue-home]),
 body:has([data-dialogue-home]) {
   height: 100%;
   overflow: hidden;
-  background: #0d0d0d;
+  background: #ffffff;
 }
 
 html:has([data-dialogue-home][data-theme="claude"]),
 body:has([data-dialogue-home][data-theme="claude"]) {
-  background: #f7f4ed;
+  background: #f7f5ef;
 }
 
 body:has([data-dialogue-home]) .riso-grain,
@@ -19,7 +19,7 @@ body:has([data-dialogue-home]) .scroll-progress {
 }
 
 body:has([data-dialogue-home]) .skip-link {
-  background: #10a37f;
+  background: #111111;
   color: #ffffff;
 }
 
