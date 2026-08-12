@@ -5,7 +5,8 @@ import { siteConfig } from "@/lib/site";
 export const locales = ["ko", "en"] as const;
 export type Locale = (typeof locales)[number];
 
-export const defaultLocale: Locale = "ko";
+export const defaultLocale: Locale = "en";
+export const blogDefaultLocale: Locale = "ko";
 
 export const htmlLangByLocale: Record<Locale, string> = {
   ko: "ko",
@@ -94,7 +95,11 @@ export function hreflangAlternates(
 
   return {
     ...alternateUrls,
-    "x-default": absoluteCanonicalUrl(defaultLocale, pathname, surface)
+    "x-default": absoluteCanonicalUrl(
+      surface === "blog" ? blogDefaultLocale : defaultLocale,
+      pathname,
+      surface
+    )
   };
 }
 

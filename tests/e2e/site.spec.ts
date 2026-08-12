@@ -129,7 +129,7 @@ test.describe("localized navigation and metadata", () => {
       canonical: "https://nimdal.xyz/ko/projects/alphaduo",
       ko: "https://nimdal.xyz/ko/projects/alphaduo",
       en: "https://nimdal.xyz/en/projects/alphaduo",
-      default: "https://nimdal.xyz/ko/projects/alphaduo"
+      default: "https://nimdal.xyz/en/projects/alphaduo"
     });
   });
 
@@ -140,7 +140,7 @@ test.describe("localized navigation and metadata", () => {
       canonical: "https://nimdal.xyz/en/portfolio",
       ko: "https://nimdal.xyz/ko/portfolio",
       en: "https://nimdal.xyz/en/portfolio",
-      default: "https://nimdal.xyz/ko/portfolio"
+      default: "https://nimdal.xyz/en/portfolio"
     });
   });
 
@@ -175,6 +175,12 @@ test.describe("localized navigation and metadata", () => {
 });
 
 test.describe("legacy routing and host surfaces", () => {
+  test("main root defaults to the English portfolio", async ({ request, baseURL }) => {
+    const response = await request.get(localUrl(baseURL, "/"), { maxRedirects: 0 });
+
+    await expectPermanentRedirect(response, baseURL, { pathname: "/en" });
+  });
+
   test("legacy portfolio route permanently redirects to the localized dossier", async ({
     request,
     baseURL
@@ -184,7 +190,7 @@ test.describe("legacy routing and host surfaces", () => {
     });
 
     await expectPermanentRedirect(response, baseURL, {
-      pathname: "/ko/portfolio"
+      pathname: "/en/portfolio"
     });
   });
 
@@ -195,7 +201,7 @@ test.describe("legacy routing and host surfaces", () => {
     const cases = [
       {
         from: "/projects/arcdu-nft/proof",
-        pathname: "/ko/projects/alphaduo",
+        pathname: "/en/projects/alphaduo",
         hash: "#proof"
       },
       {
@@ -205,7 +211,7 @@ test.describe("legacy routing and host surfaces", () => {
       },
       {
         from: "/projects/hyperalphaduo/build",
-        pathname: "/ko/projects/hyperalphaduo",
+        pathname: "/en/projects/hyperalphaduo",
         hash: "#build"
       }
     ] as const;
@@ -438,8 +444,16 @@ test.describe("public links and not-found behavior", () => {
   }) => {
     await page.goto("/ko");
 
-    await expect(page.locator('a[href="/ko/projects/alphaduo"]').first()).toBeVisible();
-    await expect(page.locator('a[href="mailto:admin@fiveovertwo.xyz"]')).toBeVisible();
+    await page.getByRole("button", { name: "직접 만든 제품을 보여주세요" }).click();
+    const alphaDuo = page.getByRole("button", { name: /AlphaDuo/ }).first();
+    await expect(alphaDuo).toBeVisible();
+    await alphaDuo.click();
+    await expect(page.getByRole("heading", { name: "AlphaDuo", exact: true })).toBeVisible();
+    await expect(page).toHaveURL(/\/ko#ask-projects$/);
+    await expect(page.locator('a[href^="/ko/projects/"]')).toHaveCount(0);
+
+    await page.getByRole("button", { name: "함께 일하려면?" }).click();
+    await expect(page.locator('a[href="mailto:admin@fiveovertwo.xyz"]').first()).toBeVisible();
     await expect(page.locator('a[href="https://x.com/0xnimdal"]')).toBeVisible();
     await expect(page.locator('a[href="https://t.me/nimdal"]')).toBeVisible();
     await expect(
@@ -465,6 +479,79 @@ test.describe("public links and not-found behavior", () => {
     await expect(
       page.locator('a[href="https://github.com/nimdalkr/ethoskaito"]')
     ).toHaveAttribute("target", "_blank");
+  });
+
+  test("the home dialogue resolves known free-text questions and rejects undocumented ones", async ({
+    page
+  }) => {
+    let requestCount = 0;
+    await page.route("**/api/assistant", async (route) => {
+      requestCount += 1;
+      if (requestCount === 1) {
+        await route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({
+            answer: "NEVADA에서는 SEO, KOL, 현지화와 측정 체계를 하나의 한국 시장 진입 구조로 연결했어요.",
+            model: "gemini-test",
+            grounded: true
+          })
+        });
+        return;
+      }
+      await route.fulfill({ status: 502, contentType: "application/json", body: JSON.stringify({ error: "test fallback" }) });
+    });
+    await page.goto("/ko");
+
+    const question = page.getByRole("textbox", { name: "Nimdal에 대해 자유롭게 물어보세요" });
+    await question.fill("NEVADA에서 어떤 마케팅을 했나요?");
+    await question.press("Enter");
+    await expect(page).toHaveURL(/#ask-web3$/);
+    await expect(page.getByRole("heading", { name: "공개 기록을 바탕으로 답하면" })).toBeVisible();
+    await expect(page.getByText("PORTFOLIO CORPUS ONLY", { exact: true })).toBeVisible();
+
+    await question.fill("가장 좋아하는 음식은 무엇인가요?");
+    await question.press("Enter");
+    await expect(page.getByRole("heading", { name: "그 내용은 공개된 포트폴리오 기록에서 찾지 못했어요." })).toBeVisible();
+    await expect(page.getByTestId("evidence-visual")).toContainText("NIMDAL_IDENTITY.JPG");
+  });
+
+  test("home detail actions stay inside the conversation and expose the complete records", async ({
+    page
+  }) => {
+    await page.goto("/ko");
+
+    await expect(page.locator('a[href^="/ko/about"], a[href^="/ko/portfolio"], a[href^="/ko/lab"], a[href*="/ko/projects/"]')).toHaveCount(0);
+    await page.getByRole("button", { name: "직접 만든 제품을 보여주세요" }).click();
+    await page.getByRole("button", { name: "모든 개인 프로젝트를 보여주세요" }).click();
+    await expect(page.getByRole("button", { name: /Discord Bulk Leave Tool/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /maple uNion/ }).last()).toBeVisible();
+    await expect(page).toHaveURL(/\/ko#ask-projects$/);
+
+    await page.getByRole("link", { name: "어떤 경력을 쌓았나요?" }).click();
+    await page.getByRole("button", { name: "관련 경력 사례를 모두 보여주세요" }).click();
+    await expect(page.getByText("동시에 운영한 프로젝트의 시간축", { exact: true }).last()).toBeVisible();
+    await expect(page.getByRole("button", { name: /Leica 온라인 유입 및 매출 성장/ })).toBeVisible();
+    await expect(page).toHaveURL(/\/ko#ask-career$/);
+  });
+
+  test("ChatGPT and Claude themes switch without resetting the conversation and persist", async ({
+    page
+  }) => {
+    await page.goto("/ko");
+    const home = page.getByTestId("dialogue-home");
+    await expect(home).toHaveAttribute("data-theme", "chatgpt");
+
+    await page.getByRole("button", { name: "Nimdal은 누구인가요?" }).click();
+    await expect(page.getByRole("heading", { name: "Nimdal은 탁찬우의 퍼블릭 아이덴티티예요." })).toBeVisible();
+    await page.getByTestId("theme-claude").click();
+    await expect(home).toHaveAttribute("data-theme", "claude");
+    await expect(page.getByRole("heading", { name: "Nimdal은 탁찬우의 퍼블릭 아이덴티티예요." })).toBeVisible();
+
+    await page.reload();
+    await expect(page.getByTestId("dialogue-home")).toHaveAttribute("data-theme", "claude");
+    await page.getByTestId("theme-chatgpt").click();
+    await expect(page.getByTestId("dialogue-home")).toHaveAttribute("data-theme", "chatgpt");
   });
 
   test("invalid project and post slugs return 404", async ({ page, request, baseURL }) => {
@@ -494,9 +581,9 @@ test.describe("responsive and accessible interaction", () => {
     await expect(menu).toBeVisible();
     await menu.click();
     const navigation = page.getByRole("navigation", { name: "모바일 메뉴" });
-    await expect(navigation.getByRole("link", { name: "소개" })).toBeVisible();
-    await expect(navigation.getByRole("link", { name: "경력" })).toBeVisible();
-    await expect(navigation.getByRole("link", { name: "블로그" })).toBeVisible();
+    await expect(navigation.getByRole("link", { name: "Nimdal은 누구인가요?", exact: true })).toBeVisible();
+    await expect(navigation.getByRole("link", { name: "어떤 경력을 쌓았나요?", exact: true })).toBeVisible();
+    await expect(navigation.getByRole("link", { name: "Nimdalog", exact: true })).toHaveCount(0);
 
     const targets = navigation.locator("a");
     const count = await targets.count();
@@ -561,17 +648,12 @@ test.describe("responsive and accessible interaction", () => {
     await page.goto("/ko");
 
     await expect(page.locator(".scroll-progress")).toBeHidden();
-    await expect(page.locator(".cover-ink")).toBeVisible();
-    await expect(page.locator(".lab-grid")).toBeVisible();
-    await expect(page.locator(".band-ink")).toBeVisible();
-    await expect(page.locator(".contact")).toBeVisible();
+    await expect(page.getByTestId("dialogue-home")).toBeVisible();
+    await expect(page.getByTestId("dialogue-answer")).toBeVisible();
+    await expect(page.getByTestId("evidence-visual")).toBeVisible();
+    await expect(page.getByTestId("prompt-dock")).toBeVisible();
 
-    // Reveals are pinned to their settled state rather than waiting on scroll.
-    for (const reveal of await page.locator("[data-reveal]").all()) {
-      await expect(reveal).toHaveCSS("opacity", "1");
-    }
-
-    const motionStyles = await page.locator(".btn").first().evaluate((element) => {
+    const motionStyles = await page.getByRole("button", { name: "Nimdal은 누구인가요?" }).evaluate((element) => {
       const style = getComputedStyle(element);
       return {
         animationDuration: style.animationDuration,
@@ -599,6 +681,7 @@ test.describe("responsive and accessible interaction", () => {
 
     for (const pathname of ["/ko", "/ko/projects/alphaduo", "/ko/portfolio"]) {
       await page.goto(pathname);
+      await page.waitForTimeout(250);
       await page.evaluate(() => {
         document.documentElement.style.fontSize = "200%";
       });
@@ -612,6 +695,10 @@ test.describe("responsive and accessible interaction", () => {
         dimensions.scrollWidth,
         `${pathname} should reflow without horizontal overflow at 200% text zoom`
       ).toBeLessThanOrEqual(dimensions.clientWidth + 1);
+
+      await page.evaluate(() => {
+        document.documentElement.style.removeProperty("font-size");
+      });
     }
   });
 

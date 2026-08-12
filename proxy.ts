@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import {
+  blogDefaultLocale,
   canonicalSurfaceHeader,
   defaultLocale,
   isLocale,
@@ -161,11 +162,11 @@ function unlocalizedBlogPath(pathname: string) {
   const match = pathname.match(/^\/(posts|tags)(\/.*)?$/);
 
   if (match) {
-    return `/${defaultLocale}/${match[1]}${match[2] ?? ""}`;
+    return `/${blogDefaultLocale}/${match[1]}${match[2] ?? ""}`;
   }
 
   if (pathname === "/rss.xml") {
-    return `/${defaultLocale}/rss.xml`;
+    return `/${blogDefaultLocale}/rss.xml`;
   }
 
   return null;
@@ -184,16 +185,16 @@ function localizedBlogPath(pathname: string) {
 
 function prefixedLegacyBlogPath(pathname: string) {
   if (pathname === "/blog") {
-    return `/${defaultLocale}`;
+    return `/${blogDefaultLocale}`;
   }
 
   const match = pathname.match(/^\/blog\/(posts|tags)(\/.*)?$/);
   if (match) {
-    return `/${defaultLocale}/${match[1]}${match[2] ?? ""}`;
+    return `/${blogDefaultLocale}/${match[1]}${match[2] ?? ""}`;
   }
 
   if (pathname === "/blog/rss.xml") {
-    return `/${defaultLocale}/rss.xml`;
+    return `/${blogDefaultLocale}/rss.xml`;
   }
 
   return null;
@@ -244,7 +245,7 @@ function handleBlogHost(request: NextRequest) {
   }
 
   if (pathname === "/") {
-    return redirect(request, `/${defaultLocale}`, {
+    return redirect(request, `/${blogDefaultLocale}`, {
       host: BLOG_HOST,
       preserveSearch: true
     });
@@ -344,7 +345,7 @@ function handleMainHost(request: NextRequest) {
   }
 
   if (pathname === "/blog") {
-    return redirect(request, `/${defaultLocale}`, {
+    return redirect(request, `/${blogDefaultLocale}`, {
       host: BLOG_HOST,
       preserveSearch: true
     });

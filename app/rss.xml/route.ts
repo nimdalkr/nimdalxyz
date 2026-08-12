@@ -1,5 +1,5 @@
-import { blogCanonicalUrl, defaultLocale } from "@/lib/seo";
+import { blogCanonicalUrl, blogDefaultLocale } from "@/lib/seo";
 
 export function GET() {
-  return Response.redirect(blogCanonicalUrl(defaultLocale, "/rss.xml"), 308);
+  return Response.redirect(blogCanonicalUrl(blogDefaultLocale, "/rss.xml"), 308);
 }

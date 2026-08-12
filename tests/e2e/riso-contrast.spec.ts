@@ -1,9 +1,8 @@
 import { expect, test } from "@playwright/test";
 
 /**
- * One dark theme now, but the trap is unchanged: the accent is a plate colour,
- * not a type colour, and any softened ink laid over it composites down below
- * AA. Alpha is resolved here rather than compared raw.
+ * Alpha is resolved here rather than compared raw. The conversational home is
+ * audited in both its dark ChatGPT and warm Claude presentation themes.
  */
 const PAGES = ["/ko", "/en", "/en/about", "/en/portfolio", "/en/lab", "/en/projects/hyperalphaduo"];
 
@@ -60,3 +59,11 @@ for (const path of PAGES) {
     expect(failures, path).toEqual([]);
   });
 }
+
+test("contrast holds for the Claude conversation theme", async ({ page }) => {
+  await page.goto("/ko");
+  await page.getByTestId("theme-claude").click();
+  await expect(page.getByTestId("dialogue-home")).toHaveAttribute("data-theme", "claude");
+  const failures = await page.evaluate(AUDIT);
+  expect(failures, "Claude theme").toEqual([]);
+});
