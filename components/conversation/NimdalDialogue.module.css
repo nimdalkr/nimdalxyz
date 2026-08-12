@@ -3549,10 +3549,9 @@
     visibility: hidden;
   }
 
-  .experience[data-theme="chatgpt"] .themeSwitch {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
+  .experience[data-theme="chatgpt"] .themeSwitch,
+  .experience[data-theme="claude"] .themeSwitch {
+    left: calc(50vw + 125px);
   }
 }
 
@@ -3561,7 +3560,13 @@
   display: none;
 }
 
-.experience[data-theme="chatgpt"] .themeSwitch {
+.experience[data-theme="chatgpt"] .themeSwitch,
+.experience[data-theme="claude"] .themeSwitch {
+  position: fixed;
+  z-index: 72;
+  top: 5px;
+  left: 50%;
+  transform: translateX(-50%);
   gap: 0;
   min-height: 38px;
   padding: 2px;
@@ -3571,46 +3576,24 @@
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 
-.experience[data-theme="chatgpt"] .themeSwitch button {
+.experience[data-theme="chatgpt"] .themeSwitch button,
+.experience[data-theme="claude"] .themeSwitch button {
   min-width: 104px;
   min-height: 34px;
+  padding: 0 10px;
+  border: 0;
   border-radius: 18px;
   color: #585858;
   font-family: inherit;
   font-weight: 500;
 }
 
-.experience[data-theme="chatgpt"] .themeSwitch button[aria-pressed="true"] {
-  background: #ffffff;
-  color: #171717;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.09);
-}
-
-.experience[data-theme="claude"] .themeSwitch {
-  gap: 4px;
-  min-height: 36px;
-  padding: 2px;
-  border: 0;
-  border-radius: 8px;
-  background: #f0efed;
-}
-
-.experience[data-theme="claude"] .themeSwitch button {
-  min-width: 78px;
-  min-height: 32px;
-  padding: 0 10px;
-  border: 0;
-  border-radius: 7px;
-  color: #696762;
-  font-family: inherit;
-  font-weight: 500;
-}
-
+.experience[data-theme="chatgpt"] .themeSwitch button[aria-pressed="true"],
 .experience[data-theme="claude"] .themeSwitch button[aria-pressed="true"] {
   border: 0;
   background: #ffffff;
-  color: #171716;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  color: #171717;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.09);
 }
 
 .experience[data-theme="chatgpt"] .chatMain {
@@ -3981,6 +3964,11 @@
 }
 
 @media (max-width: 1100px) and (min-width: 801px) {
+  .experience[data-theme="chatgpt"] .themeSwitch,
+  .experience[data-theme="claude"] .themeSwitch {
+    left: calc(50vw + 116px);
+  }
+
   .experience[data-theme="chatgpt"] .sidebar {
     width: 232px;
   }
@@ -4017,6 +4005,16 @@
 }
 
 @media (max-width: 800px) {
+  .experience[data-theme="chatgpt"] .themeSwitch,
+  .experience[data-theme="claude"] .themeSwitch {
+    min-height: 48px;
+  }
+
+  .experience[data-theme="chatgpt"] .themeSwitch button,
+  .experience[data-theme="claude"] .themeSwitch button {
+    min-height: 44px;
+  }
+
   .experience[data-theme="chatgpt"] .topbar,
   .experience[data-theme="claude"] .topbar {
     left: 0;

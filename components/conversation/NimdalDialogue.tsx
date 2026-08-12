@@ -1011,6 +1011,11 @@ export function NimdalDialogue({ locale, projects, career, careerArc, initialThe
         </div>
       </aside>
 
+      <div className={`${styles.themeSwitch} inline-flex items-center`} role="group" aria-label={text.shell.themeLabel}>
+        <button type="button" data-testid="theme-chatgpt" aria-pressed={theme === "chatgpt"} onClick={() => chooseTheme("chatgpt")}><span>{text.shell.chatgptTheme}</span><small>CHAT</small></button>
+        <button type="button" data-testid="theme-claude" aria-pressed={theme === "claude"} onClick={() => chooseTheme("claude")}><span>{text.shell.claudeTheme}</span><small>ARTIFACT</small></button>
+      </div>
+
       <header className={`${styles.topbar} fixed top-0 right-0`}>
         <button className={styles.menuButton} type="button" onClick={() => setMenuOpen((open) => !open)} aria-expanded={menuOpen} aria-controls="nimdal-mobile-menu" aria-label={menuOpen ? text.nav.menuClose : text.nav.menuOpen}>
           {menuOpen ? <X size={21} aria-hidden /> : <List size={21} aria-hidden />}
@@ -1023,10 +1028,6 @@ export function NimdalDialogue({ locale, projects, career, careerArc, initialThe
           </span>
         </div>
         <div className={styles.topbarActions}>
-          <div className={`${styles.themeSwitch} inline-flex items-center`} role="group" aria-label={text.shell.themeLabel}>
-            <button type="button" data-testid="theme-chatgpt" aria-pressed={theme === "chatgpt"} onClick={() => chooseTheme("chatgpt")}><span>{text.shell.chatgptTheme}</span><small>CHAT</small></button>
-            <button type="button" data-testid="theme-claude" aria-pressed={theme === "claude"} onClick={() => chooseTheme("claude")}><span>{text.shell.claudeTheme}</span><small>ARTIFACT</small></button>
-          </div>
           <button className={styles.mobileNewChat} type="button" onClick={resetConversation} aria-label={text.nav.newChat} title={text.nav.newChat}><Plus size={19} aria-hidden /></button>
           <nav aria-label={locale === "ko" ? "언어 선택" : "Language selection"}><Link href={`/${oppositeLocale}`} hrefLang={oppositeLocale}>{text.nav.language}</Link></nav>
         </div>

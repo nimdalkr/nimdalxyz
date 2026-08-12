@@ -546,15 +546,20 @@ test.describe("public links and not-found behavior", () => {
   }) => {
     await page.goto("/ko");
     const home = page.getByTestId("dialogue-home");
+    const themeSwitch = page.getByRole("group", { name: "대화 화면 테마" });
     await expect(home).toHaveAttribute("data-theme", "chatgpt");
     await expect(page.getByTestId("prompt-dock")).toHaveAttribute("data-placement", "hero");
     await expect(page.getByText("공개 포트폴리오 문맥", { exact: true })).toBeHidden();
+    const chatGptSwitchBox = await themeSwitch.boundingBox();
+    expect(chatGptSwitchBox).not.toBeNull();
 
     await page.getByRole("button", { name: "Nimdal은 누구인가요?" }).click();
     await expect(page.getByRole("heading", { name: "Nimdal은 탁찬우의 퍼블릭 아이덴티티예요." })).toBeVisible();
     await expect(page.getByTestId("prompt-dock")).toHaveAttribute("data-placement", "dock");
     await page.getByTestId("theme-claude").click();
     await expect(home).toHaveAttribute("data-theme", "claude");
+    const claudeSwitchBox = await themeSwitch.boundingBox();
+    expect(claudeSwitchBox).toEqual(chatGptSwitchBox);
     await expect(page.getByText("공개 포트폴리오 문맥", { exact: true })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Nimdal은 탁찬우의 퍼블릭 아이덴티티예요." })).toBeVisible();
 
@@ -603,6 +608,14 @@ test.describe("responsive and accessible interaction", () => {
   }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/ko");
+
+    const themeSwitch = page.getByRole("group", { name: "대화 화면 테마" });
+    const chatGptSwitchBox = await themeSwitch.boundingBox();
+    await page.getByTestId("theme-claude").click();
+    await expect(page.getByTestId("dialogue-home")).toHaveAttribute("data-theme", "claude");
+    const claudeSwitchBox = await themeSwitch.boundingBox();
+    expect(claudeSwitchBox).toEqual(chatGptSwitchBox);
+    expect(claudeSwitchBox?.height ?? 0).toBeGreaterThanOrEqual(44);
 
     const menu = page.getByRole("button", { name: "메뉴 열기" });
     await expect(menu).toBeVisible();

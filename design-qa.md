@@ -4,6 +4,7 @@
 
 - ChatGPT reference: `C:/Users/Admin/AppData/Local/Temp/codex-clipboard-b2ab1c8d-c3c6-4430-a8d4-819e9ff43dfa.png` (1898 x 855).
 - Claude reference: `C:/Users/Admin/AppData/Local/Temp/codex-clipboard-91e35eb0-5b8c-4aef-8d9e-0a97d9f7de2a.png` (1895 x 838).
+- Fixed-switch reference: `C:/Users/Admin/AppData/Local/Temp/codex-clipboard-da3c3def-90e9-4869-ac58-d932060da3b6.png`.
 - Product constraint: retain Nimdal's identity, portfolio navigation, theme switch, grounded answers, and real profile assets. The sources establish interaction density and layout language; the site does not impersonate either product or reproduce unsupported controls.
 
 ## Compared state
@@ -33,6 +34,8 @@
    - Fix: ChatGPT uses a 760 x 56 single-line pill; Claude uses a 674 x 122 two-row work surface with controls anchored to its lower row.
 5. **[P2] Fixed desktop dimensions could have displaced the mobile experience.**
    - Fix: preserved the existing mobile navigation and added theme-specific responsive constraints for headings, composers, prompt expansion, and legal copy.
+6. **[P2] The segmented theme control shifted when the sidebar width changed.**
+   - Fix: moved the control out of the theme-specific top bars into one viewport-fixed layer and standardized its geometry. In-app browser measurements are identical in both modes: `x=534`, `y=5`, `212 x 38px` at 1280 x 720.
 
 ## Fidelity review
 
@@ -47,6 +50,7 @@
 - ESLint: passed.
 - Production build: passed. Existing BLOG editor filesystem-tracing warnings remain unchanged.
 - Focused theme and prompt behavior: 2 passed.
+- Fixed switch geometry on desktop and 390px mobile: passed.
 - Full regression and accessibility suite: 87 passed.
 
 ## Final result
