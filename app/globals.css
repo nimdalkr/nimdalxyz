@@ -9,7 +9,7 @@ body:has([data-dialogue-home]) {
 
 html:has([data-dialogue-home][data-theme="claude"]),
 body:has([data-dialogue-home][data-theme="claude"]) {
-  background: #f7f5ef;
+  background: #ffffff;
 }
 
 body:has([data-dialogue-home]) .riso-grain,

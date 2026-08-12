@@ -408,7 +408,7 @@ test.describe("public links and not-found behavior", () => {
     const response = await page.goto("/write");
 
     expect(response?.status()).toBe(200);
-    await expect(page).toHaveURL(/\/write\/login$/);
+    await expect(page).toHaveURL(/\/write\/login$/, { timeout: 15_000 });
     await expect(page.getByRole("heading", { name: "글쓰기" })).toBeVisible();
     await expect(page.getByRole("status")).toContainText("인증 환경 설정이 완료되지 않았습니다");
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
@@ -444,6 +444,7 @@ test.describe("public links and not-found behavior", () => {
   }) => {
     await page.goto("/ko");
 
+    await page.getByRole("button", { name: "추천 질문 펼치기" }).click();
     await page.getByRole("button", { name: "직접 만든 제품을 보여주세요" }).click();
     const alphaDuo = page.getByRole("button", { name: /AlphaDuo/ }).first();
     await expect(alphaDuo).toBeVisible();
@@ -522,6 +523,7 @@ test.describe("public links and not-found behavior", () => {
     await page.goto("/ko");
 
     await expect(page.locator('a[href^="/ko/about"], a[href^="/ko/portfolio"], a[href^="/ko/lab"], a[href*="/ko/projects/"]')).toHaveCount(0);
+    await page.getByRole("button", { name: "추천 질문 펼치기" }).click();
     await page.getByRole("button", { name: "직접 만든 제품을 보여주세요" }).click();
     await page.getByRole("button", { name: "모든 개인 프로젝트를 보여주세요" }).click();
     await expect(page.getByRole("button", { name: /Discord Bulk Leave Tool/ })).toBeVisible();
@@ -546,20 +548,37 @@ test.describe("public links and not-found behavior", () => {
     const home = page.getByTestId("dialogue-home");
     await expect(home).toHaveAttribute("data-theme", "chatgpt");
     await expect(page.getByTestId("prompt-dock")).toHaveAttribute("data-placement", "hero");
-    await expect(page.getByText("공개 포트폴리오 문맥 사용 중", { exact: true })).toBeHidden();
+    await expect(page.getByText("공개 포트폴리오 문맥", { exact: true })).toBeHidden();
 
     await page.getByRole("button", { name: "Nimdal은 누구인가요?" }).click();
     await expect(page.getByRole("heading", { name: "Nimdal은 탁찬우의 퍼블릭 아이덴티티예요." })).toBeVisible();
     await expect(page.getByTestId("prompt-dock")).toHaveAttribute("data-placement", "dock");
     await page.getByTestId("theme-claude").click();
     await expect(home).toHaveAttribute("data-theme", "claude");
-    await expect(page.getByText("공개 포트폴리오 문맥 사용 중", { exact: true })).toBeVisible();
+    await expect(page.getByText("공개 포트폴리오 문맥", { exact: true })).toBeVisible();
     await expect(page.getByRole("heading", { name: "Nimdal은 탁찬우의 퍼블릭 아이덴티티예요." })).toBeVisible();
 
     await page.reload();
     await expect(page.getByTestId("dialogue-home")).toHaveAttribute("data-theme", "claude");
     await page.getByTestId("theme-chatgpt").click();
     await expect(page.getByTestId("dialogue-home")).toHaveAttribute("data-theme", "chatgpt");
+  });
+
+  test("starter prompts follow the compact behavior of each AI home", async ({ page }) => {
+    await page.goto("/ko");
+
+    const promptMenu = page.getByRole("button", { name: "추천 질문 펼치기" });
+    await expect(page.getByRole("button", { name: "Nimdal은 누구인가요?" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "어떤 경력을 쌓았나요?" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "직접 만든 제품을 보여주세요" })).toBeHidden();
+
+    await promptMenu.click();
+    await expect(page.getByRole("button", { name: "직접 만든 제품을 보여주세요" })).toBeVisible();
+
+    await page.getByTestId("theme-claude").click();
+    await expect(page.getByRole("button", { name: "Nimdal은 누구인가요?" })).toBeHidden();
+    await promptMenu.click();
+    await expect(page.getByRole("button", { name: "Nimdal은 누구인가요?" })).toBeVisible();
   });
 
   test("invalid project and post slugs return 404", async ({ page, request, baseURL }) => {

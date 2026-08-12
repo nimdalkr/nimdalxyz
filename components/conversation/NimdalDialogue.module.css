@@ -3342,3 +3342,794 @@
     font-size: 26px;
   }
 }
+
+/* =============================================================================
+   CURRENT AI HOME REFERENCE PASS
+   -----------------------------------------------------------------------------
+   Empty states follow the current sparse ChatGPT and Claude home composition.
+   Portfolio depth remains in navigation and the conversation itself.
+   ========================================================================== */
+
+.experience[data-theme="chatgpt"] {
+  --stage: #ffffff;
+  --panel: #f7f7f8;
+  --panel-solid: #f3f3f3;
+  --panel-hover: #e9e9ea;
+  --paper: #171717;
+  --body-copy: #343434;
+  --muted: #5d5d5d;
+  --quiet: #686868;
+  --rule: rgba(13, 13, 13, 0.08);
+  --rule-strong: rgba(13, 13, 13, 0.15);
+  --topbar: #ffffff;
+  --starter: transparent;
+  --starter-hover: #f6f6f6;
+  --composer: #ffffff;
+  --composer-dock: rgba(255, 255, 255, 0.97);
+  --font-answer: "Segoe UI", "Malgun Gothic", Arial, sans-serif;
+}
+
+.experience[data-theme="claude"] {
+  --stage: #ffffff;
+  --panel: #fafafa;
+  --panel-solid: #f1f0ed;
+  --panel-hover: #efeeeb;
+  --paper: #171716;
+  --body-copy: #3f3e3b;
+  --muted: #5f5d58;
+  --quiet: #6e6b65;
+  --rule: rgba(30, 29, 27, 0.1);
+  --rule-strong: rgba(30, 29, 27, 0.18);
+  --cyan: #b85b3f;
+  --lime: #b85b3f;
+  --topbar: #ffffff;
+  --starter: transparent;
+  --starter-hover: #f7f6f3;
+  --user-bubble: #f1f0ed;
+  --card: #ffffff;
+  --media-surface: #f3f2ef;
+  --composer: #ffffff;
+  --composer-dock: rgba(255, 255, 255, 0.97);
+  --mobile-panel: #fafafa;
+  --font-answer: "Segoe UI", "Malgun Gothic", Arial, sans-serif;
+  background: #ffffff;
+}
+
+.experience[data-theme="chatgpt"] .atmosphere,
+.experience[data-theme="chatgpt"] .atmosphereVeil,
+.experience[data-theme="claude"] .atmosphere,
+.experience[data-theme="claude"] .atmosphereVeil {
+  display: none;
+}
+
+.experience[data-theme="chatgpt"] .sidebar {
+  width: 250px;
+  padding: 9px 8px 12px;
+  border-right: 1px solid #ececec;
+  background: #f7f7f8;
+}
+
+.experience[data-theme="claude"] .sidebar {
+  width: 280px;
+  padding: 8px 8px 12px;
+  border-right: 1px solid #e8e8e6;
+  background: #fafafa;
+  backdrop-filter: none;
+}
+
+.experience[data-theme="chatgpt"] .brand,
+.experience[data-theme="claude"] .brand {
+  min-height: 42px;
+  padding: 2px 7px;
+  border: 0;
+}
+
+.experience[data-theme="chatgpt"] .brand {
+  gap: 9px;
+}
+
+.experience[data-theme="chatgpt"] .brand img {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 7px;
+}
+
+.experience[data-theme="chatgpt"] .brand strong {
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.experience[data-theme="chatgpt"] .brand small {
+  color: #686868;
+  font-family: inherit;
+  font-size: 8px;
+}
+
+.experience[data-theme="claude"] .brand img {
+  display: none;
+}
+
+.experience[data-theme="claude"] .brand strong {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 23px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.experience[data-theme="claude"] .brand small {
+  display: none;
+}
+
+.experience[data-theme="chatgpt"] .newChat,
+.experience[data-theme="claude"] .newChat {
+  min-height: 38px;
+  margin-top: 7px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: #ececec;
+  color: #202020;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.experience[data-theme="chatgpt"] .newChat:hover,
+.experience[data-theme="chatgpt"] .newChat:focus-visible,
+.experience[data-theme="claude"] .newChat:hover,
+.experience[data-theme="claude"] .newChat:focus-visible {
+  background: #e4e4e4;
+  color: #111111;
+}
+
+.experience[data-theme="chatgpt"] .topicNav,
+.experience[data-theme="claude"] .topicNav {
+  gap: 1px;
+  margin-top: 26px;
+}
+
+.experience[data-theme="chatgpt"] .topicNav > p,
+.experience[data-theme="claude"] .topicNav > p {
+  margin: 0 8px 7px;
+  color: #686868;
+  font-size: 8px;
+  font-weight: 600;
+}
+
+.experience[data-theme="chatgpt"] .topicNav a,
+.experience[data-theme="claude"] .topicNav a {
+  min-height: 38px;
+  gap: 10px;
+  padding: 8px 9px;
+  border: 0;
+  border-radius: 7px;
+  color: #3f3f3f;
+  font-family: "Segoe UI", "Malgun Gothic", Arial, sans-serif;
+  font-size: 12px;
+}
+
+.experience[data-theme="chatgpt"] .topicNav a[aria-current="page"],
+.experience[data-theme="claude"] .topicNav a[aria-current="page"] {
+  background: #ececea;
+  box-shadow: none;
+  color: #171717;
+}
+
+.experience[data-theme="claude"] .topicNav a[aria-current="page"] svg {
+  color: #b85b3f;
+}
+
+.experience[data-theme="chatgpt"] .sidebarProfile,
+.experience[data-theme="claude"] .sidebarProfile {
+  padding: 11px 7px 3px;
+  border-top-color: #e2e2e2;
+}
+
+.experience[data-theme="chatgpt"] .topbar {
+  left: 250px;
+  min-height: 48px;
+  padding: 5px 18px;
+  border: 0;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(14px);
+}
+
+.experience[data-theme="claude"] .topbar {
+  left: 280px;
+  min-height: 48px;
+  padding: 5px 18px;
+  border: 0;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(14px);
+}
+
+@media (min-width: 801px) {
+  .experience[data-theme="chatgpt"] .modelLabel,
+  .experience[data-theme="claude"] .modelLabel {
+    visibility: hidden;
+  }
+
+  .experience[data-theme="chatgpt"] .themeSwitch {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+
+.themeSwitch button small,
+.experience[data-theme="claude"] .themeSwitch button small {
+  display: none;
+}
+
+.experience[data-theme="chatgpt"] .themeSwitch {
+  gap: 0;
+  min-height: 38px;
+  padding: 2px;
+  border: 0;
+  border-radius: 20px;
+  background: #f2f2f2;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.experience[data-theme="chatgpt"] .themeSwitch button {
+  min-width: 104px;
+  min-height: 34px;
+  border-radius: 18px;
+  color: #585858;
+  font-family: inherit;
+  font-weight: 500;
+}
+
+.experience[data-theme="chatgpt"] .themeSwitch button[aria-pressed="true"] {
+  background: #ffffff;
+  color: #171717;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.09);
+}
+
+.experience[data-theme="claude"] .themeSwitch {
+  gap: 4px;
+  min-height: 36px;
+  padding: 2px;
+  border: 0;
+  border-radius: 8px;
+  background: #f0efed;
+}
+
+.experience[data-theme="claude"] .themeSwitch button {
+  min-width: 78px;
+  min-height: 32px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 7px;
+  color: #696762;
+  font-family: inherit;
+  font-weight: 500;
+}
+
+.experience[data-theme="claude"] .themeSwitch button[aria-pressed="true"] {
+  border: 0;
+  background: #ffffff;
+  color: #171716;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.experience[data-theme="chatgpt"] .chatMain {
+  margin-left: 250px;
+}
+
+.experience[data-theme="claude"] .chatMain {
+  margin-left: 280px;
+}
+
+.experience[data-theme="chatgpt"] .threadViewport,
+.experience[data-theme="claude"] .threadViewport {
+  inset: 48px 0 0;
+}
+
+.experience[data-theme="chatgpt"] .thread {
+  width: min(840px, 100%);
+}
+
+.experience[data-theme="claude"] .thread {
+  width: min(900px, 100%);
+}
+
+.experience[data-theme="chatgpt"] .emptyState {
+  min-height: calc(100svh - 48px);
+  justify-content: center;
+  padding: 0 0 76px;
+  transform: translateY(-10px);
+}
+
+.experience[data-theme="chatgpt"] .emptyAvatar,
+.experience[data-theme="chatgpt"] .statusLine,
+.experience[data-theme="chatgpt"] .emptyState > p:not(.statusLine) {
+  display: none;
+}
+
+.experience[data-theme="chatgpt"] .emptyState h1 {
+  max-width: 760px;
+  margin-top: 0;
+  color: #111111;
+  font-family: "Segoe UI", "Malgun Gothic", Arial, sans-serif;
+  font-size: 28px;
+  font-weight: 400;
+  line-height: 1.3;
+}
+
+.experience[data-theme="claude"] .emptyState {
+  display: grid;
+  width: min(700px, 100%);
+  min-height: calc(100svh - 48px);
+  grid-template-columns: 38px minmax(0, 1fr);
+  align-content: center;
+  align-items: center;
+  column-gap: 15px;
+  margin: 0 auto;
+  padding: 0 0 88px;
+  text-align: left;
+  transform: translateY(-2px);
+}
+
+.experience[data-theme="claude"] .emptyAvatar {
+  width: 38px;
+  height: 38px;
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.experience[data-theme="claude"] .emptyAvatar img {
+  inset: 0;
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 8px;
+  box-shadow: none;
+}
+
+.experience[data-theme="claude"] .statusLine,
+.experience[data-theme="claude"] .emptyState > p:not(.statusLine) {
+  display: none;
+}
+
+.experience[data-theme="claude"] .emptyState h1 {
+  max-width: none;
+  grid-column: 2;
+  grid-row: 1;
+  margin-top: 0;
+  color: #171716;
+  font-family: "Segoe UI", "Malgun Gothic", Arial, sans-serif;
+  font-size: 40px;
+  font-weight: 400;
+  line-height: 1.18;
+}
+
+.heroComposer,
+.experience[data-theme="chatgpt"] .heroComposer,
+.experience[data-theme="claude"] .heroComposer {
+  position: relative;
+  inset: auto;
+  grid-column: 1 / -1;
+  width: 100%;
+  padding: 0;
+  background: transparent;
+  backdrop-filter: none;
+}
+
+.experience[data-theme="chatgpt"] .heroComposer {
+  width: min(760px, 100%);
+  margin-top: 28px;
+}
+
+.experience[data-theme="claude"] .heroComposer {
+  width: min(674px, 100%);
+  margin-top: 34px;
+}
+
+.composer .promptMenuButton {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: #252525;
+  cursor: pointer;
+}
+
+.composer .promptMenuButton:hover,
+.composer .promptMenuButton:focus-visible {
+  background: #f0f0f0;
+}
+
+.experience[data-theme="chatgpt"] .composerDock {
+  left: 250px;
+}
+
+.experience[data-theme="claude"] .composerDock {
+  left: 280px;
+  background: rgba(255, 255, 255, 0.97);
+}
+
+.experience[data-theme="chatgpt"] .heroComposer,
+.experience[data-theme="claude"] .heroComposer {
+  left: auto;
+}
+
+.experience[data-theme="chatgpt"] .heroComposer .composer {
+  min-height: 56px;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 8px 7px 10px;
+  border: 1px solid #e0e0e0;
+  border-radius: 28px;
+  background: #ffffff;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.08);
+}
+
+.experience[data-theme="chatgpt"] .heroComposer .promptMenuButton {
+  grid-column: 1;
+  border-radius: 50%;
+}
+
+.experience[data-theme="chatgpt"] .heroComposer textarea {
+  min-height: 38px;
+  grid-column: 2;
+  padding: 9px 0 7px;
+  color: #202020;
+  font-size: 14px;
+}
+
+.experience[data-theme="chatgpt"] .composerMeta {
+  display: none;
+}
+
+.experience[data-theme="chatgpt"] .heroComposer .sendButton {
+  width: 38px;
+  height: 38px;
+  grid-column: 3;
+  border-radius: 50%;
+  background: #171717;
+  color: #ffffff;
+}
+
+.experience[data-theme="chatgpt"] .heroComposer .sendButton:hover:not(:disabled),
+.experience[data-theme="chatgpt"] .heroComposer .sendButton:focus-visible:not(:disabled) {
+  background: #000000;
+}
+
+.experience[data-theme="claude"] .heroComposer .composer {
+  min-height: 122px;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  grid-template-rows: minmax(55px, auto) 38px;
+  align-items: center;
+  gap: 5px 10px;
+  padding: 13px 14px 10px 16px;
+  border: 1px solid #d8d8d5;
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.experience[data-theme="claude"] .heroComposer textarea {
+  min-height: 55px;
+  grid-column: 1 / -1;
+  grid-row: 1;
+  padding: 3px 5px;
+  color: #262522;
+  font-family: "Segoe UI", "Malgun Gothic", Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.experience[data-theme="claude"] .heroComposer .promptMenuButton {
+  grid-column: 1;
+  grid-row: 2;
+  border-radius: 8px;
+}
+
+.experience[data-theme="claude"] .heroComposer .composerMeta {
+  display: flex;
+  min-width: 0;
+  grid-column: 2;
+  grid-row: 2;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  color: #5f5d58;
+  font-family: "Segoe UI", "Malgun Gothic", Arial, sans-serif;
+  font-size: 10px;
+}
+
+.experience[data-theme="claude"] .heroComposer .composerMeta span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.experience[data-theme="claude"] .heroComposer .composerMeta small {
+  flex: 0 0 auto;
+  color: #4e4c48;
+  font-family: inherit;
+  font-size: 9px;
+  font-weight: 600;
+}
+
+.experience[data-theme="claude"] .heroComposer .sendButton {
+  width: 38px;
+  height: 38px;
+  grid-column: 3;
+  grid-row: 2;
+  align-self: center;
+  border-radius: 9px;
+  background: #262522;
+  color: #ffffff;
+}
+
+.experience[data-theme="claude"] .heroComposer .sendButton:hover:not(:disabled),
+.experience[data-theme="claude"] .heroComposer .sendButton:focus-visible:not(:disabled) {
+  background: #111111;
+}
+
+.experience[data-theme="chatgpt"] .heroComposer > p,
+.experience[data-theme="claude"] .heroComposer > p {
+  position: fixed;
+  right: 20px;
+  bottom: 12px;
+  left: 270px;
+  width: auto;
+  margin: 0;
+  color: #6b6b6b;
+  font-size: 7px;
+  text-align: center;
+}
+
+.experience[data-theme="claude"] .heroComposer > p {
+  left: 300px;
+}
+
+.experience[data-theme="chatgpt"] .starterGrid {
+  display: grid;
+  width: min(760px, 100%);
+  grid-template-columns: 1fr;
+  gap: 2px;
+  margin-top: 20px;
+}
+
+.experience[data-theme="chatgpt"] .starterGrid[data-expanded="false"] button:nth-child(n + 3) {
+  display: none;
+}
+
+.experience[data-theme="chatgpt"] .starterGrid button {
+  min-height: 46px;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 10px;
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+}
+
+.experience[data-theme="chatgpt"] .starterGrid button > svg:first-child,
+.experience[data-theme="chatgpt"] .starterGrid button:nth-child(2n) > svg:first-child,
+.experience[data-theme="chatgpt"] .starterGrid button:nth-child(3n) > svg:first-child {
+  color: #666666;
+}
+
+.experience[data-theme="chatgpt"] .starterGrid button > svg:last-child,
+.experience[data-theme="chatgpt"] .starterGrid button small {
+  display: none;
+}
+
+.experience[data-theme="chatgpt"] .starterGrid button span {
+  display: block;
+}
+
+.experience[data-theme="chatgpt"] .starterGrid button strong {
+  color: #686868;
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.experience[data-theme="chatgpt"] .starterGrid button:hover,
+.experience[data-theme="chatgpt"] .starterGrid button:focus-visible {
+  border: 0;
+  background: #f6f6f6;
+  color: #202020;
+  transform: none;
+}
+
+.experience[data-theme="claude"] .starterGrid[data-expanded="false"] {
+  display: none;
+}
+
+.experience[data-theme="claude"] .starterGrid[data-expanded="true"] {
+  display: grid;
+  width: min(674px, 100%);
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 18px;
+  margin-top: 18px;
+  border: 0;
+}
+
+.experience[data-theme="claude"] .starterGrid button {
+  min-height: 54px;
+  padding: 9px 4px;
+  border-top: 1px solid #e3e2df;
+  font-family: "Segoe UI", "Malgun Gothic", Arial, sans-serif;
+}
+
+.experience[data-theme="claude"] .starterGrid button strong {
+  font-family: inherit;
+  font-size: 11px;
+}
+
+.experience[data-theme="claude"] .starterGrid button:hover,
+.experience[data-theme="claude"] .starterGrid button:focus-visible {
+  padding-left: 8px;
+  background: #f7f6f3;
+}
+
+.experience[data-theme="claude"] .messageBody > h2,
+.experience[data-theme="claude"] .messageBody > p,
+.experience[data-theme="claude"] .messageMeta strong,
+.experience[data-theme="claude"] .userMessage > div,
+.experience[data-theme="claude"] .followUps button {
+  font-family: "Segoe UI", "Malgun Gothic", Arial, sans-serif;
+}
+
+@media (max-width: 1100px) and (min-width: 801px) {
+  .experience[data-theme="chatgpt"] .sidebar {
+    width: 232px;
+  }
+
+  .experience[data-theme="chatgpt"] .topbar,
+  .experience[data-theme="chatgpt"] .composerDock {
+    left: 232px;
+  }
+
+  .experience[data-theme="chatgpt"] .chatMain {
+    margin-left: 232px;
+  }
+
+  .experience[data-theme="claude"] .sidebar {
+    width: 250px;
+  }
+
+  .experience[data-theme="claude"] .topbar,
+  .experience[data-theme="claude"] .composerDock {
+    left: 250px;
+  }
+
+  .experience[data-theme="claude"] .chatMain {
+    margin-left: 250px;
+  }
+
+  .experience[data-theme="chatgpt"] .heroComposer > p {
+    left: 252px;
+  }
+
+  .experience[data-theme="claude"] .heroComposer > p {
+    left: 270px;
+  }
+}
+
+@media (max-width: 800px) {
+  .experience[data-theme="chatgpt"] .topbar,
+  .experience[data-theme="claude"] .topbar {
+    left: 0;
+    min-height: 58px;
+    padding: 7px 10px;
+    border-bottom: 1px solid #eeeeee;
+  }
+
+  .experience[data-theme="chatgpt"] .chatMain,
+  .experience[data-theme="claude"] .chatMain {
+    margin-left: 0;
+  }
+
+  .experience[data-theme="chatgpt"] .threadViewport,
+  .experience[data-theme="claude"] .threadViewport {
+    inset: 58px 0 0;
+  }
+
+  .experience[data-theme="chatgpt"] .thread,
+  .experience[data-theme="claude"] .thread {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .experience[data-theme="chatgpt"] .composerDock,
+  .experience[data-theme="claude"] .composerDock {
+    left: 0;
+  }
+
+  .experience[data-theme="chatgpt"] .heroComposer,
+  .experience[data-theme="claude"] .heroComposer {
+    left: auto;
+  }
+
+  .experience[data-theme="chatgpt"] .emptyState {
+    min-height: calc(100svh - 58px);
+    padding: 36px 0 64px;
+    transform: none;
+  }
+
+  .experience[data-theme="claude"] .emptyState {
+    width: min(700px, 100%);
+    min-height: calc(100svh - 58px);
+    padding: 36px 0 64px;
+    transform: none;
+  }
+
+  .experience[data-theme="chatgpt"] .emptyState h1 {
+    font-size: 26px;
+  }
+
+  .experience[data-theme="claude"] .emptyState h1 {
+    font-size: 34px;
+  }
+
+  .experience[data-theme="chatgpt"] .heroComposer > p,
+  .experience[data-theme="claude"] .heroComposer > p {
+    position: static;
+    width: min(520px, 100%);
+    margin: 8px auto 0;
+  }
+
+  .experience[data-theme="claude"] .starterGrid[data-expanded="true"] {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .experience[data-theme="chatgpt"] .thread,
+  .experience[data-theme="claude"] .thread {
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .experience[data-theme="chatgpt"] .emptyState h1 {
+    max-width: 330px;
+    font-size: 24px;
+  }
+
+  .experience[data-theme="claude"] .emptyState {
+    grid-template-columns: 32px minmax(0, 1fr);
+    column-gap: 11px;
+  }
+
+  .experience[data-theme="claude"] .emptyAvatar,
+  .experience[data-theme="claude"] .emptyAvatar img {
+    width: 32px;
+    height: 32px;
+  }
+
+  .experience[data-theme="claude"] .emptyState h1 {
+    font-size: 29px;
+  }
+
+  .experience[data-theme="claude"] .heroComposer {
+    margin-top: 28px;
+  }
+
+  .experience[data-theme="claude"] .heroComposer .composer {
+    min-height: 112px;
+    padding-right: 10px;
+    padding-left: 11px;
+  }
+
+  .experience[data-theme="claude"] .heroComposer .composerMeta span {
+    display: none;
+  }
+
+  .themeSwitch button,
+  .experience[data-theme="chatgpt"] .themeSwitch button,
+  .experience[data-theme="claude"] .themeSwitch button {
+    min-width: 62px;
+    padding-right: 7px;
+    padding-left: 7px;
+  }
+}

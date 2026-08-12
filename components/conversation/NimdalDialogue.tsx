@@ -29,7 +29,6 @@ import {
 
 import type { Locale } from "@/lib/content";
 
-import { NimdalAtmosphere, type VisualTheme } from "./NimdalAtmosphere";
 import {
   CareerTimelineChart,
   CommunityGrowthChart,
@@ -37,6 +36,7 @@ import {
 } from "./PortfolioCharts";
 import styles from "./NimdalDialogue.module.css";
 
+type VisualTheme = "chatgpt" | "claude";
 type TopicId = "intro" | "career" | "projects" | "web3" | "method" | "contact";
 type DetailTopicId = Exclude<TopicId, "contact">;
 
@@ -787,6 +787,7 @@ export function NimdalDialogue({ locale, projects, career, careerArc, initialThe
   const [thinking, setThinking] = useState(false);
   const [input, setInput] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showAllPrompts, setShowAllPrompts] = useState(false);
   const [theme, setTheme] = useState<VisualTheme>(initialTheme);
 
   const oppositeLocale = locale === "ko" ? "en" : "ko";
@@ -838,6 +839,7 @@ export function NimdalDialogue({ locale, projects, career, careerArc, initialThe
     setThinking(true);
     setActiveTopic(topicForTarget(target));
     setMenuOpen(false);
+    setShowAllPrompts(false);
     setInput("");
     if (textareaRef.current) textareaRef.current.style.height = "auto";
     const topic = topicForTarget(target);
@@ -905,6 +907,7 @@ export function NimdalDialogue({ locale, projects, career, careerArc, initialThe
     setThinking(false);
     setInput("");
     setMenuOpen(false);
+    setShowAllPrompts(false);
     window.history.replaceState(null, "", window.location.pathname);
     requestAnimationFrame(() => textareaRef.current?.focus());
   };
@@ -928,7 +931,10 @@ export function NimdalDialogue({ locale, projects, career, careerArc, initialThe
     event.currentTarget.form?.requestSubmit();
   };
 
-  const chooseTheme = (nextTheme: VisualTheme) => setTheme(nextTheme);
+  const chooseTheme = (nextTheme: VisualTheme) => {
+    setTheme(nextTheme);
+    setShowAllPrompts(false);
+  };
 
   const renderComposer = (placement: "hero" | "dock") => (
     <div
@@ -937,6 +943,23 @@ export function NimdalDialogue({ locale, projects, career, careerArc, initialThe
       data-placement={placement}
     >
       <form className={styles.composer} onSubmit={submit}>
+        {placement === "hero" ? (
+          <button
+            className={styles.promptMenuButton}
+            type="button"
+            aria-expanded={showAllPrompts}
+            aria-controls="starter-prompts"
+            aria-label={showAllPrompts
+              ? locale === "ko" ? "추천 질문 접기" : "Hide prompt suggestions"
+              : locale === "ko" ? "추천 질문 펼치기" : "Show prompt suggestions"}
+            title={showAllPrompts
+              ? locale === "ko" ? "추천 질문 접기" : "Hide prompt suggestions"
+              : locale === "ko" ? "추천 질문 펼치기" : "Show prompt suggestions"}
+            onClick={() => setShowAllPrompts((expanded) => !expanded)}
+          >
+            <Plus size={20} aria-hidden />
+          </button>
+        ) : null}
         <textarea
           ref={textareaRef}
           value={input}
@@ -949,10 +972,10 @@ export function NimdalDialogue({ locale, projects, career, careerArc, initialThe
           disabled={thinking}
         />
         <div className={styles.composerMeta} aria-hidden>
-          <span><i />{locale === "ko" ? "공개 포트폴리오 문맥 사용 중" : "Using public portfolio context"}</span>
-          <small>{locale === "ko" ? "리서치" : "RESEARCH"}</small>
+          <span>{locale === "ko" ? "공개 포트폴리오 문맥" : "Public portfolio context"}</span>
+          <small>{aiEnabled ? "NIMDAL · GEMINI" : "NIMDAL · LOCAL"}</small>
         </div>
-        <button type="submit" disabled={!input.trim() || thinking} aria-label={text.shell.send} title={text.shell.send}>
+        <button className={styles.sendButton} type="submit" disabled={!input.trim() || thinking} aria-label={text.shell.send} title={text.shell.send}>
           <ArrowUp size={19} weight="bold" aria-hidden />
         </button>
       </form>
@@ -962,9 +985,6 @@ export function NimdalDialogue({ locale, projects, career, careerArc, initialThe
 
   return (
     <div className={`${styles.experience} relative min-h-svh overflow-hidden`} data-dialogue-home data-testid="dialogue-home" data-theme={theme} data-empty={isEmpty ? "true" : "false"} data-ai-enabled={aiEnabled ? "true" : "false"}>
-      <NimdalAtmosphere theme={theme} />
-      <div className={styles.atmosphereVeil} aria-hidden />
-
       <aside className={`${styles.sidebar} fixed inset-y-0 left-0 flex flex-col`} aria-label={locale === "ko" ? "Nimdal 대화 탐색" : "Nimdal conversation navigation"}>
         <Link className={styles.brand} href={`/${locale}`} aria-label={locale === "ko" ? "Nimdal 홈" : "Nimdal home"}>
           <Image src="/media/identity-octopus.jpg" alt="" width={38} height={38} priority />
@@ -1034,9 +1054,16 @@ export function NimdalDialogue({ locale, projects, career, careerArc, initialThe
               <motion.section className={styles.emptyState} initial={false} animate={{ opacity: 1 }}>
                 <div className={styles.emptyAvatar} aria-hidden><Image src="/media/identity-octopus.jpg" alt="" width={76} height={76} priority /></div>
                 <p className={styles.statusLine}><i aria-hidden />{text.shell.status}</p>
-                <h1>{text.shell.greeting}</h1><p>{text.shell.intro}</p>
+                <h1>
+                  {theme === "claude"
+                    ? locale === "ko"
+                      ? "Nimdal에 대해 물어보세요."
+                      : "Ask me about Nimdal."
+                    : text.shell.greeting}
+                </h1>
+                <p>{text.shell.intro}</p>
                 {renderComposer("hero")}
-                <div className={styles.starterGrid}>
+                <div id="starter-prompts" className={styles.starterGrid} data-expanded={showAllPrompts ? "true" : "false"}>
                   {text.prompts.map((prompt) => {
                     const Icon = topicIcons[prompt.id];
                     return <button key={prompt.id} type="button" disabled={thinking} onClick={() => ask({ kind: "topic", id: prompt.id }, prompt.label)}><Icon size={20} aria-hidden /><span><strong>{prompt.label}</strong><small>{prompt.hint}</small></span><ArrowRight size={17} aria-hidden /></button>;
