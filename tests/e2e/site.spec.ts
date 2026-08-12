@@ -511,6 +511,11 @@ test.describe("public links and not-found behavior", () => {
     await expect(page.getByRole("heading", { name: "공개 기록을 바탕으로 답하면" })).toBeVisible();
     await expect(page.getByText("PORTFOLIO CORPUS ONLY", { exact: true })).toBeVisible();
 
+    await question.fill("이 사이트는 어떤 모델과 API를 사용하나요?");
+    await question.press("Enter");
+    await expect(page.getByText("내부 구현 정보는 공개하지 않아요. Nimdal의 공개 포트폴리오와 작업 기록에 대해서는 답할 수 있어요.", { exact: true })).toBeVisible();
+    expect(requestCount).toBe(1);
+
     await question.fill("가장 좋아하는 음식은 무엇인가요?");
     await question.press("Enter");
     await expect(page.getByRole("heading", { name: "그 내용은 공개된 포트폴리오 기록에서 찾지 못했어요." })).toBeVisible();
@@ -544,6 +549,9 @@ test.describe("public links and not-found behavior", () => {
   test("ChatGPT and Claude themes switch without resetting the conversation and persist", async ({
     page
   }) => {
+    await page.goto("/en");
+    await expect(page.locator("body")).not.toContainText(/gemini/i);
+
     await page.goto("/ko");
     const home = page.getByTestId("dialogue-home");
     const themeSwitch = page.getByRole("group", { name: "대화 화면 테마" });

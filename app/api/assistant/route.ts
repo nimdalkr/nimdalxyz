@@ -2,6 +2,7 @@ import { GoogleGenAI, ThinkingLevel } from "@google/genai";
 import { NextResponse } from "next/server";
 
 import { assistantSystemInstruction } from "@/lib/assistant-corpus";
+import { assistantRefusal, isInternalAssistantQuestion } from "@/lib/assistant-policy";
 import { isLocale, type Locale } from "@/lib/content";
 
 export const runtime = "nodejs";
@@ -82,6 +83,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Question must contain between 1 and 600 characters." }, { status: 400 });
   }
 
+  if (isInternalAssistantQuestion(question)) {
+    return NextResponse.json(
+      { answer: assistantRefusal(locale), grounded: true, refused: true },
+      { headers: { "Cache-Control": "no-store" } }
+    );
+  }
+
   const apiKey = process.env.GEMINI_API_KEY?.replace(/^\uFEFF/, "").trim();
   if (!apiKey) {
     return NextResponse.json({ error: "AI assistant is not configured.", code: "AI_NOT_CONFIGURED" }, { status: 503 });
@@ -108,14 +116,14 @@ export async function POST(request: Request) {
       }
     });
     const answer = response.text?.trim();
-    if (!answer) throw new Error("Gemini returned an empty response.");
+    if (!answer) throw new Error("The assistant returned an empty response.");
 
     return NextResponse.json(
-      { answer, model, grounded: true },
+      { answer, grounded: true },
       { headers: { "Cache-Control": "no-store" } }
     );
   } catch (error) {
-    console.error("Gemini portfolio request failed:", error instanceof Error ? error.message : "unknown error");
+    console.error("Portfolio assistant request failed:", error instanceof Error ? error.message : "unknown error");
     return NextResponse.json(
       { error: "The assistant could not answer right now. Please try a suggested question." },
       { status: 502, headers: { "Cache-Control": "no-store" } }

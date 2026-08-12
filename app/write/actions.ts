@@ -257,19 +257,19 @@ function humanizeEditorError(error: unknown): Pick<EditorActionState, "message" 
 
 function queuedProcessingMessage(code: BlogEnrichmentFailureCode) {
   if (code === "configuration") {
-    return "원문은 저장했습니다. 새 배포가 끝난 뒤 Gemini 설정을 확인하고 다시 처리해 주세요.";
+    return "원문은 저장했습니다. 새 배포가 끝난 뒤 자동 보조 설정을 확인하고 다시 처리해 주세요.";
   }
 
   if (code === "upstream_rate_limit") {
-    return "원문은 저장했습니다. 새 배포가 끝나고 Gemini 사용량 제한이 풀리면 다시 처리해 주세요.";
+    return "원문은 저장했습니다. 새 배포가 끝나고 자동 보조 사용량 제한이 풀리면 다시 처리해 주세요.";
   }
 
   if (code === "request_timeout" || code === "upstream_unavailable") {
-    return "원문은 저장했습니다. Gemini 응답이 지연되어 공개하지 못했습니다. 새 배포 후 다시 처리해 주세요.";
+    return "원문은 저장했습니다. 자동 보조 응답이 지연되어 공개하지 못했습니다. 새 배포 후 다시 처리해 주세요.";
   }
 
   if (code === "upstream_rejected") {
-    return "원문은 저장했습니다. Gemini 요청이 거절되었습니다. 새 배포 후 다시 처리해 주세요.";
+    return "원문은 저장했습니다. 자동 보조 요청이 거절되었습니다. 새 배포 후 다시 처리해 주세요.";
   }
 
   if (code === "invalid_response" || code === "unsafe_output") {

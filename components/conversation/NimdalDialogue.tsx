@@ -28,6 +28,7 @@ import {
 } from "react";
 
 import type { Locale } from "@/lib/content";
+import { assistantRefusal, isInternalAssistantQuestion } from "@/lib/assistant-policy";
 
 import {
   CareerTimelineChart,
@@ -211,8 +212,8 @@ const copy: Record<Locale, DialogueCopy> = {
       assistant: "Nimdal",
       model: "Portfolio assistant",
       status: "공개된 기록에서 답변해요",
-      aiOnline: "Gemini · portfolio grounded",
-      localIndex: "Portfolio index · local mode",
+      aiOnline: "Public portfolio grounded",
+      localIndex: "Public portfolio records",
       topics: "Nimdal에게 물어보기",
       greeting: "Nimdal에 대해 무엇이 궁금한가요?",
       intro: "탁찬우의 2012년 이후 경력, Korea GTM, 직접 만든 제품과 일하는 방식을 대화하듯 확인할 수 있어요.",
@@ -220,7 +221,7 @@ const copy: Record<Locale, DialogueCopy> = {
       send: "질문 보내기",
       thinking: "기록을 읽고 있어요",
       followUps: "이어서 물어보기",
-      disclaimer: "질문은 Google Gemini로 전송될 수 있어요. 민감한 정보는 입력하지 마세요. 답변은 공개 포트폴리오 기록으로 제한돼요.",
+      disclaimer: "질문은 공개 포트폴리오 기록을 바탕으로 처리돼요. 민감한 정보는 입력하지 마세요. 답변은 공개된 기록으로 제한돼요.",
       userLabel: "나",
       assistantLabel: "Nimdal의 답변",
       unknownTitle: "그 내용은 공개된 포트폴리오 기록에서 찾지 못했어요.",
@@ -350,8 +351,8 @@ const copy: Record<Locale, DialogueCopy> = {
       assistant: "Nimdal",
       model: "Portfolio assistant",
       status: "Answers from the public record",
-      aiOnline: "Gemini · portfolio grounded",
-      localIndex: "Portfolio index · local mode",
+      aiOnline: "Public portfolio grounded",
+      localIndex: "Public portfolio records",
       topics: "Ask Nimdal",
       greeting: "What would you like to know about Nimdal?",
       intro: "Ask about Tak Chanwoo's career since 2012, Korea GTM, products he built, and how he works.",
@@ -359,7 +360,7 @@ const copy: Record<Locale, DialogueCopy> = {
       send: "Send question",
       thinking: "Reading the record",
       followUps: "Continue the conversation",
-      disclaimer: "Questions may be sent to Google Gemini. Do not enter sensitive information. Answers are limited to public portfolio records.",
+      disclaimer: "Questions are answered from public portfolio records. Do not enter sensitive information. Answers stay within the published portfolio.",
       userLabel: "You",
       assistantLabel: "Nimdal's answer",
       unknownTitle: "I could not find that in the public portfolio record.",
@@ -879,13 +880,13 @@ export function NimdalDialogue({ locale, projects, career, careerArc, initialThe
         body: JSON.stringify({ locale, question, history })
       });
       if (!response.ok) throw new Error("Assistant request failed");
-      const payload = await response.json() as { answer?: string; model?: string };
+      const payload = await response.json() as { answer?: string };
       if (!payload.answer) throw new Error("Assistant returned no answer");
       if (requestIdRef.current !== requestId) return;
       setMessages((current) => [...current, {
         id: nextId(),
         role: "assistant",
-        target: { kind: "ai", text: payload.answer as string, model: payload.model ?? "Gemini" }
+        target: { kind: "ai", text: payload.answer as string, model: "Nimdal" }
       }]);
     } catch {
       if (requestIdRef.current !== requestId) return;
@@ -916,6 +917,16 @@ export function NimdalDialogue({ locale, projects, career, careerArc, initialThe
     event.preventDefault();
     const question = input.trim();
     if (!question || thinking) return;
+    if (isInternalAssistantQuestion(question)) {
+      prepareQuestion({ kind: "unknown" }, question);
+      setMessages((current) => [...current, {
+        id: nextId(),
+        role: "assistant",
+        target: { kind: "ai", text: assistantRefusal(locale), model: "Nimdal" }
+      }]);
+      setThinking(false);
+      return;
+    }
     void askWithAI(question);
   };
 
@@ -973,13 +984,15 @@ export function NimdalDialogue({ locale, projects, career, careerArc, initialThe
         />
         <div className={styles.composerMeta} aria-hidden>
           <span>{locale === "ko" ? "공개 포트폴리오 문맥" : "Public portfolio context"}</span>
-          <small>{aiEnabled ? "NIMDAL · GEMINI" : "NIMDAL · LOCAL"}</small>
+          <small>NIMDAL · PORTFOLIO</small>
         </div>
         <button className={styles.sendButton} type="submit" disabled={!input.trim() || thinking} aria-label={text.shell.send} title={text.shell.send}>
           <ArrowUp size={19} weight="bold" aria-hidden />
         </button>
       </form>
-      <p>{text.shell.disclaimer}</p>
+      <p>{locale === "ko"
+        ? "질문은 공개 포트폴리오 기록을 바탕으로 처리돼요. 민감한 정보는 입력하지 마세요. 답변은 공개된 기록으로 제한돼요."
+        : text.shell.disclaimer}</p>
     </div>
   );
 
@@ -1024,7 +1037,9 @@ export function NimdalDialogue({ locale, projects, career, careerArc, initialThe
           <Image src="/media/identity-octopus.jpg" alt="" width={30} height={30} />
           <span>
             <strong>{theme === "chatgpt" ? text.shell.assistant : `${text.shell.assistant} desk`}</strong>
-            <small>{theme === "chatgpt" ? (aiEnabled ? text.shell.aiOnline : text.shell.localIndex) : (locale === "ko" ? "기록 · 근거 · 아티팩트" : "RECORDS · EVIDENCE · ARTIFACTS")}</small>
+            <small>{theme === "chatgpt"
+              ? (locale === "ko" ? "공개 포트폴리오 기록" : "Public portfolio records")
+              : (locale === "ko" ? "기록 · 근거 · 아티팩트" : "RECORDS · EVIDENCE · ARTIFACTS")}</small>
           </span>
         </div>
         <div className={styles.topbarActions}>
