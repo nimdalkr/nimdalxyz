@@ -86,7 +86,9 @@ test("assistant keeps the requested voice and offers direct contact for missing 
   const instruction = assistantSystemInstruction("ko");
 
   expect(instruction).toContain("friendly person from Busan");
-  expect(instruction).toContain("KakaoTalk ID: trialhero, Telegram: @nimdal, X: @0xnimdal");
+  expect(instruction).toContain("KakaoTalk ID: trialhero\nTelegram: @nimdal\nX: @0xnimdal");
+  expect(instruction).toContain("do not guess, infer, speculate");
+  expect(instruction).toContain("내가 아는 척하면 좀 그렇지 아이가.");
 });
 
 function pendingBlogRequest(slug: string, imageCount = 0): BlogPendingRequest {
