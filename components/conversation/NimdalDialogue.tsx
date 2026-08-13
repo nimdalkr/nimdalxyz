@@ -113,7 +113,7 @@ type AssistantTarget =
   | { kind: "detail"; id: DetailTopicId }
   | { kind: "project"; slug: string }
   | { kind: "career"; id: string }
-  | { kind: "ai"; text: string; model: string }
+  | { kind: "ai"; text: string }
   | { kind: "unknown" };
 
 type DialogueCopy = {
@@ -146,7 +146,6 @@ type DialogueCopy = {
     themeLabel: string;
     chatgptTheme: string;
     claudeTheme: string;
-    aiAnswerTitle: string;
   };
   prompts: Prompt[];
   answers: Record<TopicId, Answer>;
@@ -230,7 +229,6 @@ const copy: Record<Locale, DialogueCopy> = {
       themeLabel: "대화 화면 테마",
       chatgptTheme: "ChatGPT",
       claudeTheme: "Claude",
-      aiAnswerTitle: "공개 기록을 바탕으로 답하면"
     },
     prompts: [
       { id: "intro", label: "Nimdal은 누구인가요?", hint: "정체성과 지금 하는 일" },
@@ -369,7 +367,6 @@ const copy: Record<Locale, DialogueCopy> = {
       themeLabel: "Conversation theme",
       chatgptTheme: "ChatGPT",
       claudeTheme: "Claude",
-      aiAnswerTitle: "Based on the public record"
     },
     prompts: [
       { id: "intro", label: "Who is Nimdal?", hint: "Identity and current work" },
@@ -666,9 +663,7 @@ function AssistantAnswer({
   if (target.kind === "ai") {
     return (
       <>
-        <h2>{text.shell.aiAnswerTitle}</h2>
         {target.text.split(/\n{2,}/).filter(Boolean).map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
-        <div className={styles.aiProvenance}><i aria-hidden /><span>{target.model}</span><small>PORTFOLIO CORPUS ONLY</small></div>
       </>
     );
   }
@@ -886,7 +881,7 @@ export function NimdalDialogue({ locale, projects, career, careerArc, initialThe
       setMessages((current) => [...current, {
         id: nextId(),
         role: "assistant",
-        target: { kind: "ai", text: payload.answer as string, model: "Nimdal" }
+        target: { kind: "ai", text: payload.answer as string }
       }]);
     } catch {
       if (requestIdRef.current !== requestId) return;
@@ -922,7 +917,7 @@ export function NimdalDialogue({ locale, projects, career, careerArc, initialThe
       setMessages((current) => [...current, {
         id: nextId(),
         role: "assistant",
-        target: { kind: "ai", text: assistantRefusal(locale), model: "Nimdal" }
+        target: { kind: "ai", text: assistantRefusal(locale) }
       }]);
       setThinking(false);
       return;

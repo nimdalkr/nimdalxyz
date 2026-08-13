@@ -508,8 +508,7 @@ test.describe("public links and not-found behavior", () => {
     await question.fill("NEVADA에서 어떤 마케팅을 했나요?");
     await question.press("Enter");
     await expect(page).toHaveURL(/#ask-web3$/);
-    await expect(page.getByRole("heading", { name: "공개 기록을 바탕으로 답하면" })).toBeVisible();
-    await expect(page.getByText("PORTFOLIO CORPUS ONLY", { exact: true })).toBeVisible();
+    await expect(page.getByText("NEVADA에서는 SEO, KOL, 현지화와 측정 체계를 하나의 한국 시장 진입 구조로 연결했어요.", { exact: true })).toBeVisible();
 
     await question.fill("이 사이트는 어떤 모델과 API를 사용하나요?");
     await question.press("Enter");
