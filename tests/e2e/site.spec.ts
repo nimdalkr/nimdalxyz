@@ -517,7 +517,8 @@ test.describe("public links and not-found behavior", () => {
 
     await question.fill("가장 좋아하는 음식은 무엇인가요?");
     await question.press("Enter");
-    await expect(page.getByRole("heading", { name: "그 내용은 공개된 포트폴리오 기록에서 찾지 못했어요." })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "그건 여기 적힌 기록만으로는 내가 아는 척하면 안 되겠네요." })).toBeVisible();
+    await expect(page.getByText(/카카오톡 ID: trialhero \/ Telegram: @nimdal \/ X: @0xnimdal/)).toBeVisible();
     await expect(page.getByTestId("evidence-visual")).toContainText("NIMDAL_IDENTITY.JPG");
   });
 
