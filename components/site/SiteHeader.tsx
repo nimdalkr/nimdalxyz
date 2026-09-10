@@ -4,7 +4,6 @@ import Link from "next/link";
 import { LocaleSwitch } from "@/components/site/LocaleSwitch";
 import { MobileMenu } from "@/components/site/MobileMenu";
 import type { Locale } from "@/lib/content";
-import { blogCanonicalUrl } from "@/lib/seo";
 import { siteConfig } from "@/lib/site";
 
 interface SiteHeaderProps {
@@ -46,9 +45,6 @@ export function SiteHeader({ locale, active, blogSurface = false }: SiteHeaderPr
         <Link className={active === "career" ? "is-active" : undefined} href={`/${locale}/portfolio`}>
           {copy.career}
         </Link>
-        <a className={active === "blog" ? "is-active" : undefined} href={blogCanonicalUrl(locale)}>
-          {copy.blog}
-        </a>
       </nav>
       <div className="masthead-tools">
         <LocaleSwitch locale={locale} absoluteOrigin={origin} />

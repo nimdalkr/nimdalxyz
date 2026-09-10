@@ -4,7 +4,9 @@ import {
   ArrowDown,
   ArrowLeft,
   ArrowRight,
-  ArrowUp,
+  Asterisk,
+  Compass,
+  Sparkle,
   ArrowUpRight,
   ChatCircleDots,
   Check,
@@ -18,23 +20,14 @@ import {
 } from "@phosphor-icons/react";
 import Image from "next/image";
 import Link from "next/link";
-import {
-  useEffect,
-  useRef,
-  useState,
-  type FormEvent,
-  type ReactNode,
-} from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import type {
   CareerChapterCopy,
   Locale,
   ProjectDetailCopy,
 } from "@/lib/content";
-import {
-  assistantRefusal,
-  isInternalAssistantQuestion,
-} from "@/lib/assistant-policy";
+import { aboutNimdalLinks, aboutNimdalPrompt } from "@/lib/ask-about-nimdal";
 import styles from "./ProfileHome.module.css";
 
 type Project = {
@@ -79,7 +72,6 @@ type Detail = {
   pages: { label: string; text: string }[];
   links?: { label: string; href: string }[];
 };
-type Message = { role: "user" | "assistant"; text: string };
 
 function ExternalLink({
   href,
@@ -244,206 +236,41 @@ function DetailDialog({
   );
 }
 
-function Assistant({
-  locale,
-  close,
-  messages,
-  setMessages,
-}: {
-  locale: Locale;
-  close: () => void;
-  messages: Message[];
-  setMessages: (messages: Message[]) => void;
-}) {
-  const korean = locale === "ko";
-  const [question, setQuestion] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState(false);
-  const controller = useRef<AbortController | null>(null);
-  const conversation = useRef<HTMLDivElement>(null);
-  const submitting = useRef(false);
-  useEffect(
-    () => () => {
-      controller.current?.abort();
-      controller.current = null;
-    },
-    [],
-  );
-  useEffect(() => {
-    conversation.current?.scrollTo({ top: conversation.current.scrollHeight });
-  }, [messages, busy]);
-  const suggestions = korean
-    ? [
-        "님달은 어떤 사람이에요?",
-        "2012년부터의 경력을 알려줘요",
-        "직접 만든 프로젝트가 궁금해요",
-      ]
-    : [
-        "Who is Nimdal?",
-        "Tell me about his career since 2012",
-        "What has he built?",
-      ];
-  async function send(event?: FormEvent, prompt = question) {
-    event?.preventDefault();
-    const text = prompt.trim();
-    if (!text || text.length > 600 || submitting.current) return;
-    const next: Message[] = [...messages, { role: "user", text }];
-    setMessages(next);
-    setQuestion("");
-    setError(false);
-    if (isInternalAssistantQuestion(text)) {
-      setMessages([
-        ...next,
-        { role: "assistant", text: assistantRefusal(locale) },
-      ]);
-      return;
-    }
-    submitting.current = true;
-    setBusy(true);
-    const abort = new AbortController();
-    controller.current = abort;
-    const timeout = window.setTimeout(() => abort.abort(), 22000);
-    try {
-      const response = await fetch("/api/assistant", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          question: text,
-          locale,
-          history: messages.slice(-6),
-        }),
-        signal: abort.signal,
-      });
-      const data = await response.json();
-      if (
-        !response.ok ||
-        typeof data.answer !== "string" ||
-        !data.answer.trim()
-      )
-        throw new Error("Unavailable");
-      setMessages([...next, { role: "assistant", text: data.answer }]);
-    } catch {
-      if (controller.current === abort) setError(true);
-    } finally {
-      window.clearTimeout(timeout);
-      submitting.current = false;
-      setBusy(false);
-    }
-  }
-  return (
-    <Dialog
-      title={korean ? "님달에게 궁금한 게 있나요?" : "Ask about Nimdal"}
-      close={close}
-      chat
-    >
-      <div
-        className={styles.conversation}
-        ref={conversation}
-        role="log"
-        aria-live="polite"
-        aria-label={korean ? "대화" : "Conversation"}
-      >
-        <div className={styles.chatWelcome}>
-          <Image
-            src="/media/identity-octopus.jpg"
-            alt=""
-            width={52}
-            height={52}
-          />
-          <h2>
-            {korean
-              ? "뭐가 궁금하신데예?"
-              : "Well, what are you curious about?"}
-          </h2>
-          <p>
-            {korean
-              ? "일 이야기든, 직접 만든 것이든. 편하게 물어보이소."
-              : "The work, the projects, the person. Go on, ask away."}
-          </p>
-        </div>
-        {messages.length === 0 && (
-          <div className={styles.suggestions}>
-            {suggestions.map((prompt) => (
-              <button key={prompt} onClick={() => void send(undefined, prompt)}>
-                {prompt}
-                <ArrowUpRight size={16} />
-              </button>
-            ))}
-          </div>
-        )}
-        {messages.map((message, index) => (
-          <div
-            key={index}
-            className={
-              message.role === "user"
-                ? styles.userMessage
-                : styles.assistantMessage
-            }
-          >
-            <span>
-              {message.role === "user" ? (korean ? "나" : "You") : "Nimdal AI"}
-            </span>
-            <p>{message.text}</p>
-          </div>
-        ))}
-        {busy && (
-          <p className={styles.thinking} role="status">
-            {korean
-              ? "잠깐만예, 정리하고 있어요"
-              : "One moment, putting it together"}
-            <span>...</span>
-          </p>
-        )}
-        {error && (
-          <div className={styles.chatError} role="alert">
-            <p>
-              {korean
-                ? "지금은 답변 연결이 어렵네예. 다시 물어보시거나 님달에게 직접 연락해 주이소."
-                : "Ah, I couldn't connect just now. Try again, or go straight to Nimdal."}
-            </p>
-            <p>
-              KakaoTalk: trialhero
-              <br />
-              <ExternalLink href="https://t.me/nimdal">
-                Telegram: @nimdal
-              </ExternalLink>
-              <br />
-              <ExternalLink href="https://x.com/0xnimdal">
-                X: @0xnimdal
-              </ExternalLink>
-            </p>
-          </div>
-        )}
-      </div>
-      <form className={styles.composer} onSubmit={send}>
-        <input
-          aria-label={korean ? "질문" : "Your question"}
-          placeholder={
-            korean ? "님달에 대해 물어보세요" : "Ask something about Nimdal..."
-          }
-          value={question}
-          onChange={(e) => setQuestion(e.target.value)}
-          maxLength={600}
-          disabled={busy}
-        />
-        <button
-          className={styles.sendButton}
-          disabled={!question.trim() || busy}
-          aria-label={korean ? "질문 보내기" : "Send question"}
-        >
-          <ArrowUp size={20} />
-        </button>
-      </form>
-    </Dialog>
-  );
-}
-
 export function ProfileHome({ locale, projects, career, careerArc }: Props) {
   const korean = locale === "ko";
   const [detail, setDetail] = useState<Detail | null>(null);
   const [allProjects, setAllProjects] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [promptCopied, setPromptCopied] = useState(false);
+  const [copyFailed, setCopyFailed] = useState(false);
+  const aiPanel = useRef<HTMLDivElement>(null);
+  const aiToggle = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (!chatOpen) return;
+    aiPanel.current
+      ?.querySelector<HTMLElement>("a")
+      ?.focus({ preventScroll: true });
+    const dismiss = (event: PointerEvent) => {
+      if (
+        event.target instanceof Node &&
+        !aiPanel.current?.contains(event.target) &&
+        !aiToggle.current?.contains(event.target)
+      )
+        setChatOpen(false);
+    };
+    const escape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setChatOpen(false);
+        aiToggle.current?.focus();
+      }
+    };
+    document.addEventListener("pointerdown", dismiss);
+    document.addEventListener("keydown", escape);
+    return () => {
+      document.removeEventListener("pointerdown", dismiss);
+      document.removeEventListener("keydown", escape);
+    };
+  }, [chatOpen]);
   const [copied, setCopied] = useState(false);
   const copyTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(
@@ -453,7 +280,7 @@ export function ProfileHome({ locale, projects, career, careerArc }: Props) {
     [],
   );
   const featured =
-    projects.find((project) => project.slug === "alphaduo") ?? projects[0];
+    projects.find((project) => project.slug === "hyperalphaduo") ?? projects[0];
   const remaining = projects.filter((project) => project !== featured);
   const projectOrder = [
     "mylol",
@@ -518,7 +345,6 @@ export function ProfileHome({ locale, projects, career, careerArc }: Props) {
           label: "GitHub",
           href: project.repositoryUrl,
         },
-        project.articleUrl && { label: "nimdalog", href: project.articleUrl },
         project.referenceUrl && {
           label: korean ? "관련 링크" : "Reference",
           href: project.referenceUrl,
@@ -670,15 +496,6 @@ export function ProfileHome({ locale, projects, career, careerArc }: Props) {
               />
             </div>
           </button>
-          <a href="https://blog.nimdal.xyz/" className={styles.journalLink}>
-            <span className={styles.journalMark}>n.</span>
-            {korean
-              ? "만들고 운영하며 남기는 기록"
-              : "Notes from building, trying, and figuring things out."}
-            <span>
-              nimdalog <ArrowRight size={15} />
-            </span>
-          </a>
         </section>
 
         <section className={styles.section} aria-labelledby="projects-title">
@@ -724,23 +541,25 @@ export function ProfileHome({ locale, projects, career, careerArc }: Props) {
               ),
             )}
           </div>
-          <button
-            className={styles.moreButton}
-            aria-expanded={allProjects}
-            onClick={() => setAllProjects(!allProjects)}
-          >
-            {allProjects
-              ? korean
-                ? "간단히 보기"
-                : "Show less"
-              : korean
-                ? "모든 프로젝트 보기"
-                : "All personal projects"}
-            <ArrowDown
-              size={16}
-              className={allProjects ? styles.upArrow : ""}
-            />
-          </button>
+          {orderedProjects.length > 4 && (
+            <button
+              className={styles.moreButton}
+              aria-expanded={allProjects}
+              onClick={() => setAllProjects(!allProjects)}
+            >
+              {allProjects
+                ? korean
+                  ? "간단히 보기"
+                  : "Show less"
+                : korean
+                  ? "모든 프로젝트 보기"
+                  : "All personal projects"}
+              <ArrowDown
+                size={16}
+                className={allProjects ? styles.upArrow : ""}
+              />
+            </button>
+          )}
         </section>
 
         <section className={styles.section} aria-labelledby="career-title">
@@ -854,10 +673,6 @@ export function ProfileHome({ locale, projects, career, careerArc }: Props) {
         <footer className={styles.footer}>
           <span>© {new Date().getFullYear()} Nimdal</span>
           <div>
-            <a href="https://blog.nimdal.xyz/">
-              nimdalog
-              <ArrowUpRight size={13} />
-            </a>
             <Link
               href={korean ? "/en" : "/ko"}
               hrefLang={korean ? "en" : "ko"}
@@ -869,14 +684,17 @@ export function ProfileHome({ locale, projects, career, careerArc }: Props) {
         </footer>
       </div>
       <button
+        ref={aiToggle}
         className={styles.askButton}
-        onClick={() => setChatOpen(true)}
+        aria-expanded={chatOpen}
+        aria-controls="ask-ai-panel"
+        onClick={() => setChatOpen(!chatOpen)}
         aria-haspopup="dialog"
         aria-label={
           korean ? "AI에게 님달에 대해 물어보기" : "Ask an AI about Nimdal"
         }
       >
-        <span>{korean ? "님달에게 물어봐요" : "Ask an AI"}</span>
+        <span>{korean ? "AI에게 물어봐요" : "Ask an AI"}</span>
         <Image
           src="/media/identity-octopus.jpg"
           alt=""
@@ -892,12 +710,57 @@ export function ProfileHome({ locale, projects, career, careerArc }: Props) {
         />
       )}
       {chatOpen && (
-        <Assistant
-          locale={locale}
-          close={() => setChatOpen(false)}
-          messages={messages}
-          setMessages={setMessages}
-        />
+        <div
+          ref={aiPanel}
+          id="ask-ai-panel"
+          role="dialog"
+          aria-label={korean ? "AI 선택" : "Choose an AI"}
+          className={styles.aiPanel}
+        >
+          <h2>{korean ? "AI에게 님달을 물어보세요" : "Ask an AI about me"}</h2>
+          <div className={styles.aiProviders}>
+            {aboutNimdalLinks(locale).map((provider, index) => {
+              const Icon = [ChatCircleDots, Asterisk, Sparkle, Compass][index];
+              return (
+                <ExternalLink key={provider.id} href={provider.href}>
+                  <span title={provider.note ?? provider.name}>
+                    <Icon size={23} aria-hidden />
+                  </span>
+                  <span>{provider.name}</span>
+                </ExternalLink>
+              );
+            })}
+          </div>
+          <button
+            className={styles.copyPrompt}
+            onClick={async () => {
+              try {
+                await navigator.clipboard.writeText(aboutNimdalPrompt(locale));
+                setPromptCopied(true);
+                setCopyFailed(false);
+              } catch {
+                setCopyFailed(true);
+              }
+            }}
+          >
+            {promptCopied ? <Check size={16} /> : <Copy size={16} />}
+            {promptCopied
+              ? korean
+                ? "복사했어요"
+                : "Copied"
+              : korean
+                ? "질문 복사"
+                : "Copy the prompt instead"}
+          </button>
+          {copyFailed && (
+            <textarea
+              readOnly
+              aria-label={korean ? "복사할 질문" : "Prompt to copy"}
+              value={aboutNimdalPrompt(locale)}
+              onFocus={(event) => event.target.select()}
+            />
+          )}
+        </div>
       )}
     </main>
   );

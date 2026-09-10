@@ -21,7 +21,7 @@ test("profile is server-rendered with identity, career since 2012, and real medi
     page
       .getByRole("region", { name: "Background", exact: true })
       .getByRole("listitem"),
-  ).toHaveCount(8);
+  ).toHaveCount(7);
   await expect(page.getByRole("button", { name: /^Read case:/ })).toHaveCount(
     6,
   );
@@ -49,15 +49,12 @@ test("profile is server-rendered with identity, career since 2012, and real medi
   expect(errors).toEqual([]);
 });
 
-test("all nine projects and career cases open in paginated, keyboard-accessible dialogs", async ({
+test("the two selected projects and career cases open in paginated, keyboard-accessible dialogs", async ({
   page,
 }) => {
   await page.goto("/en");
-  await page
-    .getByRole("button", { name: "All personal projects", exact: true })
-    .click();
   const projects = page.getByRole("button", { name: /^Explore / });
-  await expect(projects).toHaveCount(9);
+  await expect(projects).toHaveCount(2);
   for (const button of await projects.all()) {
     await button.click();
     const dialog = page.getByRole("dialog");
@@ -134,65 +131,82 @@ test("portrait, contact links and language switch work", async ({
   ).toBeVisible();
 });
 
-test("AI sends history, blocks internal questions, handles failure and preserves the chat", async ({
+test("AI chooser opens provider links with the same copyable prompt without calling the site API", async ({
   page,
-}, testInfo) => {
+  context,
+}) => {
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
   let calls = 0;
-  await page.route("**/api/assistant", async (route) => {
-    calls++;
-    const data = route.request().postDataJSON();
-    expect(data.locale).toBe("en");
-    if (calls === 1) {
-      expect(data.history).toEqual([]);
-      await route.fulfill({
-        json: { answer: "Nimdal has been building communities since 2012." },
-      });
-    } else {
-      expect(data.history.length).toBeGreaterThan(0);
-      await route.fulfill({ status: 502, json: { error: "offline" } });
-    }
+  page.on("request", (request) => {
+    if (request.url().includes("/api/assistant")) calls++;
   });
   await page.goto("/en");
-  await page.getByRole("button", { name: "Ask an AI about Nimdal" }).click();
-  await expect(
-    page.getByRole("button", { name: "Send question" }),
-  ).toBeDisabled();
-  await page.getByRole("button", { name: "Who is Nimdal?" }).click();
-  await expect(
-    page.getByText("Nimdal has been building communities since 2012.", {
-      exact: true,
+  const toggle = page.getByRole("button", { name: "Ask an AI about Nimdal" });
+  await toggle.click();
+  const panel = page.getByRole("dialog", { name: "Choose an AI" });
+  await expect(panel.getByRole("link")).toHaveCount(4);
+  for (const name of ["ChatGPT", "Claude", "Gemini", "Perplexity"]) {
+    const link = panel.getByRole("link", { name, exact: true });
+    await expect(link).toHaveAttribute("target", "_blank");
+    const url = new URL((await link.getAttribute("href"))!);
+    expect(url.searchParams.get("q")).toContain("https://nimdal.xyz/en");
+    expect(url.searchParams.get("q")).toContain("myLoL is a hobby project");
+  }
+  await panel.getByRole("button", { name: "Copy the prompt instead" }).click();
+  const copied = await page.evaluate(() => navigator.clipboard.readText());
+  expect(copied).toBe(
+    new URL(
+      (await panel
+        .getByRole("link", { name: "ChatGPT", exact: true })
+        .getAttribute("href"))!,
+    ).searchParams.get("q"),
+  );
+  await context.route("https://chatgpt.com/**", (route) =>
+    route.fulfill({
+      contentType: "text/html",
+      body: "<title>External assistant</title>",
     }),
-  ).toBeVisible();
-  await page
-    .getByRole("textbox", { name: "Your question" })
-    .fill("Which API model powers you?");
-  await page.getByRole("button", { name: "Send question" }).click();
-  await expect(
-    page.getByText(/I don’t share internal implementation details/),
-  ).toBeVisible();
-  expect(calls).toBe(1);
-  await page
-    .getByRole("textbox", { name: "Your question" })
-    .fill("Tell me more about his career");
-  await page.getByRole("button", { name: "Send question" }).click();
-  await expect(page.getByRole("dialog").getByRole("alert")).toContainText(
-    "KakaoTalk: trialhero",
   );
-  await expect(page.getByRole("dialog").getByRole("alert")).toContainText(
-    "Telegram: @nimdal",
-  );
-  await expect(page.getByRole("dialog").getByRole("alert")).toContainText(
-    "X: @0xnimdal",
-  );
-  await page.screenshot({ path: testInfo.outputPath("profile-ai.png") });
+  const popupPromise = context.waitForEvent("page");
+  await panel.getByRole("link", { name: "ChatGPT", exact: true }).click();
+  const popup = await popupPromise;
+  await popup.waitForLoadState();
+  expect(new URL(popup.url()).searchParams.get("q")).toBe(copied);
+  await popup.close();
   await page.keyboard.press("Escape");
-  await page.getByRole("button", { name: "Ask an AI about Nimdal" }).click();
-  await expect(
-    page.getByText("Nimdal has been building communities since 2012.", {
+  await expect(panel).toHaveCount(0);
+  await expect(toggle).toBeFocused();
+  await toggle.click();
+  await page.getByRole("heading", { name: "Nimdal", exact: true }).click();
+  await expect(panel).toHaveCount(0);
+  expect(calls).toBe(0);
+});
+
+test("retired projects, blog links and hobby career entries are not public", async ({
+  page,
+  request,
+}) => {
+  for (const locale of ["en", "ko"]) {
+    await page.goto("/" + locale);
+    await expect(
+      page.locator('a[href*="blog.nimdal.xyz"], a[href$="/blog"]'),
+    ).toHaveCount(0);
+    const background = page.getByRole("region", {
+      name: locale === "en" ? "Background" : "걸어온 길",
       exact: true,
-    }),
-  ).toBeVisible();
-  await expect(page.locator("body")).not.toContainText(/gemini/i);
+    });
+    await expect(
+      background.getByRole("heading", { name: "myLoL", exact: true }),
+    ).toHaveCount(0);
+    await page.goto("/" + locale + "/lab");
+    await expect(
+      page.locator('a[href*="blog.nimdal.xyz"], a[href$="/blog"]'),
+    ).toHaveCount(0);
+    const response = await request.get("/" + locale + "/projects/maple-union");
+    expect(response.status()).toBe(404);
+  }
+  const sitemap = await (await request.get("/sitemap.xml")).text();
+  expect(sitemap).not.toContain("/projects/maple-union");
 });
 
 for (const width of [390, 1440]) {
@@ -220,7 +234,7 @@ for (const width of [390, 1440]) {
       path: testInfo.outputPath(`profile-${width}.png`),
     });
     await page
-      .getByRole("button", { name: "Explore AlphaDuo", exact: true })
+      .getByRole("button", { name: "Explore HyperAlphaDuo", exact: true })
       .click();
     const dialog = page.getByRole("dialog");
     await expect(
@@ -250,7 +264,7 @@ for (const width of [390, 1440]) {
     await page.keyboard.press("Escape");
     await page.getByRole("button", { name: "Ask an AI about Nimdal" }).click();
     await expect(
-      page.getByRole("textbox", { name: "Your question" }),
+      page.getByRole("dialog", { name: "Choose an AI" }),
     ).toBeInViewport();
     expect(await overflow()).toBe(false);
     await page.screenshot({

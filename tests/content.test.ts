@@ -214,9 +214,9 @@ test("content inventory keeps the baseline content and unique public posts", asy
   const blogPosts = await getLocalizedBlogPosts("en");
   const blogSlugs = blogPosts.map(({ slug }) => slug);
 
-  expect(projects).toHaveLength(9);
+  expect(projects).toHaveLength(2);
   expect(careerCases).toHaveLength(6);
-  expect(careerChapters).toHaveLength(8);
+  expect(careerChapters).toHaveLength(7);
   expect(blogPosts.length).toBeGreaterThanOrEqual(baselineBlogSlugs.length);
   baselineBlogSlugs.forEach((slug) => expect(blogSlugs).toContain(slug));
 
@@ -695,11 +695,9 @@ test("project and career media include evidence metadata", () => {
   );
 });
 
-test("AlphaDuo is present and the retired ARCDU identity is absent", async () => {
-  const alphaDuo = projects.find(({ slug }) => slug === "alphaduo");
-  expect(alphaDuo).toBeDefined();
-  expect(alphaDuo?.copy.ko.title).toBe("AlphaDuo");
-  expect(alphaDuo?.copy.en.title).toBe("AlphaDuo");
+test("Only selected personal projects are public and hobby work is absent from careers", async () => {
+  expect(projects.map(project => project.slug)).toEqual(["hyperalphaduo", "mylol"]);
+  expect(careerChapters.map(chapter => chapter.copy.en.organization)).not.toContain("myLoL");
 
   const serializedContent = JSON.stringify({
     blogPosts: await getLocalizedBlogPosts("en"),

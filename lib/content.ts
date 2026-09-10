@@ -188,18 +188,11 @@ const email = "admin@fiveovertwo.xyz";
 const undated = "undated";
 
 export const projectSlugs = [
-  "alphaduo",
   "hyperalphaduo",
-  "mylol",
-  "maple-union",
-  "ethosalpha",
-  "kol-listing",
-  "tg-finance-search-portal",
-  "social-poster-one",
-  "discord-bulk-leave"
+  "mylol"
 ] as const;
 
-export const projects = [
+const projectArchive = [
   {
     slug: "alphaduo",
     status: "live",
@@ -847,7 +840,12 @@ export const projects = [
   }
 ] as const satisfies readonly Project[];
 
-export const careerChapters = [
+// Keep the source records, but publish only the owner's selected personal work.
+export const projects = projectArchive.filter((project) =>
+  projectSlugs.some((slug) => slug === project.slug)
+);
+
+const careerChapterArchive = [
   {
     id: "makorang-lab",
     period: "2012.12-2016.07",
@@ -1025,6 +1023,8 @@ export const careerChapters = [
     }
   }
 ] as const satisfies readonly CareerChapter[];
+
+export const careerChapters = careerChapterArchive.filter((chapter) => chapter.id !== "mylol-operations");
 
 export const careerCases = [
   {
@@ -1449,7 +1449,6 @@ export const siteContent = {
       { label: "홈", href: "/ko" },
       { label: "프로젝트", href: "/ko/lab" },
       { label: "경력", href: "/ko/portfolio" },
-      { label: "블로그", href: "/ko/blog" },
       { label: "연락", href: "/ko#contact" }
     ],
     home: {
@@ -1469,7 +1468,7 @@ export const siteContent = {
       },
       metrics: [
         {
-          value: "9",
+          value: "2",
           label: "프로젝트",
           context: "현재 포트폴리오에 등록한 리서치, 자동화, 게임 프로젝트 수입니다.",
           source: "현재 저장소의 프로젝트 데이터",
@@ -1651,7 +1650,6 @@ export const siteContent = {
       { label: "Home", href: "/en" },
       { label: "Lab", href: "/en/lab" },
       { label: "Career", href: "/en/portfolio" },
-      { label: "BLOG", href: "/en/blog" },
       { label: "Contact", href: "/en#contact" }
     ],
     home: {
@@ -1671,7 +1669,7 @@ export const siteContent = {
       },
       metrics: [
         {
-          value: "9",
+          value: "2",
           label: "Lab projects",
           context: "Research, automation, and game projects defined in this content model.",
           source: "The projects array in the current repository",

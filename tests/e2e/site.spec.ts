@@ -104,7 +104,7 @@ function formatAxeViolations(
 
 test.describe("localized navigation and metadata", () => {
   for (const pathname of [
-    "/ko/projects/alphaduo",
+    "/ko/projects/hyperalphaduo",
     "/ko/portfolio",
     "/ko/lab"
   ]) {
@@ -123,13 +123,13 @@ test.describe("localized navigation and metadata", () => {
   }
 
   test("project pages expose canonical and hreflang URLs", async ({ page }) => {
-    await page.goto("/ko/projects/alphaduo");
+    await page.goto("/ko/projects/hyperalphaduo");
 
     await expectAlternates(page, {
-      canonical: "https://nimdal.xyz/ko/projects/alphaduo",
-      ko: "https://nimdal.xyz/ko/projects/alphaduo",
-      en: "https://nimdal.xyz/en/projects/alphaduo",
-      default: "https://nimdal.xyz/en/projects/alphaduo"
+      canonical: "https://nimdal.xyz/ko/projects/hyperalphaduo",
+      ko: "https://nimdal.xyz/ko/projects/hyperalphaduo",
+      en: "https://nimdal.xyz/en/projects/hyperalphaduo",
+      default: "https://nimdal.xyz/en/projects/hyperalphaduo"
     });
   });
 
@@ -243,7 +243,7 @@ test.describe("legacy routing and host surfaces", () => {
     await page.goto("/ko#project-arcdu-nft-room-proof");
 
     await expect(page).toHaveURL(/\/ko\/projects\/alphaduo#proof$/, { timeout: 15_000 });
-    await expect(page.getByRole("heading", { level: 1, name: "AlphaDuo" })).toBeVisible();
+    await expect(page.locator(".not-found-page")).toBeVisible();
   });
 
   test("room-less legacy project hashes default to the signal anchor", async ({ page }) => {
@@ -451,19 +451,11 @@ test.describe("public links and not-found behavior", () => {
     await expect(page.locator('a[href^="tel:"]')).toHaveCount(0);
   });
 
-  test("project evidence pages expose exact live and repository destinations", async ({
-    page
-  }) => {
-    await page.goto("/en/projects/alphaduo");
-    await expect(page.locator('a[href="https://alphaduo.pro"]')).toHaveAttribute(
-      "target",
-      "_blank"
-    );
-
-    await page.goto("/en/projects/ethosalpha");
-    await expect(
-      page.locator('a[href="https://github.com/nimdalkr/ethoskaito"]')
-    ).toHaveAttribute("target", "_blank");
+  test("selected project pages expose their live and community destinations", async ({ page }) => {
+    await page.goto("/en/projects/hyperalphaduo");
+    await expect(page.locator('a[href="https://hyperalphaduo.vercel.app/"]')).toHaveAttribute("target", "_blank");
+    await page.goto("/en/projects/mylol");
+    await expect(page.locator('a[href="https://cafe.naver.com/xavishowtime"]')).toHaveAttribute("target", "_blank");
   });
 
   // Profile interaction, assistant, and detail paging coverage lives in profile-home.spec.ts.
@@ -489,7 +481,7 @@ test.describe("responsive and accessible interaction", () => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/en");
     const chronology = page.getByRole("region", { name: "Background", exact: true });
-    await expect(chronology.getByRole("listitem")).toHaveCount(8);
+    await expect(chronology.getByRole("listitem")).toHaveCount(7);
     for (const name of ["Makorang Lab", "Baboclub", "FIVE OVER TWO"]) {
       await expect(chronology.getByRole("heading", { name, exact: true })).toBeVisible();
     }
@@ -558,7 +550,7 @@ test.describe("responsive and accessible interaction", () => {
   }) => {
     await page.setViewportSize({ width: 640, height: 900 });
 
-    for (const pathname of ["/ko", "/ko/projects/alphaduo", "/ko/portfolio"]) {
+    for (const pathname of ["/ko", "/ko/projects/hyperalphaduo", "/ko/portfolio"]) {
       await page.goto(pathname);
       await page.waitForTimeout(250);
       await page.evaluate(() => {
@@ -583,7 +575,7 @@ test.describe("responsive and accessible interaction", () => {
 
   for (const pathname of [
     "/ko",
-    "/ko/projects/alphaduo",
+    "/ko/projects/hyperalphaduo",
     "/ko/portfolio",
     "/ko/lab"
   ]) {
