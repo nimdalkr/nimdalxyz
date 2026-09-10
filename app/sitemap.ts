@@ -1,6 +1,5 @@
 import type { MetadataRoute } from "next";
 
-import { projectSlugs } from "@/lib/content";
 import {
   absoluteCanonicalUrl,
   hreflangAlternates,
@@ -26,15 +25,6 @@ function localizedEntries(pathname: string, options: SitemapOptions): MetadataRo
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
-    ...localizedEntries("/", { changeFrequency: "weekly", priority: 1 }),
-    ...localizedEntries("/about", { changeFrequency: "monthly", priority: 0.9 }),
-    ...localizedEntries("/lab", { changeFrequency: "monthly", priority: 0.85 }),
-    ...localizedEntries("/portfolio", { changeFrequency: "monthly", priority: 0.85 }),
-    ...projectSlugs.flatMap((slug) =>
-      localizedEntries(`/projects/${slug}`, {
-        changeFrequency: "monthly",
-        priority: 0.8
-      })
-    )
+    ...localizedEntries("/", { changeFrequency: "weekly", priority: 1 })
   ];
 }

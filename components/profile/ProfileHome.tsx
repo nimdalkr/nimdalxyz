@@ -560,7 +560,7 @@ export function ProfileHome({ locale, featured, projects, career, careerArc }: P
           )}
         </section>
 
-        <section className={styles.section} aria-labelledby="career-title">
+        <section className={styles.section} id="career" aria-labelledby="career-title">
           <div className={styles.sectionHeading}>
             <h2 id="career-title">
               {korean ? "커리어 프로젝트" : "Selected career work"}
@@ -592,7 +592,7 @@ export function ProfileHome({ locale, featured, projects, career, careerArc }: P
           </div>
         </section>
 
-        <section className={styles.section} aria-labelledby="background-title">
+        <section className={styles.section} id="background" aria-labelledby="background-title">
           <div className={styles.sectionHeading}>
             <h2 id="background-title">{korean ? "걸어온 길" : "Background"}</h2>
             <span>

@@ -4,17 +4,11 @@ import {
   blogDefaultLocale,
   canonicalSurfaceHeader,
   defaultLocale,
-  isLocale,
-  isProjectSection,
-  normalizeProjectSlug,
-  projectCanonicalPath,
-  type Locale,
-  type ProjectSection
+  isLocale
 } from "@/lib/seo";
 import { siteConfig } from "@/lib/site";
 
 const BLOG_HOST = new URL(siteConfig.blogUrl).hostname;
-const MAIN_HOST = new URL(siteConfig.mainUrl).hostname;
 const EDITOR_PATH = /^\/(?:keystatic|api\/keystatic)(?:\/|$)/;
 const WRITE_PATH = /^\/write(?:\/|$)/;
 const AUTH_PATH = /^\/api\/auth(?:\/|$)/;
@@ -67,10 +61,6 @@ function redirect(
   return NextResponse.redirect(url, 308);
 }
 
-function mainHostFor(request: NextRequest) {
-  return isBlogHost(request) ? MAIN_HOST : undefined;
-}
-
 function blogSurfaceHeaders(request: NextRequest) {
   const headers = new Headers(request.headers);
   headers.set(canonicalSurfaceHeader, "blog");
@@ -81,81 +71,6 @@ function mainSurfaceHeaders(request: NextRequest) {
   const headers = new Headers(request.headers);
   headers.delete(canonicalSurfaceHeader);
   return headers;
-}
-
-function localizedLegacyProject(pathname: string): {
-  locale: Locale;
-  slug: string;
-  section?: ProjectSection;
-} | null {
-  const segments = pathname.split("/").filter(Boolean);
-  let locale: Locale = defaultLocale;
-
-  if (isLocale(segments[0] ?? "")) {
-    locale = segments.shift() as Locale;
-  }
-
-  if (segments[0] !== "projects" || !/^[a-z0-9-]+$/.test(segments[1] ?? "")) {
-    return null;
-  }
-
-  if (segments.length === 2) {
-    return { locale, slug: segments[1] };
-  }
-
-  if (segments.length === 3 && isProjectSection(segments[2] ?? "")) {
-    return {
-      locale,
-      slug: segments[1],
-      section: segments[2] as ProjectSection
-    };
-  }
-
-  return null;
-}
-
-function queryProjectRedirect(request: NextRequest) {
-  const { pathname, searchParams } = request.nextUrl;
-  const normalizedPathname = pathname === "/" ? pathname : pathname.replace(/\/$/, "");
-  const rootLocale = normalizedPathname === "/" ? defaultLocale : normalizedPathname.slice(1);
-
-  if (!isLocale(rootLocale) || !searchParams.has("project")) {
-    return null;
-  }
-
-  const project = searchParams.get("project") ?? "";
-  if (!/^[a-z0-9-]+$/.test(project)) {
-    return null;
-  }
-
-  const requestedSection = searchParams.get("room") ?? "signal";
-  const section = isProjectSection(requestedSection) ? requestedSection : "signal";
-
-  return redirect(request, projectCanonicalPath(rootLocale, project), {
-    hash: section,
-    host: mainHostFor(request)
-  });
-}
-
-function legacyProjectRedirect(request: NextRequest) {
-  const legacyProject = localizedLegacyProject(request.nextUrl.pathname);
-  if (!legacyProject) {
-    return null;
-  }
-
-  const { locale, slug, section } = legacyProject;
-  const canonicalPath = projectCanonicalPath(locale, slug);
-  const isCanonicalPath = request.nextUrl.pathname.replace(/\/$/, "") === canonicalPath;
-  const isBlogHost = requestHost(request) === BLOG_HOST;
-
-  if (isCanonicalPath && slug === normalizeProjectSlug(slug) && !section && !isBlogHost) {
-    return null;
-  }
-
-  return redirect(request, canonicalPath, {
-    hash: section,
-    host: mainHostFor(request)
-  });
 }
 
 function unlocalizedBlogPath(pathname: string) {
@@ -351,10 +266,6 @@ function handleMainHost(request: NextRequest) {
     });
   }
 
-  if (pathname === "/portfolio") {
-    return redirect(request, `/${defaultLocale}/portfolio`, { preserveSearch: true });
-  }
-
   const legacyBlogPath = prefixedLegacyBlogPath(pathname);
   if (legacyBlogPath) {
     return redirect(request, legacyBlogPath, {
@@ -373,14 +284,26 @@ function handleMainHost(request: NextRequest) {
 }
 
 export function proxy(request: NextRequest) {
-  const projectFromQuery = queryProjectRedirect(request);
-  if (projectFromQuery) {
-    return projectFromQuery;
+  // Retired standalone pages are unavailable on every deployment hostname.
+  let pathname: string;
+  try {
+    pathname = decodeURIComponent(request.nextUrl.pathname);
+  } catch {
+    return new NextResponse("Not found", { status: 404 });
+  }
+  if (/^\/(?:ko\/|en\/)?(?:about|portfolio|protfolio|lab|projects)(?:\/|\.|$)/i.test(pathname)) {
+    return new NextResponse("Not found", {
+      status: 404,
+      headers: {
+        "X-Robots-Tag": "noindex, nofollow",
+        "Cache-Control": "no-store"
+      }
+    });
   }
 
-  const projectFromPath = legacyProjectRedirect(request);
-  if (projectFromPath) {
-    return projectFromPath;
+  const rootLocale = pathname === "/" ? defaultLocale : pathname.replace(/^\//, "").replace(/\/$/, "");
+  if (isLocale(rootLocale) && request.nextUrl.searchParams.has("project")) {
+    return redirect(request, `/${rootLocale}`);
   }
 
   return isBlogHost(request)

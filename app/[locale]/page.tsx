@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { notFound } from "next/navigation";
 
-import { LegacyHashBridge } from "@/components/compat/LegacyHashBridge";
 import { ProfileHome } from "@/components/profile/ProfileHome";
 import { StructuredData } from "@/components/seo/StructuredData";
 import {
@@ -141,7 +140,6 @@ export default async function HomePage({ params }: HomePageProps) {
 
   return (
     <>
-      <LegacyHashBridge locale={locale} />
       <StructuredData data={schema} />
       <ProfileHome
         locale={locale}

@@ -17,7 +17,7 @@ const navCopy = {
   en: { about: "About", career: "Career", blog: "Blog", menu: "Primary navigation" }
 } as const;
 
-export function SiteHeader({ locale, active, blogSurface = false }: SiteHeaderProps) {
+export function SiteHeader({ locale, blogSurface = false }: SiteHeaderProps) {
   const copy = navCopy[locale];
   const origin = blogSurface ? siteConfig.blogUrl : undefined;
 
@@ -39,10 +39,10 @@ export function SiteHeader({ locale, active, blogSurface = false }: SiteHeaderPr
         <span>NIMDAL.XYZ</span>
       </Link>
       <nav className="masthead-nav" aria-label={copy.menu}>
-        <Link className={active === "about" ? "is-active" : undefined} href={`/${locale}/about`}>
+        <Link href={`${siteConfig.mainUrl}/${locale}#background`}>
           {copy.about}
         </Link>
-        <Link className={active === "career" ? "is-active" : undefined} href={`/${locale}/portfolio`}>
+        <Link href={`${siteConfig.mainUrl}/${locale}#career`}>
           {copy.career}
         </Link>
       </nav>

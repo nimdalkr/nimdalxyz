@@ -207,10 +207,8 @@ test("retired projects, blog links and hobby career entries are not public", asy
     await expect(
       background.getByRole("heading", { name: "myLoL", exact: true }),
     ).toHaveCount(0);
-    await page.goto("/" + locale + "/lab");
-    await expect(
-      page.locator('a[href*="blog.nimdal.xyz"], a[href$="/blog"]'),
-    ).toHaveCount(0);
+    const labResponse = await request.get("/" + locale + "/lab");
+    expect(labResponse.status()).toBe(404);
     const response = await request.get("/" + locale + "/projects/maple-union");
     expect(response.status()).toBe(404);
   }

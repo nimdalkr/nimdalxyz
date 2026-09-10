@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { LocaleSwitch } from "@/components/site/LocaleSwitch";
 import type { Locale } from "@/lib/content";
+import { siteConfig } from "@/lib/site";
 
 interface MobileMenuProps { locale: Locale; absoluteOrigin?: string; }
 
@@ -23,8 +24,8 @@ export function MobileMenu({ locale, absoluteOrigin }: MobileMenuProps) {
       {open ? (
         <div className="mobile-panel" id="mobile-navigation">
           <nav aria-label={locale === "ko" ? "모바일 메뉴" : "Mobile navigation"}>
-            <Link href={`/${locale}/about`} onClick={() => setOpen(false)}>{copy.about}</Link>
-            <Link href={`/${locale}/portfolio`} onClick={() => setOpen(false)}>{copy.career}</Link>
+            <Link href={`${siteConfig.mainUrl}/${locale}#background`} onClick={() => setOpen(false)}>{copy.about}</Link>
+            <Link href={`${siteConfig.mainUrl}/${locale}#career`} onClick={() => setOpen(false)}>{copy.career}</Link>
           </nav>
           <LocaleSwitch locale={locale} compact absoluteOrigin={absoluteOrigin} />
         </div>

@@ -103,44 +103,13 @@ function formatAxeViolations(
 }
 
 test.describe("localized navigation and metadata", () => {
-  for (const pathname of [
-    "/ko/projects/hyperalphaduo",
-    "/ko/portfolio",
-    "/ko/lab"
-  ]) {
-    test(`locale switch keeps the equivalent path for ${pathname}`, async ({ page }) => {
-      await page.goto(pathname);
-
-      const expectedPath = pathname.replace(/^\/ko/, "/en");
-      const languageNavigation = page.getByRole("navigation", { name: /Language|언어 선택/ });
-      const englishLink = languageNavigation.getByRole("link", { name: "EN", exact: true });
-
-      await expect(englishLink).toHaveAttribute("href", expectedPath);
-      await englishLink.click();
-      await expect(page).toHaveURL(new RegExp(`${expectedPath.replaceAll("/", "\\/")}/?$`));
-      await expect(page.locator("html")).toHaveAttribute("lang", "en");
-    });
-  }
-
-  test("project pages expose canonical and hreflang URLs", async ({ page }) => {
-    await page.goto("/ko/projects/hyperalphaduo");
-
+  test("only the profile home exposes portfolio canonical URLs", async ({ page }) => {
+    await page.goto("/en");
     await expectAlternates(page, {
-      canonical: "https://nimdal.xyz/ko/projects/hyperalphaduo",
-      ko: "https://nimdal.xyz/ko/projects/hyperalphaduo",
-      en: "https://nimdal.xyz/en/projects/hyperalphaduo",
-      default: "https://nimdal.xyz/en/projects/hyperalphaduo"
-    });
-  });
-
-  test("operator dossier exposes corrected localized canonical URLs", async ({ page }) => {
-    await page.goto("/en/portfolio");
-
-    await expectAlternates(page, {
-      canonical: "https://nimdal.xyz/en/portfolio",
-      ko: "https://nimdal.xyz/ko/portfolio",
-      en: "https://nimdal.xyz/en/portfolio",
-      default: "https://nimdal.xyz/en/portfolio"
+      canonical: "https://nimdal.xyz/en",
+      ko: "https://nimdal.xyz/ko",
+      en: "https://nimdal.xyz/en",
+      default: "https://nimdal.xyz/en"
     });
   });
 
@@ -181,75 +150,12 @@ test.describe("legacy routing and host surfaces", () => {
     await expectPermanentRedirect(response, baseURL, { pathname: "/en" });
   });
 
-  test("legacy portfolio route permanently redirects to the localized dossier", async ({
-    request,
-    baseURL
-  }) => {
-    const response = await request.get(localUrl(baseURL, "/portfolio"), {
-      maxRedirects: 0
-    });
-
-    await expectPermanentRedirect(response, baseURL, {
-      pathname: "/en/portfolio"
-    });
-  });
-
-  test("legacy project rooms permanently redirect to canonical anchors", async ({
-    request,
-    baseURL
-  }) => {
-    const cases = [
-      {
-        from: "/projects/arcdu-nft/proof",
-        pathname: "/en/projects/alphaduo",
-        hash: "#proof"
-      },
-      {
-        from: "/en/projects/arcdu-nft/next",
-        pathname: "/en/projects/alphaduo",
-        hash: "#next"
-      },
-      {
-        from: "/projects/hyperalphaduo/build",
-        pathname: "/en/projects/hyperalphaduo",
-        hash: "#build"
-      }
-    ] as const;
-
-    for (const route of cases) {
-      const response = await request.get(localUrl(baseURL, route.from), {
-        maxRedirects: 0
-      });
-      await expectPermanentRedirect(response, baseURL, route);
-    }
-  });
-
-  test("legacy project query links normalize AlphaDuo and preserve the room anchor", async ({
-    request,
-    baseURL
-  }) => {
-    const response = await request.get(
-      localUrl(baseURL, "/en?project=arcdu-nft&room=proof"),
-      { maxRedirects: 0 }
-    );
-
-    await expectPermanentRedirect(response, baseURL, {
-      pathname: "/en/projects/alphaduo",
-      hash: "#proof"
-    });
-  });
-
-  test("legacy hash links use the client compatibility bridge", async ({ page }) => {
+  test("legacy query links return home and hashes do not open standalone pages", async ({ page, request, baseURL }) => {
+    const response = await request.get(localUrl(baseURL, "/en?project=arcdu-nft&room=proof"), { maxRedirects: 0 });
+    await expectPermanentRedirect(response, baseURL, { pathname: "/en" });
     await page.goto("/ko#project-arcdu-nft-room-proof");
-
-    await expect(page).toHaveURL(/\/ko\/projects\/alphaduo#proof$/, { timeout: 15_000 });
-    await expect(page.locator(".not-found-page")).toBeVisible();
-  });
-
-  test("room-less legacy project hashes default to the signal anchor", async ({ page }) => {
-    await page.goto("/ko#project-arcdu-nft");
-
-    await expect(page).toHaveURL(/\/ko\/projects\/alphaduo#signal$/, { timeout: 15_000 });
+    await expect(page.locator("[data-profile-home]")).toBeVisible();
+    await expect(page).toHaveURL(/\/ko#project-arcdu-nft-room-proof$/);
   });
 
   test("blog host rewrites localized hubs and publishes blog canonicals", async ({
@@ -439,23 +345,22 @@ test.describe("public links and not-found behavior", () => {
     await expect(page.getByText("English body", { exact: true })).toBeVisible();
   });
 
-  test("home and dossier retain the intended external contact links without a phone number", async ({ page }) => {
+  test("home retains the intended external contact links without a phone number", async ({ page }) => {
     await page.goto("/ko");
     await expect(page.locator('a[href^="/ko/projects/"]')).toHaveCount(0);
     await expect(page.locator('a[href="mailto:admin@fiveovertwo.xyz"]')).toBeVisible();
     await expect(page.locator('a[href="https://x.com/0xnimdal"]').last()).toBeVisible();
     await expect(page.locator('a[href="https://t.me/nimdal"]')).toBeVisible();
     await expect(page.locator('a[href^="tel:"]')).toHaveCount(0);
-    await page.goto("/en/portfolio");
-    await expect(page.locator('a[href="mailto:admin@fiveovertwo.xyz"]')).toBeVisible();
-    await expect(page.locator('a[href^="tel:"]')).toHaveCount(0);
   });
 
-  test("selected project pages expose their live and community destinations", async ({ page }) => {
-    await page.goto("/en/projects/hyperalphaduo");
-    await expect(page.locator('a[href="https://hyperalphaduo.vercel.app/"]')).toHaveAttribute("target", "_blank");
-    await page.goto("/en/projects/mylol");
-    await expect(page.locator('a[href="https://cafe.naver.com/xavishowtime"]')).toHaveAttribute("target", "_blank");
+  test("home project dialogs retain external destinations", async ({ page }) => {
+    await page.goto("/en");
+    await page.getByRole("button", { name: "Explore HyperAlphaDuo", exact: true }).click();
+    await expect(page.getByRole("dialog").locator('a[href="https://hyperalphaduo.vercel.app/"]')).toHaveAttribute("target", "_blank");
+    await page.keyboard.press("Escape");
+    await page.getByRole("button", { name: "Explore myLoL", exact: true }).click();
+    await expect(page.getByRole("dialog").locator('a[href="https://cafe.naver.com/xavishowtime"]')).toHaveAttribute("target", "_blank");
   });
 
   // Profile interaction, assistant, and detail paging coverage lives in profile-home.spec.ts.
@@ -463,9 +368,7 @@ test.describe("public links and not-found behavior", () => {
   test("invalid project and post slugs return 404", async ({ page, request, baseURL }) => {
     const projectResponse = await page.goto("/ko/projects/not-a-real-project");
     expect(projectResponse?.status()).toBe(404);
-    await expect(page.getByRole("heading", { name: "이 페이지는 없습니다." })).toBeVisible({
-      timeout: 15_000
-    });
+    await expect(page.locator("body")).toHaveText("Not found");
 
     const postResponse = await blogHostGet(
       request,
@@ -550,7 +453,7 @@ test.describe("responsive and accessible interaction", () => {
   }) => {
     await page.setViewportSize({ width: 640, height: 900 });
 
-    for (const pathname of ["/ko", "/ko/projects/hyperalphaduo", "/ko/portfolio"]) {
+    for (const pathname of ["/ko", "/en"]) {
       await page.goto(pathname);
       await page.waitForTimeout(250);
       await page.evaluate(() => {
@@ -575,9 +478,7 @@ test.describe("responsive and accessible interaction", () => {
 
   for (const pathname of [
     "/ko",
-    "/ko/projects/hyperalphaduo",
-    "/ko/portfolio",
-    "/ko/lab"
+    "/en"
   ]) {
     test(`axe finds no serious or critical issues on ${pathname}`, async ({ page }) => {
       await page.goto(pathname);

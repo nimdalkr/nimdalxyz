@@ -4,7 +4,7 @@ import { expect, test } from "@playwright/test";
  * Alpha is resolved here rather than compared raw. Audit the profile home,
  * its assistant, and the existing document surfaces.
  */
-const PAGES = ["/ko", "/en", "/en/about", "/en/portfolio", "/en/lab", "/en/projects/hyperalphaduo"];
+const PAGES = ["/ko", "/en"];
 
 const AUDIT = `(() => {
   const parse = (value) => {
