@@ -1,8 +1,8 @@
 import { expect, test } from "@playwright/test";
 
 /**
- * Alpha is resolved here rather than compared raw. The conversational home is
- * audited in both its dark ChatGPT and warm Claude presentation themes.
+ * Alpha is resolved here rather than compared raw. Audit the profile home,
+ * its assistant, and the existing document surfaces.
  */
 const PAGES = ["/ko", "/en", "/en/about", "/en/portfolio", "/en/lab", "/en/projects/hyperalphaduo"];
 
@@ -60,10 +60,10 @@ for (const path of PAGES) {
   });
 }
 
-test("contrast holds for the Claude conversation theme", async ({ page }) => {
+test("contrast holds for the profile assistant", async ({ page }) => {
   await page.goto("/ko");
-  await page.getByTestId("theme-claude").click();
-  await expect(page.getByTestId("dialogue-home")).toHaveAttribute("data-theme", "claude");
+  await page.getByRole("button", { name: "AI에게 님달에 대해 물어보기" }).click();
+  await expect(page.getByRole("dialog")).toBeVisible();
   const failures = await page.evaluate(AUDIT);
-  expect(failures, "Claude theme").toEqual([]);
+  expect(failures, "Profile assistant").toEqual([]);
 });

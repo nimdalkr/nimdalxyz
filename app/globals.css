@@ -1,5 +1,15 @@
 @import "tailwindcss";
 
+html:has([data-profile-home]), body:has([data-profile-home]) {
+  background: #fafbf9;
+  color-scheme: light;
+}
+body:has([data-profile-home]) .riso-grain,
+body:has([data-profile-home]) .ink-brush,
+body:has([data-profile-home]) .scroll-progress {
+  display: none !important;
+}
+
 html:has([data-dialogue-home]),
 body:has([data-dialogue-home]) {
   height: 100%;

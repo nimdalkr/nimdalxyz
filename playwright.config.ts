@@ -3,6 +3,7 @@ import { defineConfig, devices } from "@playwright/test";
 // Tests that assert on modules rather than on a running site. Naming them here
 // keeps a targeted run from booting a dev server it will never call.
 const NODE_ONLY_TESTS = ["tests/content.test.ts", "tests/vercel-ignore-build.test.ts"];
+const port = process.env.PLAYWRIGHT_PORT ?? "3000";
 
 const runsNodeOnlyTests =
   process.argv.some((argument) =>
@@ -19,7 +20,7 @@ export default defineConfig({
   workers: 1,
   reporter: process.env.CI ? "github" : "list",
   use: {
-    baseURL: "http://127.0.0.1:3000",
+    baseURL: `http://127.0.0.1:${port}`,
     trace: "on-first-retry"
   },
   projects: [
@@ -31,8 +32,8 @@ export default defineConfig({
   webServer: runsNodeOnlyTests
     ? undefined
     : {
-        command: "npm run dev",
-        url: "http://127.0.0.1:3000",
+        command: `npm run dev -- --port ${port}`,
+        url: `http://127.0.0.1:${port}`,
         timeout: 120_000,
         reuseExistingServer: !process.env.CI
       }

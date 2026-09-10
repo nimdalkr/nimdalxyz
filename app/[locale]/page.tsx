@@ -1,9 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 
 import { LegacyHashBridge } from "@/components/compat/LegacyHashBridge";
-import { NimdalDialogue } from "@/components/conversation/NimdalDialogue";
+import { ProfileHome } from "@/components/profile/ProfileHome";
 import { StructuredData } from "@/components/seo/StructuredData";
 import {
   careerCases,
@@ -20,8 +19,8 @@ interface HomePageProps {
 }
 
 export const viewport: Viewport = {
-  themeColor: "#090b0d",
-  colorScheme: "dark"
+  themeColor: "#fafbf9",
+  colorScheme: "light"
 };
 
 function pageLocale(value: string) {
@@ -38,8 +37,8 @@ export async function generateMetadata({ params }: HomePageProps): Promise<Metad
   return {
     title: content.seo.title,
     description: korean
-      ? "Nimdal, 탁찬우의 경력과 프로젝트를 질문으로 탐색하는 대화형 포트폴리오입니다."
-      : "A conversational portfolio for exploring Nimdal / Tak Chanwoo's career, projects, and operating philosophy.",
+      ? "창업가이자 빌더 Nimdal, 탁찬우. 2012년부터 이어 온 경력과 캠페인, 커뮤니티, 직접 만든 제품을 소개합니다."
+      : "Nimdal / Tak Chanwoo. Founder, growth operator, and builder. Explore the projects, campaigns, and communities I've been building since 2012.",
     alternates: metadataAlternates(locale),
     openGraph: {
       title: content.seo.title,
@@ -48,17 +47,15 @@ export async function generateMetadata({ params }: HomePageProps): Promise<Metad
       locale: openGraphLocaleByLocale[locale],
       type: "website",
       images: [{
-        url: "/media/og-dive.png",
-        width: 1200,
-        height: 630,
-        alt: korean ? "Nimdal 대화형 포트폴리오" : "Nimdal conversational portfolio"
+        url: "/media/identity-octopus.jpg",
+        alt: korean ? "Nimdal의 픽셀 문어 프로필" : "Nimdal's pixel octopus identity"
       }]
     },
     twitter: {
-      card: "summary_large_image",
+      card: "summary",
       title: content.seo.title,
       description: content.seo.description,
-      images: ["/media/og-dive.png"]
+      images: ["/media/identity-octopus.jpg"]
     }
   };
 }
@@ -66,11 +63,10 @@ export async function generateMetadata({ params }: HomePageProps): Promise<Metad
 export default async function HomePage({ params }: HomePageProps) {
   const locale = pageLocale((await params).locale);
   const korean = locale === "ko";
-  const savedTheme = (await cookies()).get("nimdal-theme")?.value;
-  const initialTheme = savedTheme === "claude" ? "claude" : "chatgpt";
   const projects = projectRecords.map((projectRecord) => {
     const project: Project = projectRecord;
     const localized = project.copy[locale];
+    const preview = project.media.find((media) => media.role === "proof") ?? project.media[0];
 
     return {
       slug: project.slug,
@@ -80,8 +76,8 @@ export default async function HomePage({ params }: HomePageProps) {
       status: project.status,
       tags: [...localized.tags],
       detail: { ...localized.detail },
-      image: project.media[0].src,
-      imageAlt: project.media[0].alt[locale],
+      image: preview.src,
+      imageAlt: preview.alt[locale],
       media: project.media.slice(0, 3).map((media) => ({
         src: media.src,
         alt: media.alt[locale],
@@ -146,13 +142,11 @@ export default async function HomePage({ params }: HomePageProps) {
     <>
       <LegacyHashBridge locale={locale} />
       <StructuredData data={schema} />
-      <NimdalDialogue
+      <ProfileHome
         locale={locale}
         projects={projects}
         career={career}
         careerArc={careerArc}
-        initialTheme={initialTheme}
-        aiEnabled={Boolean(process.env.GEMINI_API_KEY)}
       />
     </>
   );

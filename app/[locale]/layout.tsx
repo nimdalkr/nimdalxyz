@@ -1,10 +1,6 @@
 import type { Metadata, Viewport } from "next";
 
-import { ScrollProgress } from "@/components/motion/ScrollProgress";
-import { InkBrush } from "@/components/ink/InkBrush";
-import { InkReveals } from "@/components/ink/InkReveals";
-import { InkTransition } from "@/components/ink/InkTransition";
-import { PaperGrain } from "@/components/ink/PaperGrain";
+import { LegacyEffects } from "@/components/ink/LegacyEffects";
 import { bricolage, nanumMyeongjo, notoSerifKr, plexMono } from "@/lib/fonts";
 import { isLocale, locales, siteContent } from "@/lib/content";
 
@@ -96,11 +92,7 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
         <a className="skip-link" href="#main-content">
           {locale === "ko" ? "본문으로 바로가기" : "Skip to content"}
         </a>
-        <ScrollProgress />
-        <PaperGrain />
-        <InkBrush />
-        <InkReveals />
-        <InkTransition />
+        <LegacyEffects />
         <div className="locale-root" data-locale={locale}>{children}</div>
       </body>
     </html>

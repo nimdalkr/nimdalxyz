@@ -439,29 +439,13 @@ test.describe("public links and not-found behavior", () => {
     await expect(page.getByText("English body", { exact: true })).toBeVisible();
   });
 
-  test("home and dossier retain the intended external contact links without a phone number", async ({
-    page
-  }) => {
+  test("home and dossier retain the intended external contact links without a phone number", async ({ page }) => {
     await page.goto("/ko");
-
-    await page.getByRole("button", { name: "추천 질문 펼치기" }).click();
-    await page.getByRole("button", { name: "직접 만든 제품을 보여주세요" }).click();
-    const alphaDuo = page.getByRole("button", { name: /AlphaDuo/ }).first();
-    await expect(alphaDuo).toBeVisible();
-    await alphaDuo.click();
-    await expect(page.getByRole("heading", { name: "AlphaDuo", exact: true })).toBeVisible();
-    await expect(page).toHaveURL(/\/ko#ask-projects$/);
     await expect(page.locator('a[href^="/ko/projects/"]')).toHaveCount(0);
-
-    await page.getByRole("button", { name: "함께 일하려면?" }).click();
-    await expect(page.locator('a[href="mailto:admin@fiveovertwo.xyz"]').first()).toBeVisible();
-    await expect(page.locator('a[href="https://x.com/0xnimdal"]')).toBeVisible();
+    await expect(page.locator('a[href="mailto:admin@fiveovertwo.xyz"]')).toBeVisible();
+    await expect(page.locator('a[href="https://x.com/0xnimdal"]').last()).toBeVisible();
     await expect(page.locator('a[href="https://t.me/nimdal"]')).toBeVisible();
-    await expect(
-      page.locator('a[href="https://linkedin.com/in/chanwoo-tak-132b281a4"]')
-    ).toBeVisible();
     await expect(page.locator('a[href^="tel:"]')).toHaveCount(0);
-
     await page.goto("/en/portfolio");
     await expect(page.locator('a[href="mailto:admin@fiveovertwo.xyz"]')).toBeVisible();
     await expect(page.locator('a[href^="tel:"]')).toHaveCount(0);
@@ -482,117 +466,7 @@ test.describe("public links and not-found behavior", () => {
     ).toHaveAttribute("target", "_blank");
   });
 
-  test("the home dialogue resolves known free-text questions and rejects undocumented ones", async ({
-    page
-  }) => {
-    let requestCount = 0;
-    await page.route("**/api/assistant", async (route) => {
-      requestCount += 1;
-      if (requestCount === 1) {
-        await route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({
-            answer: "NEVADA에서는 SEO, KOL, 현지화와 측정 체계를 하나의 한국 시장 진입 구조로 연결했어요.",
-            model: "gemini-test",
-            grounded: true
-          })
-        });
-        return;
-      }
-      await route.fulfill({ status: 502, contentType: "application/json", body: JSON.stringify({ error: "test fallback" }) });
-    });
-    await page.goto("/ko");
-
-    const question = page.getByRole("textbox", { name: "Nimdal에 대해 자유롭게 물어보세요" });
-    await question.fill("NEVADA에서 어떤 마케팅을 했나요?");
-    await question.press("Enter");
-    await expect(page).toHaveURL(/#ask-web3$/);
-    await expect(page.getByText("NEVADA에서는 SEO, KOL, 현지화와 측정 체계를 하나의 한국 시장 진입 구조로 연결했어요.", { exact: true })).toBeVisible();
-
-    await question.fill("이 사이트는 어떤 모델과 API를 사용하나요?");
-    await question.press("Enter");
-    await expect(page.getByText("내부 구현 정보는 공개하지 않아요. Nimdal의 공개 포트폴리오와 작업 기록에 대해서는 답할 수 있어요.", { exact: true })).toBeVisible();
-    expect(requestCount).toBe(1);
-
-    await question.fill("가장 좋아하는 음식은 무엇인가요?");
-    await question.press("Enter");
-    await expect(page.getByRole("heading", { name: "그건 여기 적힌 기록만으로는 내가 아는 척하면 안 되겠네요." })).toBeVisible();
-    await expect(page.getByText(/카카오톡 ID: trialhero \/ Telegram: @nimdal \/ X: @0xnimdal/)).toBeVisible();
-    await expect(page.getByTestId("evidence-visual")).toContainText("NIMDAL_IDENTITY.JPG");
-  });
-
-  test("home detail actions stay inside the conversation and expose the complete records", async ({
-    page
-  }) => {
-    await page.goto("/ko");
-
-    await expect(page.locator('a[href^="/ko/about"], a[href^="/ko/portfolio"], a[href^="/ko/lab"], a[href*="/ko/projects/"]')).toHaveCount(0);
-    await page.getByRole("button", { name: "추천 질문 펼치기" }).click();
-    await page.getByRole("button", { name: "직접 만든 제품을 보여주세요" }).click();
-    await page.getByRole("button", { name: "모든 개인 프로젝트를 보여주세요" }).click();
-    await expect(page.getByRole("button", { name: /Discord Bulk Leave Tool/ })).toBeVisible();
-    await expect(page.getByRole("button", { name: /maple uNion/ }).last()).toBeVisible();
-    await expect(page).toHaveURL(/\/ko#ask-projects$/);
-
-    await page.getByRole("link", { name: "어떤 경력을 쌓았나요?" }).click();
-    await page.getByRole("button", { name: "2012년부터의 전체 커리어를 보여주세요" }).click();
-    await expect(page.getByText("2012년부터 현재까지의 커리어 아크", { exact: true }).last()).toBeVisible();
-    const timeline = page.locator('svg[aria-label*="조직과 역할의 변화"]').last();
-    await expect(timeline.getByText("Makorang Lab", { exact: true })).toBeVisible();
-    await expect(timeline.getByText("Baboclub", { exact: true })).toBeVisible();
-    await expect(timeline.getByText("FIVE OVER TWO", { exact: true })).toBeVisible();
-    await expect(page.getByRole("button", { name: /Leica 온라인 유입 및 매출 성장/ })).toBeVisible();
-    await expect(page).toHaveURL(/\/ko#ask-career$/);
-  });
-
-  test("ChatGPT and Claude themes switch without resetting the conversation and persist", async ({
-    page
-  }) => {
-    await page.goto("/en");
-    await expect(page.locator("body")).not.toContainText(/gemini/i);
-
-    await page.goto("/ko");
-    const home = page.getByTestId("dialogue-home");
-    const themeSwitch = page.getByRole("group", { name: "대화 화면 테마" });
-    await expect(home).toHaveAttribute("data-theme", "chatgpt");
-    await expect(page.getByTestId("prompt-dock")).toHaveAttribute("data-placement", "hero");
-    await expect(page.getByText("공개 포트폴리오 문맥", { exact: true })).toBeHidden();
-    const chatGptSwitchBox = await themeSwitch.boundingBox();
-    expect(chatGptSwitchBox).not.toBeNull();
-
-    await page.getByRole("button", { name: "Nimdal은 누구인가요?" }).click();
-    await expect(page.getByRole("heading", { name: "Nimdal은 탁찬우의 퍼블릭 아이덴티티예요." })).toBeVisible();
-    await expect(page.getByTestId("prompt-dock")).toHaveAttribute("data-placement", "dock");
-    await page.getByTestId("theme-claude").click();
-    await expect(home).toHaveAttribute("data-theme", "claude");
-    const claudeSwitchBox = await themeSwitch.boundingBox();
-    expect(claudeSwitchBox).toEqual(chatGptSwitchBox);
-    await expect(page.getByText("공개 포트폴리오 문맥", { exact: true })).toBeVisible();
-    await expect(page.getByRole("heading", { name: "Nimdal은 탁찬우의 퍼블릭 아이덴티티예요." })).toBeVisible();
-
-    await page.reload();
-    await expect(page.getByTestId("dialogue-home")).toHaveAttribute("data-theme", "claude");
-    await page.getByTestId("theme-chatgpt").click();
-    await expect(page.getByTestId("dialogue-home")).toHaveAttribute("data-theme", "chatgpt");
-  });
-
-  test("starter prompts follow the compact behavior of each AI home", async ({ page }) => {
-    await page.goto("/ko");
-
-    const promptMenu = page.getByRole("button", { name: "추천 질문 펼치기" });
-    await expect(page.getByRole("button", { name: "Nimdal은 누구인가요?" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "어떤 경력을 쌓았나요?" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "직접 만든 제품을 보여주세요" })).toBeHidden();
-
-    await promptMenu.click();
-    await expect(page.getByRole("button", { name: "직접 만든 제품을 보여주세요" })).toBeVisible();
-
-    await page.getByTestId("theme-claude").click();
-    await expect(page.getByRole("button", { name: "Nimdal은 누구인가요?" })).toBeHidden();
-    await promptMenu.click();
-    await expect(page.getByRole("button", { name: "Nimdal은 누구인가요?" })).toBeVisible();
-  });
+  // Profile interaction, assistant, and detail paging coverage lives in profile-home.spec.ts.
 
   test("invalid project and post slugs return 404", async ({ page, request, baseURL }) => {
     const projectResponse = await page.goto("/ko/projects/not-a-real-project");
@@ -611,62 +485,24 @@ test.describe("public links and not-found behavior", () => {
 });
 
 test.describe("responsive and accessible interaction", () => {
-  test("390px navigation is operable and visible touch targets are at least 44px square", async ({
-    page
-  }) => {
-    await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto("/ko");
-
-    const themeSwitch = page.getByRole("group", { name: "대화 화면 테마" });
-    const chatGptSwitchBox = await themeSwitch.boundingBox();
-    await page.getByTestId("theme-claude").click();
-    await expect(page.getByTestId("dialogue-home")).toHaveAttribute("data-theme", "claude");
-    const claudeSwitchBox = await themeSwitch.boundingBox();
-    expect(claudeSwitchBox).toEqual(chatGptSwitchBox);
-    expect(claudeSwitchBox?.height ?? 0).toBeGreaterThanOrEqual(44);
-
-    const menu = page.getByRole("button", { name: "메뉴 열기" });
-    await expect(menu).toBeVisible();
-    await menu.click();
-    const navigation = page.getByRole("navigation", { name: "모바일 메뉴" });
-    await expect(navigation.getByRole("link", { name: "Nimdal은 누구인가요?", exact: true })).toBeVisible();
-    await expect(navigation.getByRole("link", { name: "어떤 경력을 쌓았나요?", exact: true })).toBeVisible();
-    await expect(navigation.getByRole("link", { name: "Nimdalog", exact: true })).toHaveCount(0);
-
-    const targets = navigation.locator("a");
-    const count = await targets.count();
-    for (let index = 0; index < count; index += 1) {
-      const target = targets.nth(index);
-      const box = await target.boundingBox();
-      expect(box, `touch target ${index} should have a bounding box`).not.toBeNull();
-      expect(box?.height ?? 0, `touch target ${index} should be at least 44px high`).toBeGreaterThanOrEqual(44);
-    }
-
-    await page.getByRole("navigation", { name: "언어 선택" }).getByRole("link", { name: "EN", exact: true }).click();
-    await expect(page).toHaveURL(/\/en$/);
-  });
-
-  test("390px career chronology exposes every chapter without a horizontal chart", async ({
-    page
-  }) => {
+  test("390px profile navigation and chronology remain accessible", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/en");
-    await page.getByRole("button", { name: /What has he done\?/ }).click();
-
-    const chronology = page.getByLabel("Mobile career chronology");
-    await expect(chronology).toBeVisible();
-    await expect(chronology.getByRole("button")).toHaveCount(8);
-    await expect(chronology.getByRole("button", { name: /Makorang Lab/ })).toBeVisible();
-    await expect(chronology.getByRole("button", { name: /Baboclub/ })).toBeVisible();
-    await expect(chronology.getByRole("button", { name: /FIVE OVER TWO/ })).toBeVisible();
-
-    await chronology.getByRole("button", { name: /FIVE OVER TWO/ }).click();
-    await expect(page.getByText("Turning services into systems and products", { exact: true })).toBeVisible();
+    const chronology = page.getByRole("region", { name: "Background", exact: true });
+    await expect(chronology.getByRole("listitem")).toHaveCount(8);
+    for (const name of ["Makorang Lab", "Baboclub", "FIVE OVER TWO"]) {
+      await expect(chronology.getByRole("heading", { name, exact: true })).toBeVisible();
+    }
+    const contact = page.getByRole("link", { name: "Contact", exact: true });
+    const box = await contact.boundingBox();
+    expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
+    await page.getByRole("link", { name: "한국어로 전환" }).click();
+    await expect(page).toHaveURL(new RegExp("/ko$"));
   });
 
   test("390px BLOG links keep 44px touch targets", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto("http://blog.localhost:3000/ko");
+    await page.goto(`http://blog.localhost:${process.env.PLAYWRIGHT_PORT ?? "3000"}/ko`);
 
     const targets = page.locator("a");
     const count = await targets.count();
@@ -704,40 +540,17 @@ test.describe("responsive and accessible interaction", () => {
     expect(focusStyle.outlineWidth).toBeGreaterThanOrEqual(2);
 
     await page.keyboard.press("Tab");
-    await expect(page.locator(":focus")).toHaveAttribute("href", "/ko");
+    await expect(page.locator(":focus")).toHaveAttribute("aria-label", "탁찬우 소개");
   });
 
-  test("reduced-motion mode removes the progress layer and renders reveals statically", async ({
-    page
-  }) => {
+  test("reduced-motion mode keeps the profile readable without animated layers", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/ko");
-
     await expect(page.locator(".scroll-progress")).toBeHidden();
-    await expect(page.getByTestId("dialogue-home")).toBeVisible();
-    await expect(page.getByTestId("dialogue-answer")).toBeVisible();
-    await expect(page.getByTestId("evidence-visual")).toBeVisible();
-    await expect(page.getByTestId("prompt-dock")).toBeVisible();
-
-    const motionStyles = await page.getByRole("button", { name: "Nimdal은 누구인가요?" }).evaluate((element) => {
-      const style = getComputedStyle(element);
-      return {
-        animationDuration: style.animationDuration,
-        scrollBehavior: getComputedStyle(document.documentElement).scrollBehavior,
-        transitionDuration: style.transitionDuration
-      };
-    });
-
-    expect(motionStyles.scrollBehavior).toBe("auto");
-    const durationInSeconds = (value: string) => {
-      const firstDuration = value.split(",")[0]?.trim() ?? "0s";
-      return firstDuration.endsWith("ms")
-        ? Number.parseFloat(firstDuration) / 1000
-        : Number.parseFloat(firstDuration);
-    };
-
-    expect(durationInSeconds(motionStyles.animationDuration)).toBeLessThanOrEqual(0.00001);
-    expect(durationInSeconds(motionStyles.transitionDuration)).toBeLessThanOrEqual(0.00001);
+    await expect(page.locator("[data-profile-home]")).toBeVisible();
+    const button = page.getByRole("button", { name: "탁찬우 소개" });
+    await expect(button).toHaveCSS("transition-duration", "0s");
+    await expect(page.locator("html")).toHaveCSS("scroll-behavior", "auto");
   });
 
   test("200% text-zoom reflow heuristic does not introduce horizontal scrolling", async ({
@@ -792,7 +605,7 @@ test.describe("responsive and accessible interaction", () => {
   }
 
   test("axe finds no serious or critical issues on the blog host", async ({ page }) => {
-    const response = await page.goto("http://blog.localhost:3000/ko");
+    const response = await page.goto(`http://blog.localhost:${process.env.PLAYWRIGHT_PORT ?? "3000"}/ko`);
     expect(response?.status()).toBe(200);
 
     const results = await new AxeBuilder({ page })
