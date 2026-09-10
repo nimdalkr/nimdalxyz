@@ -49,12 +49,12 @@ test("profile is server-rendered with identity, career since 2012, and real medi
   expect(errors).toEqual([]);
 });
 
-test("the two selected projects and career cases open in paginated, keyboard-accessible dialogs", async ({
+test("featured, personal projects and career cases open in paginated, keyboard-accessible dialogs", async ({
   page,
 }) => {
   await page.goto("/en");
   const projects = page.getByRole("button", { name: /^Explore / });
-  await expect(projects).toHaveCount(2);
+  await expect(projects).toHaveCount(3);
   for (const button of await projects.all()) {
     await button.click();
     const dialog = page.getByRole("dialog");
@@ -188,6 +188,15 @@ test("retired projects, blog links and hobby career entries are not public", asy
 }) => {
   for (const locale of ["en", "ko"]) {
     await page.goto("/" + locale);
+    const featured = page.locator('section[aria-labelledby="featured-title"]');
+    const personal = page.locator('section[aria-labelledby="projects-title"]');
+    await expect(featured.getByRole("heading", { name: "AlphaDuo", exact: true })).toBeVisible();
+    await expect(featured.locator("img")).toHaveAttribute("alt", /AlphaDuo/);
+    await expect(personal.getByRole("heading", { level: 3 })).toHaveText(["myLoL", "HyperAlphaDuo"]);
+    await expect(personal).toContainText("02");
+    await featured.getByRole("button").click();
+    await expect(page.getByRole("dialog").locator('a[href="https://alphaduo.pro"]')).toBeVisible();
+    await page.keyboard.press("Escape");
     await expect(
       page.locator('a[href*="blog.nimdal.xyz"], a[href$="/blog"]'),
     ).toHaveCount(0);
@@ -234,7 +243,7 @@ for (const width of [390, 1440]) {
       path: testInfo.outputPath(`profile-${width}.png`),
     });
     await page
-      .getByRole("button", { name: "Explore HyperAlphaDuo", exact: true })
+      .getByRole("button", { name: "Explore AlphaDuo", exact: true })
       .click();
     const dialog = page.getByRole("dialog");
     await expect(

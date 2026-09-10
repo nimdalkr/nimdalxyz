@@ -200,53 +200,53 @@ const projectArchive = [
     media: [
       {
         role: "proof",
-        src: "/media/projects/alphaduo-proof.png",
+        src: "/media/projects/alphaduo-dashboard-2026-09.png",
         alt: {
-          ko: "PnL, 지갑, Arc 브리지, SBT 접근 메뉴가 보이는 AlphaDuo NFT Wallet Profile 화면.",
-          en: "AlphaDuo NFT Wallet Profile showing PnL, wallets, Bridge to Arc, and SBT Access navigation."
+          ko: "최신 NFT 포스팅, 래플, 콜라보 요청과 활동 통계를 모은 AlphaDuo 대시보드.",
+          en: "AlphaDuo dashboard with NFT posts, raffles, collaboration requests, and activity metrics."
         },
         source: {
-          ko: "alphaduo.pro 실제 서비스 화면",
-          en: "Live alphaduo.pro capture"
+          ko: "사용자가 제공한 alphaduo.pro 서비스 화면",
+          en: "Owner-provided alphaduo.pro screenshot"
         },
-        capturedAt: "2026-07-19",
+        capturedAt: undated,
         claim: {
-          ko: "AlphaDuo 공개 화면에서 NFT 지갑 프로필, 지갑 연결, Arc Testnet, 양도할 수 없는 SBT 인증 메뉴를 확인할 수 있습니다.",
-          en: "The public AlphaDuo surface contains an NFT wallet profile, wallet connection, Arc Testnet, and non-transferable SBT access flow."
+          ko: "NFT 포스팅, 래플, 콜라보 요청, 최근 활동과 운영 통계를 한 대시보드에서 보여줍니다.",
+          en: "The dashboard brings together NFT posts, raffles, collaboration requests, recent activity, and operating metrics."
         },
         limitation: {
-          ko: "지갑을 연결하지 않은 정적 화면이므로, 지갑별 데이터의 정확도나 브리지 완료 여부까지는 확인할 수 없습니다.",
-          en: "This is a static capture with no wallet connected; it does not prove wallet-data accuracy or a completed bridge transaction."
+          ko: "단일 시점의 화면이며, 누적 이용 실적이나 각 기능의 완료 흐름을 증명하지는 않습니다.",
+          en: "A single screenshot does not establish long-term usage or verify each feature's end-to-end flow."
         }
       }
     ],
     copy: {
       ko: {
         title: "AlphaDuo",
-        category: "NFT 지갑 분석",
-        summary: "NFT 멤버십, 지갑 분석, Arc Testnet 브리지를 한곳에서 다루는 공개 웹3 서비스입니다.",
-        tags: ["NFT", "지갑 분석", "Arc Testnet", "SBT"],
+        category: "NFT 커뮤니티 플랫폼",
+        summary: "NFT 소식, 래플, 콜라보 요청과 커뮤니티 활동을 한곳에 모은 웹3 플랫폼입니다.",
+        tags: ["NFT", "커뮤니티", "래플", "콜라보"],
         detail: {
-          problem: "NFT 활동 확인, 지갑 모니터링, 멤버 인증, Arc 정산을 각각 다른 도구에서 처리해야 했습니다.",
-          decision: "양도할 수 없는 SBT로 멤버를 확인하고, 지갑 분석은 읽기 전용으로 제한했습니다. 확인할 수 없는 데이터는 표시하지 않았습니다.",
-          system: "NFT Wallet Profile에 PnL, 지갑 목록, Bridge to Arc, SBT Access를 한 흐름으로 묶었습니다.",
-          proof: "alphaduo.pro와 2026-07-19 실제 서비스 화면에서 Arc Testnet과 양도할 수 없는 SBT 인증 흐름을 확인할 수 있습니다.",
-          limitation: "현재는 테스트넷 베타입니다. 캡처에 지갑이 연결되지 않아 실제 정산 결과나 분석 정확도까지는 확인할 수 없습니다.",
-          next: "테스트 지갑을 연결한 전체 흐름과 데이터 출처, 거래 영수증, 복구 조건을 함께 공개할 계획입니다."
+          problem: "NFT 소식과 참여 기회, 커뮤니티 활동을 여러 채널에서 따로 확인해야 합니다.",
+          decision: "최신 포스팅, 래플과 콜라보 요청을 하나의 홈 대시보드에서 탐색하도록 구성했습니다.",
+          system: "포스팅 피드, 얼리 프로젝트, 래플, 캘린더 Beta, PnL 메뉴와 최근 활동 및 운영 통계를 연결합니다.",
+          proof: "첨부된 실제 서비스 화면에서 포스팅 피드, 진행 중 래플, 콜라보 요청과 최근 활동을 확인할 수 있습니다.",
+          limitation: "화면의 수치는 특정 시점의 상태이며 누적 성과를 의미하지 않습니다.",
+          next: "alphaduo.pro에서 현재 공개된 서비스를 확인할 수 있습니다."
         }
       },
       en: {
         title: "AlphaDuo",
-        category: "NFT wallet intelligence",
-        summary: "A public Web3 product connecting NFT membership, wallet analytics, and an Arc Testnet bridge in one flow.",
-        tags: ["NFT", "Wallet analytics", "Arc Testnet", "SBT"],
+        category: "NFT community platform",
+        summary: "A Web3 platform bringing NFT updates, raffles, collaboration requests, and community activity into one place.",
+        tags: ["NFT", "Community", "Raffles", "Collaborations"],
         detail: {
-          problem: "NFT activity, wallet monitoring, member access, and Arc settlement flows are fragmented across separate tools.",
-          decision: "Use a non-transferable SBT as the access boundary, keep wallet analytics read-only, and avoid inventing unavailable data.",
-          system: "The NFT Wallet Profile connects PnL, wallet lists, Bridge to Arc, and SBT Access.",
-          proof: "A public alphaduo.pro URL and a production capture dated 2026-07-19 are available; the screen explicitly identifies Arc Testnet and a non-transferable SBT.",
-          limitation: "This is a testnet beta. No wallet is connected in the capture, and it does not verify real-value settlement or analytical accuracy.",
-          next: "Publish a representative connected-wallet flow with data sources, transaction receipts, and recovery conditions."
+          problem: "NFT updates, participation opportunities, and community activity are spread across separate channels.",
+          decision: "Bring the latest posts, raffles, and collaboration requests into a single home dashboard.",
+          system: "The dashboard connects a post feed, early projects, raffles, Calendar Beta, and PnL navigation with recent activity and operating metrics.",
+          proof: "The service screenshot shows the post feed, ongoing raffles, collaboration requests, and recent activity.",
+          limitation: "The displayed metrics represent one moment, not cumulative performance.",
+          next: "Explore the currently available service at alphaduo.pro."
         }
       }
     }
@@ -840,7 +840,9 @@ const projectArchive = [
   }
 ] as const satisfies readonly Project[];
 
-// Keep the source records, but publish only the owner's selected personal work.
+export const featuredProject = projectArchive[0];
+
+// Featured work is separate from the owner's selected personal projects.
 export const projects = projectArchive.filter((project) =>
   projectSlugs.some((slug) => slug === project.slug)
 );

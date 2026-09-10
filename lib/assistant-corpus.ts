@@ -1,6 +1,7 @@
 import {
   careerCases,
   careerChapters,
+  featuredProject,
   type Locale,
   type Project,
   projects,
@@ -33,11 +34,12 @@ export function buildAssistantCorpus(locale: Locale) {
       period: chapter.period,
       ...chapter.copy[locale]
     })),
-    projects: projects.map((projectRecord) => {
+    projects: [featuredProject, ...projects].map((projectRecord) => {
       const project: Project = projectRecord;
       const copy = project.copy[locale];
       return {
         id: project.slug,
+        placement: project.slug === featuredProject.slug ? "featured" : "personal",
         status: project.status,
         title: copy.title,
         category: copy.category,

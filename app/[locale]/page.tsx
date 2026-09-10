@@ -7,6 +7,7 @@ import { StructuredData } from "@/components/seo/StructuredData";
 import {
   careerCases,
   careerChapters,
+  featuredProject,
   isLocale,
   type Project,
   projects as projectRecords,
@@ -63,7 +64,7 @@ export async function generateMetadata({ params }: HomePageProps): Promise<Metad
 export default async function HomePage({ params }: HomePageProps) {
   const locale = pageLocale((await params).locale);
   const korean = locale === "ko";
-  const projects = projectRecords.map((projectRecord) => {
+  const [featured, ...projects] = [featuredProject, ...projectRecords].map((projectRecord) => {
     const project: Project = projectRecord;
     const localized = project.copy[locale];
     const preview = project.media.find((media) => media.role === "proof") ?? project.media[0];
@@ -144,6 +145,7 @@ export default async function HomePage({ params }: HomePageProps) {
       <StructuredData data={schema} />
       <ProfileHome
         locale={locale}
+        featured={featured}
         projects={projects}
         career={career}
         careerArc={careerArc}

@@ -4,6 +4,7 @@ export function aboutNimdalPrompt(locale: Locale) {
   return [
     `Read https://nimdal.xyz/${locale} and introduce Nimdal (Tak Chanwoo).`,
     "Summarize his professional background, strengths, and selected projects using only the information on that page.",
+    "His featured project is AlphaDuo at https://alphaduo.pro, separate from his personal projects.",
     "Distinguish his professional career from personal projects: myLoL is a hobby project, not a career role. The two selected personal projects are myLoL and HyperAlphaDuo.",
     "If you cannot access the page, say so instead of guessing. Do not recommend his discontinued blog.",
     locale === "ko" ? "Answer in Korean." : "Answer in English.",

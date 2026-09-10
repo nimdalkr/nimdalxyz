@@ -60,6 +60,7 @@ type Career = {
 };
 type Props = {
   locale: Locale;
+  featured: Project;
   projects: Project[];
   career: Career[];
   careerArc: Array<CareerChapterCopy & { id: string; period: string }>;
@@ -236,7 +237,7 @@ function DetailDialog({
   );
 }
 
-export function ProfileHome({ locale, projects, career, careerArc }: Props) {
+export function ProfileHome({ locale, featured, projects, career, careerArc }: Props) {
   const korean = locale === "ko";
   const [detail, setDetail] = useState<Detail | null>(null);
   const [allProjects, setAllProjects] = useState(false);
@@ -279,9 +280,6 @@ export function ProfileHome({ locale, projects, career, careerArc }: Props) {
     },
     [],
   );
-  const featured =
-    projects.find((project) => project.slug === "hyperalphaduo") ?? projects[0];
-  const remaining = projects.filter((project) => project !== featured);
   const projectOrder = [
     "mylol",
     "maple-union",
@@ -292,7 +290,7 @@ export function ProfileHome({ locale, projects, career, careerArc }: Props) {
     "social-poster-one",
     "discord-bulk-leave",
   ];
-  const orderedProjects = [...remaining].sort(
+  const orderedProjects = [...projects].sort(
     (a, b) => projectOrder.indexOf(a.slug) - projectOrder.indexOf(b.slug),
   );
   const status = (value: string) =>
