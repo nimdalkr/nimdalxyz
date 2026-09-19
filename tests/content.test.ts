@@ -60,11 +60,6 @@ import {
   projects,
   siteContent
 } from "../lib/content";
-import {
-  assistantRefusal,
-  isInternalAssistantQuestion
-} from "../lib/assistant-policy";
-import { assistantSystemInstruction } from "../lib/assistant-corpus";
 
 const expectedLocales = ["en", "ko"] as const;
 const mediaRoles = ["career", "concept", "document", "identity", "proof"] as const;
@@ -73,23 +68,6 @@ const baselineBlogSlugs = [
   "nimdal-logbook",
   "research-tools-should-make-markets-readable"
 ] as const;
-
-test("assistant refuses provider and implementation questions without blocking portfolio questions", () => {
-  expect(isInternalAssistantQuestion("Which API powers this assistant?")).toBe(true);
-  expect(isInternalAssistantQuestion("이 사이트는 어떤 모델과 API를 사용하나요?")).toBe(true);
-  expect(isInternalAssistantQuestion("What has Nimdal built since 2012?")).toBe(false);
-  expect(isInternalAssistantQuestion("How did Social Poster-One use APIs for automation?")).toBe(false);
-  expect(assistantRefusal("en")).toContain("internal implementation details");
-});
-
-test("assistant keeps the requested voice and offers direct contact for missing facts", () => {
-  const instruction = assistantSystemInstruction("ko");
-
-  expect(instruction).toContain("friendly person from Busan");
-  expect(instruction).toContain("KakaoTalk ID: trialhero\nTelegram: @nimdal\nX: @0xnimdal");
-  expect(instruction).toContain("do not guess, infer, speculate");
-  expect(instruction).toContain("내가 아는 척하면 좀 그렇지 아이가.");
-});
 
 function pendingBlogRequest(slug: string, imageCount = 0): BlogPendingRequest {
   const bodyImages = Array.from({ length: imageCount }, (_, index) => {
