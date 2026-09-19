@@ -1,0 +1,135 @@
+/* Base for the profile home's own root layout. It carries only the rules the
+   home took from the BLOG's global stylesheet, so the ink type system and its
+   Korean serif @font-face sets stay off this page. */
+@layer theme, base, components, utilities;
+@import "tailwindcss/preflight.css" layer(base);
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: #fafbf9;
+  color-scheme: light;
+  scroll-behavior: smooth;
+  /* Keeps keyboard focus clear of the fixed "Ask an AI" button. */
+  scroll-padding-bottom: 96px;
+  text-rendering: optimizeLegibility;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: #fafbf9;
+  color: #141519;
+  font-size: 1.02rem;
+  line-height: 1.78;
+  overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  border-radius: 0;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+img,
+svg {
+  max-width: 100%;
+}
+
+::selection {
+  background: #c9321f;
+  color: #fdf6f1;
+}
+
+:focus-visible {
+  outline: 3px solid #c9321f;
+  outline-offset: 3px;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.03;
+  text-wrap: balance;
+}
+
+:lang(ko) h1,
+:lang(ko) h2,
+:lang(ko) h3,
+:lang(ko) h4 {
+  letter-spacing: -0.005em;
+  line-height: 1.26;
+  word-break: keep-all;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+:lang(ko) p,
+:lang(ko) li,
+:lang(ko) dd {
+  word-break: keep-all;
+}
+
+.skip-link {
+  position: fixed;
+  z-index: 100;
+  left: clamp(1.25rem, 4vw, 4rem);
+  top: 1rem;
+  padding: 0.85rem 1.1rem;
+  background: #c9321f;
+  color: #fdf6f1;
+  font-family: var(--font-mono), monospace;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transform: translateY(-220%);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+@media (max-width: 767px) {
+  .skip-link {
+    left: 1.25rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

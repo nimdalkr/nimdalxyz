@@ -15,7 +15,6 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
-    "@google/genai": "^2.16.0",
     "@keystatic/core": "^0.6.0",
     "@keystatic/next": "^5.0.4",
     "@markdoc/markdoc": "^0.5.8",
@@ -23,21 +22,16 @@
     "@mdx-js/react": "^3.0.0",
     "@next/mdx": "16.3.0",
     "@phosphor-icons/react": "2.1.10",
-    "clsx": "^2.1.1",
-    "d3": "^7.9.0",
-    "gsap": "^3.15.0",
     "motion": "^12.40.0",
     "next": "16.3.0",
     "next-auth": "^4.24.15",
     "react": "19.2.7",
-    "react-dom": "19.2.7",
-    "tailwind-merge": "^2.5.5"
+    "react-dom": "19.2.7"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.12.1",
     "@playwright/test": "1.61.1",
     "@tailwindcss/postcss": "^4.0.0",
-    "@types/d3": "^7.4.3",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",

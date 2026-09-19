@@ -251,32 +251,6 @@
 .featured:hover .featuredImage {
   transform: translateY(0);
 }
-.journalLink {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  min-height: 54px;
-  font-size: 12px;
-  color: var(--muted);
-  padding: 10px 2px;
-}
-.journalMark {
-  font-size: 20px;
-  font-weight: 700;
-  color: #596d53;
-  padding-right: 4px;
-}
-.journalLink > span:last-child {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  margin-left: auto;
-  white-space: nowrap;
-  color: var(--text);
-}
-.journalLink:hover {
-  color: var(--green);
-}
 .projectGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -351,7 +325,7 @@
   min-width: 0;
   border-radius: 6px;
   background: #fff;
-  font-size: 10px;
+  font-size: 12px;
   color: #293526;
 }
 .aiProviders a:hover {
@@ -461,11 +435,15 @@
   background: transparent;
   text-align: left;
   color: inherit;
-  transition: padding 0.2s;
 }
-.careerRow:hover {
-  padding-left: 8px;
-  padding-right: 8px;
+.careerRow > * {
+  transition: transform 0.2s;
+}
+.careerRow:hover > :not(svg) {
+  transform: translateX(8px);
+}
+.careerRow:hover > svg {
+  transform: translateX(-8px);
 }
 .careerLogo {
   width: 54px;
@@ -694,7 +672,12 @@
 }
 .detailText {
   min-height: 146px;
+}
+.detailPage {
   animation: open 0.2s ease-out;
+}
+.detailPageIdle {
+  display: none;
 }
 .detailText h2 {
   font-size: 22px;
@@ -731,149 +714,6 @@
 .pagination > span > span {
   color: #626b5a;
 }
-.chatDialog {
-  margin: 0;
-  left: auto;
-  top: auto;
-  bottom: 24px;
-  right: 24px;
-  width: 420px;
-  height: min(640px, calc(100dvh - 48px));
-  overflow: hidden;
-}
-.chatDialog[open] {
-  display: flex;
-  flex-direction: column;
-}
-.chatDialog .dialogTop {
-  flex-shrink: 0;
-}
-.conversation {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  padding: 26px 22px;
-}
-.chatWelcome img {
-  border-radius: 50%;
-  image-rendering: pixelated;
-}
-.chatWelcome h2 {
-  margin-top: 16px;
-  font-size: 23px;
-  line-height: 1.35;
-  font-weight: 600;
-  max-width: 290px;
-}
-.chatWelcome p {
-  color: var(--muted);
-  font-size: 13px;
-  margin-top: 10px;
-}
-.suggestions {
-  margin-top: 28px;
-  display: grid;
-  gap: 8px;
-}
-.suggestions button {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  text-align: left;
-  gap: 8px;
-  font-size: 12px;
-  min-height: 45px;
-  padding: 10px 12px;
-  border: 1px solid var(--line);
-  background: #f1f4ee;
-  border-radius: 6px;
-  color: var(--text);
-}
-.suggestions svg {
-  flex-shrink: 0;
-}
-.userMessage,
-.assistantMessage {
-  font-size: 14px;
-  margin-top: 22px;
-  overflow-wrap: anywhere;
-}
-.userMessage {
-  background: #e9eee4;
-  border-radius: 8px;
-  padding: 13px 16px;
-}
-.userMessage > span,
-.assistantMessage > span {
-  display: block;
-  font-size: 11px;
-  color: #5e6a55;
-  margin-bottom: 6px;
-}
-.assistantMessage p,
-.userMessage p {
-  white-space: pre-wrap;
-  line-height: 1.8;
-}
-.composer {
-  display: flex;
-  align-items: center;
-  margin: 10px 16px 16px;
-  padding: 7px 7px 7px 12px;
-  border: 1px solid #d5ddce;
-  background: #fff;
-  border-radius: 8px;
-  gap: 8px;
-  flex-shrink: 0;
-}
-.composer input {
-  min-width: 0;
-  flex: 1;
-  width: 100%;
-  outline: 0;
-  border: 0;
-  padding: 0;
-  background: transparent;
-  font-size: 14px;
-  min-height: 44px;
-  color: var(--text);
-}
-.composer:focus-within {
-  outline: 2px solid var(--green);
-  outline-offset: 2px;
-}
-.sendButton {
-  background: #273e2b;
-  color: #fff;
-  border: 0;
-  border-radius: 50%;
-  width: 44px;
-  height: 44px;
-  flex-shrink: 0;
-  display: grid;
-  place-items: center;
-}
-.thinking {
-  margin-top: 20px !important;
-  font-size: 12px;
-  color: var(--muted);
-}
-.thinking span {
-  animation: pulse 1.2s ease-in-out infinite alternate;
-}
-.chatError {
-  margin-top: 18px;
-  font-size: 13px;
-  color: #704a34;
-}
-.chatError p + p {
-  margin-top: 10px;
-}
-.chatError a {
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
 .srOnly {
   position: absolute;
   width: 1px;
@@ -890,14 +730,6 @@
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-@keyframes pulse {
-  from {
-    opacity: 0.3;
-  }
-  to {
-    opacity: 1;
   }
 }
 @media (max-width: 820px) {
@@ -961,7 +793,7 @@
   }
   .sectionHeading > span {
     max-width: 145px;
-    font-size: 10px;
+    font-size: 11px;
   }
   .sectionHeading h2 {
     font-size: 11px;
@@ -984,15 +816,6 @@
     height: 100%;
     object-fit: cover;
     object-position: top left;
-  }
-  .journalLink {
-    flex-wrap: wrap;
-    gap: 6px;
-    font-size: 11px;
-    padding-top: 16px;
-  }
-  .journalLink > span:last-child {
-    margin-left: 25px;
   }
   .projectGrid {
     grid-template-columns: 1fr;
@@ -1040,13 +863,6 @@
     margin-top: 54px;
     font-size: 11px;
   }
-  .chatDialog {
-    bottom: 12px;
-    right: 12px;
-    width: calc(100vw - 24px);
-    height: min(650px, calc(100dvh - 24px));
-    max-height: calc(100dvh - 24px);
-  }
   .detailBody {
     padding: 18px 22px;
   }
@@ -1062,9 +878,6 @@
   .dialogTop {
     padding-left: 18px;
     font-size: 12px;
-  }
-  .composer input {
-    font-size: 16px;
   }
 }
 @media (prefers-reduced-motion: reduce) {

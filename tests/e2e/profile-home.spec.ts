@@ -1,6 +1,8 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
+import { careerCases, featuredProject } from "../../lib/content";
+
 test("profile is server-rendered with identity, career since 2012, and real media", async ({
   page,
   request,
@@ -10,6 +12,11 @@ test("profile is server-rendered with identity, career since 2012, and real medi
   expect(html).toContain("Makorang Lab");
   expect(html).toContain("2012");
   expect(html).toContain("FIVE OVER TWO");
+  // Case details ship in the HTML, not only in the client payload, so search
+  // engines and the AI readers the home links to can read them.
+  const visibleHtml = html.replace(/<script\b[\s\S]*?<\/script>/g, "");
+  expect(visibleHtml).toContain(featuredProject.copy.en.detail.problem);
+  expect(visibleHtml).toContain(careerCases[0].copy.en.context);
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.setViewportSize({ width: 1440, height: 1000 });
@@ -30,7 +37,7 @@ test("profile is server-rendered with identity, career since 2012, and real medi
       'a[href*="/en/projects/"], a[href*="/en/portfolio"], a[href*="/en/lab"]',
     ),
   ).toHaveCount(0);
-  const images = page.locator("main img");
+  const images = page.locator("main img:visible");
   for (const img of await images.all()) {
     await img.scrollIntoViewIfNeeded();
     await expect
@@ -47,6 +54,21 @@ test("profile is server-rendered with identity, career since 2012, and real medi
     fullPage: true,
   });
   expect(errors).toEqual([]);
+});
+
+test("the profile home does not load the BLOG's serif type system", async ({
+  request,
+}) => {
+  const html = await (await request.get("/en")).text();
+  const sheets = [...html.matchAll(/href="(\/_next\/static\/[^"]+?\.css(?:\?[^"]*)?)"/g)].map(
+    (match) => match[1],
+  );
+  expect(sheets.length).toBeGreaterThan(0);
+  for (const sheet of sheets) {
+    const css = await (await request.get(sheet)).text();
+    expect(css).not.toContain("Noto Serif KR");
+    expect(css).not.toContain("Nanum Myeongjo");
+  }
 });
 
 test("featured, personal projects and career cases open in paginated, keyboard-accessible dialogs", async ({

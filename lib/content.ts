@@ -78,6 +78,8 @@ export type CareerCase = {
   id: string;
   period: string;
   media: ProjectMedia;
+  /** Logo for the career list when `media` is not itself a logo. */
+  mark?: string;
   metrics: readonly ContentMetric[];
   copy: Localized<CareerCaseCopy>;
 };
@@ -894,7 +896,7 @@ const careerChapterArchive = [
   },
   {
     id: "mkr",
-    period: "2018.06-2024.11",
+    period: "2018.06-2024.09",
     copy: {
       ko: {
         organization: "MKR",
@@ -942,19 +944,19 @@ const careerChapterArchive = [
     copy: {
       ko: {
         organization: "Alpha Duo",
-        role: "Product Planning · QA · Community",
-        summary: "Web3 제품의 기획, QA, 비공개 베타와 커뮤니티 피드백을 연결하며 캠페인에서 제품 운영으로 역할을 확장했어요.",
-        signal: "캠페인 운영에서 제품 운영으로 확장",
-        evidence: "제품 기획, QA 및 커뮤니티 운영 기록이 포트폴리오 근거 목록에 정리되어 있어요.",
-        limitation: "비공개 베타 데이터와 내부 제품 지표는 공개 범위에 포함되지 않아요."
+        role: "KOL · Crypto Research Channel",
+        summary: "지인과 함께 크립토 리서치 채널 Alpha Duo를 운영하며 KOL로 시장 리서치를 공유하고 있어요.",
+        signal: "크립토 리서치 채널 · KOL",
+        evidence: "공개 채널 게시물로 KOL 활동을 확인할 수 있어요.",
+        limitation: "개인 KOL 활동이라 고용 경력에는 포함하지 않아요."
       },
       en: {
         organization: "Alpha Duo",
-        role: "Product Planning · QA · Community",
-        summary: "Expanded from campaign execution into product operations by connecting planning, QA, private beta, and community feedback for a Web3 product.",
-        signal: "Expanded from campaigns into product operations",
-        evidence: "Product-planning, QA, and community-operating records are indexed in the portfolio evidence inventory.",
-        limitation: "Private-beta data and internal product metrics are outside the public scope."
+        role: "KOL · Crypto Research Channel",
+        summary: "Runs the Alpha Duo crypto research channel with a partner and shares market research as a KOL.",
+        signal: "Crypto research channel · KOL",
+        evidence: "Public channel posts document the KOL activity.",
+        limitation: "Independent KOL activity, not an employment role."
       }
     }
   },
@@ -1034,7 +1036,7 @@ export const careerCases = [
     period: "2019.09-2022.12",
     media: {
       role: "career",
-      src: "/media/career/joya-logo.jpg",
+      src: "/media/career/joya-mark.png",
       alt: {
         ko: "Joya 로고.",
         en: "Joya logo."
@@ -1105,7 +1107,7 @@ export const careerCases = [
     period: "2020.03-2023.10",
     media: {
       role: "career",
-      src: "/media/career/h-animal-logo.jpg",
+      src: "/media/career/h-animal-mark.png",
       alt: {
         ko: "H 동물의료센터 로고.",
         en: "H Animal Medical Center logo."
@@ -1157,7 +1159,7 @@ export const careerCases = [
     period: "2022.07-2024.09",
     media: {
       role: "career",
-      src: "/media/career/leica-logo.jpg",
+      src: "/media/career/leica-mark.png",
       alt: {
         ko: "Leica 로고.",
         en: "Leica logo."
@@ -1246,7 +1248,7 @@ export const careerCases = [
     period: "2018.06.29-2024.09",
     media: {
       role: "career",
-      src: "/media/career/mkr-logo.jpg",
+      src: "/media/career/mkr-mark.png",
       alt: {
         ko: "MKR 로고.",
         en: "MKR logo."
@@ -1335,7 +1337,7 @@ export const careerCases = [
     period: "2025.01-2025.09",
     media: {
       role: "career",
-      src: "/media/career/bitcoin-logo.jpg",
+      src: "/media/career/bitcoin-mark.png",
       alt: {
         ko: "웹3 커리어 사례에 사용된 비트코인 심볼 이미지.",
         en: "Bitcoin symbol image used for the Web3 career case."
@@ -1385,6 +1387,7 @@ export const careerCases = [
   {
     id: "nevada-korea-marketing-lead",
     period: "2026.04-2026.06",
+    mark: "/media/career/nevada-mark.png",
     media: {
       role: "proof",
       src: "/media/career/nevada.jpg",

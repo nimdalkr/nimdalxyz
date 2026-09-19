@@ -36,13 +36,11 @@ type Project = {
   category: string;
   summary: string;
   status: string;
-  tags: string[];
   detail: ProjectDetailCopy;
   image: string;
   imageAlt: string;
   liveUrl?: string;
   repositoryUrl?: string;
-  articleUrl?: string;
   referenceUrl?: string;
 };
 type Career = {
@@ -56,6 +54,7 @@ type Career = {
   system: string;
   limitation: string;
   image: string;
+  logo: string;
   imageAlt: string;
 };
 type Props = {
@@ -64,8 +63,10 @@ type Props = {
   projects: Project[];
   career: Career[];
   careerArc: Array<CareerChapterCopy & { id: string; period: string }>;
+  year: number;
 };
 type Detail = {
+  id: string;
   title: string;
   eyebrow: string;
   image: string;
@@ -97,33 +98,36 @@ function ExternalLink({
 
 function Dialog({
   title,
+  open,
   close,
   children,
-  chat = false,
 }: {
   title: string;
+  open: boolean;
   close: () => void;
   children: ReactNode;
-  chat?: boolean;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
+  const closeButton = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     const dialog = ref.current;
+    if (!open || !dialog) return;
     const previousFocus = document.activeElement as HTMLElement | null;
     const previousOverflow = document.body.style.overflow;
-    dialog?.showModal();
+    dialog.showModal();
+    closeButton.current?.focus();
     document.body.style.overflow = "hidden";
     return () => {
-      dialog?.close();
+      dialog.close();
       document.body.style.overflow = previousOverflow;
       previousFocus?.focus({ preventScroll: true });
     };
-  }, []);
+  }, [open]);
   return (
     <dialog
       ref={ref}
       aria-label={title}
-      className={`${styles.dialog} ${chat ? styles.chatDialog : ""}`}
+      className={styles.dialog}
       onCancel={close}
       onKeyDown={(event) => {
         if (event.key !== "Tab") return;
@@ -155,7 +159,7 @@ function Dialog({
       <div className={styles.dialogTop}>
         <span>{title}</span>
         <button
-          autoFocus
+          ref={closeButton}
           className={styles.iconButton}
           onClick={close}
           aria-label="Close"
@@ -171,16 +175,22 @@ function Dialog({
 
 function DetailDialog({
   detail,
+  open,
   close,
   korean,
 }: {
   detail: Detail;
+  open: boolean;
   close: () => void;
   korean: boolean;
 }) {
   const [page, setPage] = useState(0);
+  const dismiss = () => {
+    setPage(0);
+    close();
+  };
   return (
-    <Dialog title={detail.title} close={close}>
+    <Dialog title={detail.title} open={open} close={dismiss}>
       <div className={styles.detailImage}>
         <Image
           src={detail.image}
@@ -191,14 +201,18 @@ function DetailDialog({
       </div>
       <div className={styles.detailBody}>
         <span className={styles.eyebrow}>{detail.eyebrow}</span>
-        <div
-          className={styles.detailText}
-          aria-live="polite"
-          aria-atomic="true"
-          key={page}
-        >
-          <h2>{detail.pages[page].label}</h2>
-          <p>{detail.pages[page].text}</p>
+        {/* Every page is in the server-rendered HTML so search engines and AI
+            readers get the whole case; only the current page is shown. */}
+        <div className={styles.detailText} aria-live="polite" aria-atomic="true">
+          {detail.pages.map((item, index) => (
+            <div
+              key={index === page ? `current-${index}` : index}
+              className={index === page ? styles.detailPage : styles.detailPageIdle}
+            >
+              <h2>{item.label}</h2>
+              <p>{item.text}</p>
+            </div>
+          ))}
         </div>
         {detail.links && (
           <div className={styles.detailLinks}>
@@ -237,9 +251,9 @@ function DetailDialog({
   );
 }
 
-export function ProfileHome({ locale, featured, projects, career, careerArc }: Props) {
+export function ProfileHome({ locale, featured, projects, career, careerArc, year }: Props) {
   const korean = locale === "ko";
-  const [detail, setDetail] = useState<Detail | null>(null);
+  const [detailId, setDetailId] = useState<string | null>(null);
   const [allProjects, setAllProjects] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   const [promptCopied, setPromptCopied] = useState(false);
@@ -280,16 +294,7 @@ export function ProfileHome({ locale, featured, projects, career, careerArc }: P
     },
     [],
   );
-  const projectOrder = [
-    "mylol",
-    "maple-union",
-    "hyperalphaduo",
-    "ethosalpha",
-    "kol-listing",
-    "tg-finance-search-portal",
-    "social-poster-one",
-    "discord-bulk-leave",
-  ];
+  const projectOrder = ["mylol", "hyperalphaduo"];
   const orderedProjects = [...projects].sort(
     (a, b) => projectOrder.indexOf(a.slug) - projectOrder.indexOf(b.slug),
   );
@@ -300,7 +305,7 @@ export function ProfileHome({ locale, featured, projects, career, careerArc }: P
       "in-progress": korean ? "개발 중" : "In progress",
       archived: korean ? "아카이브" : "Archived",
     })[value] ?? value;
-  function openProject(project: Project) {
+  function projectDetail(project: Project): Detail {
     const labels = korean
       ? [
           "프로젝트",
@@ -320,7 +325,8 @@ export function ProfileHome({ locale, featured, projects, career, careerArc }: P
           "Current limits",
           "What's next",
         ];
-    setDetail({
+    return {
+      id: `project-${project.slug}`,
       title: project.title,
       eyebrow: project.category,
       image: project.image,
@@ -350,9 +356,9 @@ export function ProfileHome({ locale, featured, projects, career, careerArc }: P
       ].filter((link): link is { label: string; href: string } =>
         Boolean(link),
       ),
-    });
+    };
   }
-  function openCareer(item: Career) {
+  function careerDetail(item: Career): Detail {
     const labels = korean
       ? ["프로젝트", "목표", "담당 역할", "실행", "결과", "공개 범위"]
       : [
@@ -363,7 +369,8 @@ export function ProfileHome({ locale, featured, projects, career, careerArc }: P
           "Outcomes",
           "Disclosure",
         ];
-    setDetail({
+    return {
+      id: `career-${item.id}`,
       title: item.title,
       eyebrow: item.period,
       image: item.image,
@@ -376,12 +383,34 @@ export function ProfileHome({ locale, featured, projects, career, careerArc }: P
         item.result,
         item.limitation,
       ].map((text, i) => ({ label: labels[i], text })),
-    });
+    };
   }
+  const profileDetail: Detail = {
+    id: "profile",
+    title: korean ? "탁찬우 / Nimdal" : "Tak Chanwoo / Nimdal",
+    eyebrow: korean ? "창업가 · 빌더" : "Founder / Builder",
+    image: "/media/operator-portrait.png",
+    imageAlt: "Tak Chanwoo",
+    pages: [
+      {
+        label: korean ? "반가워요, 님달이에요." : "Hi, I'm Nimdal.",
+        text: korean
+          ? "2012년부터 사람을 모으고, 사업을 운영하고, 제품을 만들어 왔어요. 지금은 FIVE OVER TWO에서 한국 시장 진출과 그로스 운영, 제품 구축을 연결하고 있어요."
+          : "I've been bringing people together, running businesses, and building products since 2012. Today, I connect Korea market entry, growth operations, and product building at FIVE OVER TWO.",
+      },
+    ],
+  };
+  const details = [
+    profileDetail,
+    projectDetail(featured),
+    ...orderedProjects.map(projectDetail),
+    ...career.map(careerDetail),
+  ];
   async function copyKakao() {
     try {
       await navigator.clipboard.writeText("trialhero");
       setCopied(true);
+      if (copyTimer.current) clearTimeout(copyTimer.current);
       copyTimer.current = setTimeout(() => setCopied(false), 2400);
     } catch {
       setCopied(false);
@@ -399,29 +428,14 @@ export function ProfileHome({ locale, featured, projects, career, careerArc }: P
           <button
             className={styles.avatar}
             aria-label={korean ? "탁찬우 소개" : "About Tak Chanwoo"}
-            onClick={() =>
-              setDetail({
-                title: korean ? "탁찬우 / Nimdal" : "Tak Chanwoo / Nimdal",
-                eyebrow: korean ? "창업가 · 빌더" : "Founder / Builder",
-                image: "/media/operator-portrait.png",
-                imageAlt: "Tak Chanwoo",
-                pages: [
-                  {
-                    label: korean ? "반가워요, 님달이에요." : "Hi, I'm Nimdal.",
-                    text: korean
-                      ? "2012년부터 사람을 모으고, 사업을 운영하고, 제품을 만들어 왔어요. 지금은 FIVE OVER TWO에서 한국 시장 진출과 그로스 운영, 제품 구축을 연결하고 있어요."
-                      : "I've been bringing people together, running businesses, and building products since 2012. Today, I connect Korea market entry, growth operations, and product building at FIVE OVER TWO.",
-                  },
-                ],
-              })
-            }
+            onClick={() => setDetailId("profile")}
           >
             <Image
               src="/media/identity-octopus.jpg"
               alt="Nimdal's pixel octopus"
               width={76}
               height={76}
-              priority
+              loading="eager"
             />
             <span className={styles.avatarHint}>
               <Plus size={13} />
@@ -465,7 +479,7 @@ export function ProfileHome({ locale, featured, projects, career, careerArc }: P
           </div>
           <button
             className={styles.featured}
-            onClick={() => openProject(featured)}
+            onClick={() => setDetailId(`project-${featured.slug}`)}
             aria-label={`${korean ? "프로젝트 열기" : "Explore"} ${featured.title}`}
           >
             <div className={styles.featuredCopy}>
@@ -490,7 +504,8 @@ export function ProfileHome({ locale, featured, projects, career, careerArc }: P
                 width={1280}
                 height={720}
                 sizes="(max-width: 760px) 90vw, 640px"
-                priority
+                preload
+                fetchPriority="high"
               />
             </div>
           </button>
@@ -513,7 +528,7 @@ export function ProfileHome({ locale, featured, projects, career, careerArc }: P
                   className={styles.projectCard}
                   data-tone={index % 4}
                   key={project.slug}
-                  onClick={() => openProject(project)}
+                  onClick={() => setDetailId(`project-${project.slug}`)}
                   aria-label={`${korean ? "프로젝트 열기" : "Explore"} ${project.title}`}
                 >
                   <div className={styles.projectVisual}>
@@ -576,11 +591,11 @@ export function ProfileHome({ locale, featured, projects, career, careerArc }: P
               <button
                 key={item.id}
                 className={styles.careerRow}
-                onClick={() => openCareer(item)}
+                onClick={() => setDetailId(`career-${item.id}`)}
                 aria-label={`${korean ? "사례 열기" : "Read case"}: ${item.title}`}
               >
                 <div className={styles.careerLogo}>
-                  <Image src={item.image} alt="" fill sizes="56px" />
+                  <Image src={item.logo} alt="" fill sizes="56px" />
                 </div>
                 <div>
                   <h3>{item.title}</h3>
@@ -669,7 +684,7 @@ export function ProfileHome({ locale, featured, projects, career, careerArc }: P
           </div>
         </section>
         <footer className={styles.footer}>
-          <span>© {new Date().getFullYear()} Nimdal</span>
+          <span>© {year} Nimdal</span>
           <div>
             <Link
               href={korean ? "/en" : "/ko"}
@@ -686,7 +701,13 @@ export function ProfileHome({ locale, featured, projects, career, careerArc }: P
         className={styles.askButton}
         aria-expanded={chatOpen}
         aria-controls="ask-ai-panel"
-        onClick={() => setChatOpen(!chatOpen)}
+        onClick={() => {
+          if (!chatOpen) {
+            setPromptCopied(false);
+            setCopyFailed(false);
+          }
+          setChatOpen(!chatOpen);
+        }}
         aria-haspopup="dialog"
         aria-label={
           korean ? "AI에게 님달에 대해 물어보기" : "Ask an AI about Nimdal"
@@ -700,66 +721,67 @@ export function ProfileHome({ locale, featured, projects, career, careerArc }: P
           height={38}
         />
       </button>
-      {detail && (
+      {details.map((item) => (
         <DetailDialog
-          detail={detail}
-          close={() => setDetail(null)}
+          key={item.id}
+          detail={item}
+          open={detailId === item.id}
+          close={() => setDetailId(null)}
           korean={korean}
         />
-      )}
-      {chatOpen && (
-        <div
-          ref={aiPanel}
-          id="ask-ai-panel"
-          role="dialog"
-          aria-label={korean ? "AI 선택" : "Choose an AI"}
-          className={styles.aiPanel}
-        >
-          <h2>{korean ? "AI에게 님달을 물어보세요" : "Ask an AI about me"}</h2>
-          <div className={styles.aiProviders}>
-            {aboutNimdalLinks(locale).map((provider, index) => {
-              const Icon = [ChatCircleDots, Asterisk, Sparkle, Compass][index];
-              return (
-                <ExternalLink key={provider.id} href={provider.href}>
-                  <span title={provider.note ?? provider.name}>
-                    <Icon size={23} aria-hidden />
-                  </span>
-                  <span>{provider.name}</span>
-                </ExternalLink>
-              );
-            })}
-          </div>
-          <button
-            className={styles.copyPrompt}
-            onClick={async () => {
-              try {
-                await navigator.clipboard.writeText(aboutNimdalPrompt(locale));
-                setPromptCopied(true);
-                setCopyFailed(false);
-              } catch {
-                setCopyFailed(true);
-              }
-            }}
-          >
-            {promptCopied ? <Check size={16} /> : <Copy size={16} />}
-            {promptCopied
-              ? korean
-                ? "복사했어요"
-                : "Copied"
-              : korean
-                ? "질문 복사"
-                : "Copy the prompt instead"}
-          </button>
-          {copyFailed && (
-            <textarea
-              readOnly
-              aria-label={korean ? "복사할 질문" : "Prompt to copy"}
-              value={aboutNimdalPrompt(locale)}
-              onFocus={(event) => event.target.select()}
-            />
-          )}
+      ))}
+      <div
+        ref={aiPanel}
+        id="ask-ai-panel"
+        role="dialog"
+        aria-label={korean ? "AI 선택" : "Choose an AI"}
+        className={styles.aiPanel}
+        hidden={!chatOpen}
+      >
+        <h2>{korean ? "AI에게 님달을 물어보세요" : "Ask an AI about me"}</h2>
+        <div className={styles.aiProviders}>
+          {aboutNimdalLinks(locale).map((provider, index) => {
+            const Icon = [ChatCircleDots, Asterisk, Sparkle, Compass][index];
+            return (
+              <ExternalLink key={provider.id} href={provider.href}>
+                <span title={provider.note ?? provider.name}>
+                  <Icon size={23} aria-hidden />
+                </span>
+                <span>{provider.name}</span>
+              </ExternalLink>
+            );
+          })}
         </div>
-      )}
+        <button
+          className={styles.copyPrompt}
+          onClick={async () => {
+            try {
+              await navigator.clipboard.writeText(aboutNimdalPrompt(locale));
+              setPromptCopied(true);
+              setCopyFailed(false);
+            } catch {
+              setCopyFailed(true);
+            }
+          }}
+        >
+          {promptCopied ? <Check size={16} /> : <Copy size={16} />}
+          {promptCopied
+            ? korean
+              ? "복사했어요"
+              : "Copied"
+            : korean
+              ? "질문 복사"
+              : "Copy the prompt instead"}
+        </button>
+        {copyFailed && (
+          <textarea
+            readOnly
+            aria-label={korean ? "복사할 질문" : "Prompt to copy"}
+            value={aboutNimdalPrompt(locale)}
+            onFocus={(event) => event.target.select()}
+          />
+        )}
+      </div>
     </main>
   );
 }
