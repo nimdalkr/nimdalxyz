@@ -74,21 +74,11 @@ export default async function HomePage({ params }: HomePageProps) {
       category: localized.category,
       summary: localized.summary,
       status: project.status,
-      tags: [...localized.tags],
       detail: { ...localized.detail },
       image: preview.src,
       imageAlt: preview.alt[locale],
-      media: project.media.slice(0, 3).map((media) => ({
-        src: media.src,
-        alt: media.alt[locale],
-        source: media.source[locale],
-        claim: media.claim[locale],
-        limitation: media.limitation[locale],
-        capturedAt: media.capturedAt
-      })),
       liveUrl: project.liveUrl,
       repositoryUrl: project.repositoryUrl,
-      articleUrl: project.articleUrl,
       referenceUrl: project.referenceUrl
     };
   });
@@ -100,20 +90,13 @@ export default async function HomePage({ params }: HomePageProps) {
       period: careerCase.period,
       title: localized.title,
       context: localized.context,
-      channels: [...localized.channels],
       objective: localized.objective,
       role: localized.role,
       result: localized.result,
-      constraint: localized.constraint,
       system: localized.system,
-      proof: localized.proof,
       limitation: localized.limitation,
       image: careerCase.media.src,
-      imageAlt: careerCase.media.alt[locale],
-      metrics: careerCase.metrics.map((metric) => ({
-        value: metric.value,
-        ...metric.copy[locale]
-      }))
+      imageAlt: careerCase.media.alt[locale]
     };
   });
   const careerArc = careerChapters.map((chapter) => ({
@@ -147,6 +130,7 @@ export default async function HomePage({ params }: HomePageProps) {
         projects={projects}
         career={career}
         careerArc={careerArc}
+        year={new Date().getFullYear()}
       />
     </>
   );

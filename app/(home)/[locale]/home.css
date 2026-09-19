@@ -14,6 +14,8 @@ html {
   background: #fafbf9;
   color-scheme: light;
   scroll-behavior: smooth;
+  /* Keeps keyboard focus clear of the fixed "Ask an AI" button. */
+  scroll-padding-bottom: 96px;
   text-rendering: optimizeLegibility;
   -webkit-text-size-adjust: 100%;
 }
