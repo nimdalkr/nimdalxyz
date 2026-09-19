@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ProfileHome } from "@/components/profile/ProfileHome";
 import { StructuredData } from "@/components/seo/StructuredData";
 import {
+  type CareerCase,
   careerCases,
   careerChapters,
   featuredProject,
@@ -82,7 +83,8 @@ export default async function HomePage({ params }: HomePageProps) {
       referenceUrl: project.referenceUrl
     };
   });
-  const career = careerCases.map((careerCase) => {
+  const career = careerCases.map((careerRecord) => {
+    const careerCase: CareerCase = careerRecord;
     const localized = careerCase.copy[locale];
 
     return {
@@ -96,6 +98,7 @@ export default async function HomePage({ params }: HomePageProps) {
       system: localized.system,
       limitation: localized.limitation,
       image: careerCase.media.src,
+      logo: careerCase.mark ?? careerCase.media.src,
       imageAlt: careerCase.media.alt[locale]
     };
   });

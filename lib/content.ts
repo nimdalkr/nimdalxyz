@@ -78,6 +78,8 @@ export type CareerCase = {
   id: string;
   period: string;
   media: ProjectMedia;
+  /** Logo for the career list when `media` is not itself a logo. */
+  mark?: string;
   metrics: readonly ContentMetric[];
   copy: Localized<CareerCaseCopy>;
 };
@@ -1034,7 +1036,7 @@ export const careerCases = [
     period: "2019.09-2022.12",
     media: {
       role: "career",
-      src: "/media/career/joya-logo.jpg",
+      src: "/media/career/joya-mark.png",
       alt: {
         ko: "Joya 로고.",
         en: "Joya logo."
@@ -1105,7 +1107,7 @@ export const careerCases = [
     period: "2020.03-2023.10",
     media: {
       role: "career",
-      src: "/media/career/h-animal-logo.jpg",
+      src: "/media/career/h-animal-mark.png",
       alt: {
         ko: "H 동물의료센터 로고.",
         en: "H Animal Medical Center logo."
@@ -1157,7 +1159,7 @@ export const careerCases = [
     period: "2022.07-2024.09",
     media: {
       role: "career",
-      src: "/media/career/leica-logo.jpg",
+      src: "/media/career/leica-mark.png",
       alt: {
         ko: "Leica 로고.",
         en: "Leica logo."
@@ -1246,7 +1248,7 @@ export const careerCases = [
     period: "2018.06.29-2024.09",
     media: {
       role: "career",
-      src: "/media/career/mkr-logo.jpg",
+      src: "/media/career/mkr-mark.png",
       alt: {
         ko: "MKR 로고.",
         en: "MKR logo."
@@ -1335,7 +1337,7 @@ export const careerCases = [
     period: "2025.01-2025.09",
     media: {
       role: "career",
-      src: "/media/career/bitcoin-logo.jpg",
+      src: "/media/career/bitcoin-mark.png",
       alt: {
         ko: "웹3 커리어 사례에 사용된 비트코인 심볼 이미지.",
         en: "Bitcoin symbol image used for the Web3 career case."
@@ -1385,6 +1387,7 @@ export const careerCases = [
   {
     id: "nevada-korea-marketing-lead",
     period: "2026.04-2026.06",
+    mark: "/media/career/nevada-mark.png",
     media: {
       role: "proof",
       src: "/media/career/nevada.jpg",

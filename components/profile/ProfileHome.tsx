@@ -54,6 +54,7 @@ type Career = {
   system: string;
   limitation: string;
   image: string;
+  logo: string;
   imageAlt: string;
 };
 type Props = {
@@ -594,7 +595,7 @@ export function ProfileHome({ locale, featured, projects, career, careerArc, yea
                 aria-label={`${korean ? "사례 열기" : "Read case"}: ${item.title}`}
               >
                 <div className={styles.careerLogo}>
-                  <Image src={item.image} alt="" fill sizes="56px" />
+                  <Image src={item.logo} alt="" fill sizes="56px" />
                 </div>
                 <div>
                   <h3>{item.title}</h3>
