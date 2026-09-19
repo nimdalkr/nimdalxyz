@@ -255,15 +255,14 @@ const projectArchive = [
   },
   {
     slug: "hyperalphaduo",
-    status: "live",
-    liveUrl: "https://hyperalphaduo.vercel.app/",
+    status: "archived",
     media: [
       {
         role: "proof",
         src: "/media/projects/hyperalphaduo-proof.png",
         alt: {
-          ko: "HyperAlphaDuo의 실제 시장 조사 화면.",
-          en: "HyperAlphaDuo live market-research interface."
+          ko: "HyperAlphaDuo 포지션 트래커 화면.",
+          en: "HyperAlphaDuo position tracker interface."
         },
         source: {
           ko: "저장소에 보관한 실제 서비스 화면",
@@ -271,8 +270,8 @@ const projectArchive = [
         },
         capturedAt: undated,
         claim: {
-          ko: "공개 사이트에서 검색과 필터를 갖춘 시장 조사 화면을 확인할 수 있습니다.",
-          en: "A searchable and filterable market-research interface exists at a public URL."
+          ko: "검색과 필터를 갖춘 시장 조사 화면을 실제로 구현해 배포했습니다.",
+          en: "A searchable, filterable market-research interface was built and deployed."
         },
         limitation: {
           ko: "정적 화면만으로는 데이터의 정확도와 갱신 주기, 실제 거래 가능 여부까지 확인할 수 없습니다.",
@@ -305,29 +304,29 @@ const projectArchive = [
       ko: {
         title: "HyperAlphaDuo",
         category: "트레이딩 리서치",
-        summary: "Hyperliquid 포지션, 토큰화 주식, 국내 거래소 가격차를 한 화면에서 비교하는 공개 리서치 도구입니다.",
+        summary: "Hyperliquid 포지션, 토큰화 주식, 국내 거래소 가격차를 한 화면에서 비교하는 리서치 도구입니다.",
         tags: ["Hyperliquid", "차익거래", "거래소", "모니터링"],
         detail: {
           problem: "토큰화 주식 가격, 국내 거래소 상장 여부, 입출금 상태를 서로 다른 시장과 화면에서 확인해야 했습니다.",
           decision: "범용 시세판보다 Hyperliquid와 국내 거래소를 비교하는 리서치 도구에 집중했습니다.",
           system: "포지션 검색·필터, HIP-3 토큰화 주식 비교, 업비트·빗썸 상장 및 입출금 모니터링으로 구성했습니다.",
-          proof: "공개 Vercel 사이트와 저장소에 보관한 실제 화면 캡처를 확인할 수 있습니다.",
+          proof: "배포는 중지했지만, 저장소에 보관한 실제 화면 캡처로 구성을 확인할 수 있습니다.",
           limitation: "현재 저장소에는 데이터 출처, 갱신 주기, 대표 분석 예시에 대한 설명이 없습니다.",
-          next: "대표 가격차 사례 한 건에 데이터 출처, 계산 방식, 분석이 성립하지 않는 조건을 함께 정리할 계획입니다."
+          next: "현재는 배포를 중지하고 아카이브로 보관하고 있습니다."
         }
       },
       en: {
         title: "HyperAlphaDuo",
         category: "Trading research",
-        summary: "A public research tool for comparing Hyperliquid positions, tokenized equities, and Korean-exchange arbitrage signals.",
+        summary: "A research tool for comparing Hyperliquid positions, tokenized equities, and Korean-exchange arbitrage signals.",
         tags: ["Hyperliquid", "Arbitrage", "Exchanges", "Monitoring"],
         detail: {
           problem: "Tokenized-equity prices, Korean-exchange listings, and deposit or withdrawal status are fragmented across markets and screens.",
           decision: "Narrow the scope from a general tracker to a research console comparing Hyperliquid with Korean exchanges.",
           system: "Position search and filters, HIP-3 tokenized-equity comparison, and Upbit and Bithumb listing and transfer monitoring.",
-          proof: "A public Vercel URL and a production-interface capture are present in the repository.",
+          proof: "The deployment is paused; a capture of the production interface is kept in the repository.",
           limitation: "The repository does not document data sources, refresh cadence, or an annotated representative workflow.",
-          next: "Annotate one representative arbitrage read with its sources, calculation, and invalidation conditions."
+          next: "The deployment is paused and the project is kept as an archive."
         }
       }
     }
