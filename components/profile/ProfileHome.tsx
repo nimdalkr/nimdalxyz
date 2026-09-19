@@ -676,6 +676,7 @@ export function ProfileHome({ locale, featured, projects, career, careerArc, yea
               {[
                 {
                   href: "https://t.me/alpha_duo",
+                  image: "/media/channels/alpha-duo.jpg",
                   name: korean ? "알파를 듀오" : "Alpha Duo",
                   note: korean
                     ? "Web3 NFT 알파 커뮤니티"
@@ -683,12 +684,13 @@ export function ProfileHome({ locale, featured, projects, career, careerArc, yea
                 },
                 {
                   href: "https://t.me/nimdaltg",
+                  image: "/media/channels/my-octopus-teacher.jpg",
                   name: korean ? "나의 문어 선생님" : "My Octopus Teacher",
                   note: korean ? "AI 정보 채널" : "AI news channel (Korean)",
                 },
               ].map((channel) => (
                 <ExternalLink key={channel.href} href={channel.href}>
-                  <PaperPlaneTilt size={20} />
+                  <Image src={channel.image} alt="" width={40} height={40} />
                   <span>
                     <strong>{channel.name}</strong>
                     <span>{channel.note}</span>
