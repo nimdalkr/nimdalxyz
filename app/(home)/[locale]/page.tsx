@@ -119,6 +119,7 @@ export default async function HomePage({ params }: HomePageProps) {
     email: "mailto:admin@fiveovertwo.xyz",
     sameAs: [
       "https://x.com/0xnimdal",
+      "https://www.threads.com/@0xnimdal",
       "https://t.me/nimdal",
       "https://linkedin.com/in/chanwoo-tak-132b281a4"
     ]

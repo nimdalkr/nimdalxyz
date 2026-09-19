@@ -351,6 +351,9 @@ test.describe("public links and not-found behavior", () => {
     await expect(page.locator('a[href="mailto:admin@fiveovertwo.xyz"]')).toBeVisible();
     await expect(page.locator('a[href="https://x.com/0xnimdal"]').last()).toBeVisible();
     await expect(page.locator('a[href="https://t.me/nimdal"]')).toBeVisible();
+    await expect(page.locator('a[href="https://www.threads.com/@0xnimdal"]')).toBeVisible();
+    await expect(page.locator('a[href="https://t.me/alpha_duo"]')).toContainText("알파를 듀오");
+    await expect(page.locator('a[href="https://t.me/nimdaltg"]')).toContainText("나의 문어 선생님");
     await expect(page.locator('a[href^="tel:"]')).toHaveCount(0);
   });
 

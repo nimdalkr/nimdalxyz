@@ -15,6 +15,7 @@ import {
   GithubLogo,
   PaperPlaneTilt,
   Plus,
+  ThreadsLogo,
   X,
   XLogo,
 } from "@phosphor-icons/react";
@@ -651,6 +652,11 @@ export function ProfileHome({ locale, featured, projects, career, careerArc, yea
             <ExternalLink href="https://x.com/0xnimdal">
               <XLogo size={20} />X<ArrowUpRight size={14} />
             </ExternalLink>
+            <ExternalLink href="https://www.threads.com/@0xnimdal">
+              <ThreadsLogo size={20} />
+              Threads
+              <ArrowUpRight size={14} />
+            </ExternalLink>
             <ExternalLink href="https://t.me/nimdal">
               <PaperPlaneTilt size={20} />
               Telegram
@@ -661,6 +667,38 @@ export function ProfileHome({ locale, featured, projects, career, careerArc, yea
               GitHub
               <ArrowUpRight size={14} />
             </ExternalLink>
+          </div>
+          <div className={styles.channels}>
+            <h3 className={styles.eyebrow}>
+              {korean ? "운영 채널" : "Channels I run"}
+            </h3>
+            <div className={styles.channelGrid}>
+              {[
+                {
+                  href: "https://t.me/alpha_duo",
+                  image: "/media/channels/alpha-duo.jpg",
+                  name: korean ? "알파를 듀오" : "Alpha Duo",
+                  note: korean
+                    ? "Web3 NFT 알파 커뮤니티"
+                    : "Web3 NFT alpha community (Korean)",
+                },
+                {
+                  href: "https://t.me/nimdaltg",
+                  image: "/media/channels/my-octopus-teacher.jpg",
+                  name: korean ? "나의 문어 선생님" : "My Octopus Teacher",
+                  note: korean ? "AI 정보 채널" : "AI news channel (Korean)",
+                },
+              ].map((channel) => (
+                <ExternalLink key={channel.href} href={channel.href}>
+                  <Image src={channel.image} alt="" width={40} height={40} />
+                  <span>
+                    <strong>{channel.name}</strong>
+                    <span>{channel.note}</span>
+                  </span>
+                  <ArrowUpRight size={14} />
+                </ExternalLink>
+              ))}
+            </div>
           </div>
           <div className={styles.contactDetails}>
             <a href="mailto:admin@fiveovertwo.xyz">
