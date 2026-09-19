@@ -1,43 +1,5 @@
 @import "tailwindcss";
 
-html:has([data-profile-home]), body:has([data-profile-home]) {
-  background: #fafbf9;
-  color-scheme: light;
-}
-body:has([data-profile-home]) .riso-grain,
-body:has([data-profile-home]) .ink-brush,
-body:has([data-profile-home]) .scroll-progress {
-  display: none !important;
-}
-
-html:has([data-dialogue-home]),
-body:has([data-dialogue-home]) {
-  height: 100%;
-  overflow: hidden;
-  background: #ffffff;
-}
-
-html:has([data-dialogue-home][data-theme="claude"]),
-body:has([data-dialogue-home][data-theme="claude"]) {
-  background: #ffffff;
-}
-
-body:has([data-dialogue-home]) .riso-grain,
-body:has([data-dialogue-home]) .ink-brush,
-body:has([data-dialogue-home]) .scroll-progress {
-  display: none !important;
-}
-
-body:has([data-dialogue-home]) .skip-link {
-  background: #111111;
-  color: #ffffff;
-}
-
-body:has([data-dialogue-home][data-theme="claude"]) .skip-link {
-  background: #b14f37;
-  color: #fffaf2;
-}
-
 /* =============================================================================
    NIMDAL / RISO PRESS
    -----------------------------------------------------------------------------
