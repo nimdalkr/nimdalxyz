@@ -851,7 +851,7 @@ export const projects = projectArchive.filter((project) =>
 const careerChapterArchive = [
   {
     id: "makorang-lab",
-    period: "2012.12-2016.07",
+    period: "2012.12-2015",
     copy: {
       ko: {
         organization: "Makorang Lab",
@@ -873,7 +873,7 @@ const careerChapterArchive = [
   },
   {
     id: "baboclub-community",
-    period: "2012.01-2024.12",
+    period: "2008.05-2024.12",
     copy: {
       ko: {
         organization: "Baboclub",
