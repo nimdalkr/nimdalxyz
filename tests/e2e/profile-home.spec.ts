@@ -71,47 +71,37 @@ test("the profile home does not load the BLOG's serif type system", async ({
   }
 });
 
-test("featured, personal projects and career cases open in paginated, keyboard-accessible dialogs", async ({
+test("featured, personal projects and career cases open as single-view, keyboard-accessible case sheets", async ({
   page,
 }) => {
   await page.goto("/en");
   const projects = page.getByRole("button", { name: /^Explore / });
   await expect(projects).toHaveCount(3);
   for (const button of await projects.all()) {
+    const title = (await button.getAttribute("aria-label"))!.replace(/^Explore /, "");
     await button.click();
-    const dialog = page.getByRole("dialog");
+    const dialog = page.getByRole("dialog", { name: title });
     await expect(
-      dialog.getByRole("heading", { name: "Overview", exact: true }),
+      dialog.getByRole("heading", { name: title, exact: true }),
     ).toBeVisible();
-    await expect(
-      dialog.getByRole("button", { name: "Previous page" }),
-    ).toBeDisabled();
-    for (let i = 0; i < 6; i++)
-      await dialog.getByRole("button", { name: "Next page" }).click();
-    await expect(
-      dialog.getByRole("heading", { name: "What's next", exact: true }),
-    ).toBeVisible();
-    await expect(
-      dialog.getByRole("button", { name: "Next page" }),
-    ).toBeDisabled();
+    // Every fact is readable at once; nothing is paged.
+    for (const label of ["Problem", "Approach", "Build", "Evidence", "Limits", "What's next"])
+      await expect(dialog.getByText(label, { exact: true })).toBeVisible();
+    await expect(dialog.getByRole("button", { name: /page/i })).toHaveCount(0);
+    await expect(dialog.getByRole("button", { name: "Close" })).toBeFocused();
     await page.keyboard.press("Escape");
-    await expect(dialog).toHaveCount(0);
+    await expect(page.getByRole("dialog")).toHaveCount(0);
     await expect(button).toBeFocused();
   }
   for (const button of await page
     .getByRole("button", { name: /^Read case:/ })
     .all()) {
     await button.click();
-    await expect(
-      page
-        .getByRole("dialog")
-        .getByRole("heading", { name: "Overview", exact: true }),
-    ).toBeVisible();
-    await page.getByRole("button", { name: "Next page" }).click();
-    await expect(
-      page.getByRole("heading", { name: "The goal", exact: true }),
-    ).toBeVisible();
+    const dialog = page.getByRole("dialog");
+    for (const label of ["Goal", "My role", "Execution", "Outcomes", "Disclosure"])
+      await expect(dialog.getByText(label, { exact: true })).toBeVisible();
     await page.keyboard.press("Escape");
+    await expect(page.getByRole("dialog")).toHaveCount(0);
   }
   await expect(page).toHaveURL(/\/en$/);
 });
@@ -266,13 +256,9 @@ for (const width of [390, 1440]) {
       .getByRole("button", { name: "Explore AlphaDuo", exact: true })
       .click();
     const dialog = page.getByRole("dialog");
-    await expect(
-      dialog.getByRole("button", { name: "Next page" }),
-    ).toBeInViewport();
-    await dialog.getByRole("button", { name: "Next page" }).click();
-    await expect(
-      dialog.getByRole("heading", { name: "The problem", exact: true }),
-    ).toBeVisible();
+    await expect(dialog.getByRole("button", { name: "Close" })).toBeInViewport();
+    await expect(dialog.getByText("Problem", { exact: true })).toBeVisible();
+    expect(await overflow()).toBe(false);
     await page.screenshot({
       path: testInfo.outputPath(`profile-detail-${width}.png`),
     });

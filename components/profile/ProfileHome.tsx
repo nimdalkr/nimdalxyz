@@ -2,8 +2,6 @@
 
 import {
   ArrowDown,
-  ArrowLeft,
-  ArrowRight,
   Asterisk,
   Compass,
   Sparkle,
@@ -70,9 +68,12 @@ type Detail = {
   id: string;
   title: string;
   eyebrow: string;
-  image: string;
-  imageAlt: string;
-  pages: { label: string; text: string }[];
+  summary: string;
+  tone: string;
+  status?: { label: string; live: boolean };
+  media?: { src: string; alt: string; portrait?: boolean };
+  mark?: string;
+  facts: { label: string; text: string }[];
   links?: { label: string; href: string }[];
 };
 
@@ -101,11 +102,13 @@ function Dialog({
   title,
   open,
   close,
+  closeLabel,
   children,
 }: {
   title: string;
   open: boolean;
   close: () => void;
+  closeLabel: string;
   children: ReactNode;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
@@ -128,7 +131,7 @@ function Dialog({
     <dialog
       ref={ref}
       aria-label={title}
-      className={styles.dialog}
+      className={styles.sheet}
       onCancel={close}
       onKeyDown={(event) => {
         if (event.key !== "Tab") return;
@@ -157,97 +160,91 @@ function Dialog({
           close();
       }}
     >
-      <div className={styles.dialogTop}>
-        <span>{title}</span>
-        <button
-          ref={closeButton}
-          className={styles.iconButton}
-          onClick={close}
-          aria-label="Close"
-          title="Close"
-        >
-          <X size={20} />
-        </button>
-      </div>
-      {children}
+      <button
+        ref={closeButton}
+        className={styles.sheetClose}
+        onClick={close}
+        aria-label={closeLabel}
+        title={closeLabel}
+      >
+        <X size={20} />
+      </button>
+      <div className={styles.sheetScroll}>{children}</div>
     </dialog>
   );
 }
 
-function DetailDialog({
+function CaseSheet({
   detail,
   open,
   close,
-  korean,
+  closeLabel,
 }: {
   detail: Detail;
   open: boolean;
   close: () => void;
-  korean: boolean;
+  closeLabel: string;
 }) {
-  const [page, setPage] = useState(0);
-  const dismiss = () => {
-    setPage(0);
-    close();
-  };
   return (
-    <Dialog title={detail.title} open={open} close={dismiss}>
-      <div className={styles.detailImage}>
-        <Image
-          src={detail.image}
-          alt={detail.imageAlt}
-          fill
-          sizes="(max-width: 640px) 90vw, 580px"
-        />
-      </div>
-      <div className={styles.detailBody}>
-        <span className={styles.eyebrow}>{detail.eyebrow}</span>
-        {/* Every page is in the server-rendered HTML so search engines and AI
-            readers get the whole case; only the current page is shown. */}
-        <div className={styles.detailText} aria-live="polite" aria-atomic="true">
-          {detail.pages.map((item, index) => (
-            <div
-              key={index === page ? `current-${index}` : index}
-              className={index === page ? styles.detailPage : styles.detailPageIdle}
-            >
-              <h2>{item.label}</h2>
-              <p>{item.text}</p>
-            </div>
-          ))}
-        </div>
+    <Dialog title={detail.title} open={open} close={close} closeLabel={closeLabel}>
+      <header
+        className={styles.sheetHead}
+        data-tone={detail.tone}
+        data-media={detail.media ? "" : undefined}
+      >
+        {detail.mark && (
+          <span className={styles.sheetMark}>
+            <Image src={detail.mark} alt="" fill sizes="64px" />
+          </span>
+        )}
+        <p className={styles.sheetEyebrow}>
+          {detail.status && (
+            <>
+              <span className={styles.sheetDot} data-live={detail.status.live} />
+              {detail.status.label}
+              <span aria-hidden="true">·</span>
+            </>
+          )}
+          {detail.eyebrow}
+        </p>
+        <h2 className={styles.sheetTitle}>{detail.title}</h2>
+        <p className={styles.sheetSummary}>{detail.summary}</p>
         {detail.links && detail.links.length > 0 && (
-          <div className={styles.detailLinks}>
+          <div className={styles.sheetLinks}>
             {detail.links.map((link) => (
               <ExternalLink key={link.href} href={link.href}>
                 {link.label}
-                <ArrowUpRight size={16} />
+                <ArrowUpRight size={15} />
               </ExternalLink>
             ))}
           </div>
         )}
-      </div>
-      <div className={styles.pagination}>
-        <button
-          className={styles.iconButton}
-          onClick={() => setPage(page - 1)}
-          disabled={page === 0}
-          aria-label={korean ? "이전 내용" : "Previous page"}
-        >
-          <ArrowLeft size={20} />
-        </button>
-        <span>
-          {String(page + 1).padStart(2, "0")}{" "}
-          <span>/ {String(detail.pages.length).padStart(2, "0")}</span>
-        </span>
-        <button
-          className={styles.iconButton}
-          onClick={() => setPage(page + 1)}
-          disabled={page === detail.pages.length - 1}
-          aria-label={korean ? "다음 내용" : "Next page"}
-        >
-          <ArrowRight size={20} />
-        </button>
-      </div>
+        {detail.media && (
+          <div
+            className={styles.sheetMedia}
+            data-portrait={detail.media.portrait ? "" : undefined}
+          >
+            <Image
+              src={detail.media.src}
+              alt={detail.media.alt}
+              fill
+              sizes="(max-width: 760px) 100vw, 640px"
+            />
+          </div>
+        )}
+      </header>
+      {/* Every fact is in the server-rendered HTML, so search engines and the
+          AI readers linked from the home get the whole case. */}
+      {detail.facts.length > 0 && (
+        <dl className={styles.sheetFacts}>
+          {detail.facts.map((fact) => (
+            <div key={fact.label}>
+              <dt>{fact.label}</dt>
+              <dd>{fact.text}</dd>
+            </div>
+          ))}
+        </dl>
+      )}
     </Dialog>
   );
 }
@@ -306,34 +303,19 @@ export function ProfileHome({ locale, featured, projects, career, careerArc, yea
       "in-progress": korean ? "개발 중" : "In progress",
       archived: korean ? "아카이브" : "Archived",
     })[value] ?? value;
-  function projectDetail(project: Project): Detail {
+  function projectDetail(project: Project, tone: string): Detail {
     const labels = korean
-      ? [
-          "프로젝트",
-          "문제",
-          "접근",
-          "구현",
-          "확인 가능한 것",
-          "현재 한계",
-          "다음 계획",
-        ]
-      : [
-          "Overview",
-          "The problem",
-          "The approach",
-          "The build",
-          "Evidence",
-          "Current limits",
-          "What's next",
-        ];
+      ? ["문제", "접근", "구현", "확인 가능한 것", "현재 한계", "다음 계획"]
+      : ["Problem", "Approach", "Build", "Evidence", "Limits", "What's next"];
     return {
       id: `project-${project.slug}`,
       title: project.title,
       eyebrow: project.category,
-      image: project.image,
-      imageAlt: project.imageAlt,
-      pages: [
-        project.summary,
+      summary: project.summary,
+      tone,
+      status: { label: status(project.status), live: project.status === "live" },
+      media: { src: project.image, alt: project.imageAlt },
+      facts: [
         project.detail.problem,
         project.detail.decision,
         project.detail.system,
@@ -361,23 +343,21 @@ export function ProfileHome({ locale, featured, projects, career, careerArc, yea
   }
   function careerDetail(item: Career): Detail {
     const labels = korean
-      ? ["프로젝트", "목표", "담당 역할", "실행", "결과", "공개 범위"]
-      : [
-          "Overview",
-          "The goal",
-          "My role",
-          "Execution",
-          "Outcomes",
-          "Disclosure",
-        ];
+      ? ["목표", "담당 역할", "실행", "결과", "공개 범위"]
+      : ["Goal", "My role", "Execution", "Outcomes", "Disclosure"];
     return {
       id: `career-${item.id}`,
       title: item.title,
       eyebrow: item.period,
-      image: item.image,
-      imageAlt: item.imageAlt,
-      pages: [
-        item.context,
+      summary: item.context,
+      tone: "neutral",
+      mark: item.logo,
+      // A case whose media is a product screen, not its logo, shows it too.
+      media:
+        item.image === item.logo
+          ? undefined
+          : { src: item.image, alt: item.imageAlt },
+      facts: [
         item.objective,
         item.role,
         item.system,
@@ -390,21 +370,24 @@ export function ProfileHome({ locale, featured, projects, career, careerArc, yea
     id: "profile",
     title: korean ? "탁찬우 / Nimdal" : "Tak Chanwoo / Nimdal",
     eyebrow: korean ? "창업가 · 빌더" : "Founder / Builder",
-    image: "/media/operator-portrait.png",
-    imageAlt: "Tak Chanwoo",
-    pages: [
-      {
-        label: korean ? "반가워요, 님달이에요." : "Hi, I'm Nimdal.",
-        text: korean
-          ? "2012년부터 사람을 모으고, 사업을 운영하고, 제품을 만들어 왔어요. 지금은 FIVE OVER TWO에서 한국 시장 진출과 그로스 운영, 제품 구축을 연결하고 있어요."
-          : "I've been bringing people together, running businesses, and building products since 2012. Today, I connect Korea market entry, growth operations, and product building at FIVE OVER TWO.",
-      },
-    ],
+    summary: korean
+      ? "반가워요, 님달이에요. 2012년부터 사람을 모으고, 사업을 운영하고, 제품을 만들어 왔어요. 지금은 FIVE OVER TWO에서 한국 시장 진출과 그로스 운영, 제품 구축을 연결하고 있어요."
+      : "Hi, I'm Nimdal. I've been bringing people together, running businesses, and building products since 2012. Today, I connect Korea market entry, growth operations, and product building at FIVE OVER TWO.",
+    tone: "neutral",
+    media: {
+      src: "/media/operator-portrait.png",
+      alt: "Tak Chanwoo",
+      portrait: true,
+    },
+    facts: [],
   };
   const details = [
     profileDetail,
-    projectDetail(featured),
-    ...orderedProjects.map(projectDetail),
+    projectDetail(featured, "featured"),
+    // Each sheet keeps the tint of the card it opens from.
+    ...orderedProjects.map((project, index) =>
+      projectDetail(project, String(index % 4)),
+    ),
     ...career.map(careerDetail),
   ];
   async function copyKakao() {
@@ -760,12 +743,12 @@ export function ProfileHome({ locale, featured, projects, career, careerArc, yea
         />
       </button>
       {details.map((item) => (
-        <DetailDialog
+        <CaseSheet
           key={item.id}
           detail={item}
           open={detailId === item.id}
           close={() => setDetailId(null)}
-          korean={korean}
+          closeLabel={korean ? "닫기" : "Close"}
         />
       ))}
       <div
