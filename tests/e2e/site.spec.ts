@@ -356,11 +356,14 @@ test.describe("public links and not-found behavior", () => {
 
   test("home project dialogs retain external destinations", async ({ page }) => {
     await page.goto("/en");
-    await page.getByRole("button", { name: "Explore HyperAlphaDuo", exact: true }).click();
-    await expect(page.getByRole("dialog").locator('a[href="https://hyperalphaduo.vercel.app/"]')).toHaveAttribute("target", "_blank");
-    await page.keyboard.press("Escape");
     await page.getByRole("button", { name: "Explore myLoL", exact: true }).click();
     await expect(page.getByRole("dialog").locator('a[href="https://cafe.naver.com/xavishowtime"]')).toHaveAttribute("target", "_blank");
+    await page.keyboard.press("Escape");
+    // HyperAlphaDuo is archived and its deployment is paused, so it must not link out to it.
+    const archived = page.getByRole("button", { name: "Explore HyperAlphaDuo", exact: true });
+    await expect(archived).toContainText("Archived");
+    await archived.click();
+    await expect(page.getByRole("dialog").locator('a[href*="hyperalphaduo.vercel.app"]')).toHaveCount(0);
   });
 
   // Profile interaction, assistant, and detail paging coverage lives in profile-home.spec.ts.

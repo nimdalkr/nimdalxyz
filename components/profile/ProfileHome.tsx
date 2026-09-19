@@ -214,7 +214,7 @@ function DetailDialog({
             </div>
           ))}
         </div>
-        {detail.links && (
+        {detail.links && detail.links.length > 0 && (
           <div className={styles.detailLinks}>
             {detail.links.map((link) => (
               <ExternalLink key={link.href} href={link.href}>
