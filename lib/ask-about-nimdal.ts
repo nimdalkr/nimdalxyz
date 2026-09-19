@@ -6,6 +6,7 @@ export function aboutNimdalPrompt(locale: Locale) {
     "Summarize his professional background, strengths, and selected projects using only the information on that page.",
     "His featured project is AlphaDuo at https://alphaduo.pro, separate from his personal projects.",
     "Distinguish his professional career from personal projects: myLoL is a hobby project, not a career role. The two selected personal projects are myLoL and HyperAlphaDuo.",
+    "Alpha Duo in his background is KOL activity for a crypto research channel, not an employment role.",
     "If you cannot access the page, say so instead of guessing. Do not recommend his discontinued blog.",
     locale === "ko" ? "Answer in Korean." : "Answer in English.",
   ].join(" ");
