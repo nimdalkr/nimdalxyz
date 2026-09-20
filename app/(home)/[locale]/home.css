@@ -1,8 +1,16 @@
-/* Base for the profile home's own root layout. It carries only the rules the
-   home took from the BLOG's global stylesheet, so the ink type system and its
-   Korean serif @font-face sets stay off this page. */
+/* Base for the profile home's own root layout. The home is set in a macOS
+   idiom: system type, system grays, and one accent blue. The BLOG's ink type
+   system and its Korean serif @font-face sets stay off this page. */
 @layer theme, base, components, utilities;
 @import "tailwindcss/preflight.css" layer(base);
+
+:root {
+  /* San Francisco and Apple SD Gothic Neo on Apple devices; Inter elsewhere. */
+  --font-system:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "Apple SD Gothic Neo",
+    var(--font-inter), "Segoe UI", Roboto, "Noto Sans KR", "Malgun Gothic",
+    sans-serif;
+}
 
 *,
 *::before,
@@ -11,7 +19,7 @@
 }
 
 html {
-  background: #fafbf9;
+  background: #f5f5f7;
   color-scheme: light;
   scroll-behavior: smooth;
   /* Keeps keyboard focus clear of the fixed "Ask an AI" button. */
@@ -23,10 +31,11 @@ html {
 body {
   margin: 0;
   min-width: 320px;
-  background: #fafbf9;
-  color: #141519;
-  font-size: 1.02rem;
-  line-height: 1.78;
+  background: #f5f5f7;
+  color: #1d1d1f;
+  font-family: var(--font-system);
+  font-size: 1rem;
+  line-height: 1.6;
   overflow-x: clip;
   -webkit-font-smoothing: antialiased;
 }
@@ -55,31 +64,29 @@ svg {
 }
 
 ::selection {
-  background: #c9321f;
-  color: #fdf6f1;
+  background: #b3d7ff;
+  color: #1d1d1f;
 }
 
 :focus-visible {
-  outline: 3px solid #c9321f;
-  outline-offset: 3px;
+  outline: 3px solid #0071e3;
+  outline-offset: 2px;
 }
 
 h1,
 h2,
 h3,
 h4 {
-  font-weight: 800;
-  letter-spacing: -0.035em;
-  line-height: 1.03;
   text-wrap: balance;
 }
 
 :lang(ko) h1,
 :lang(ko) h2,
 :lang(ko) h3,
-:lang(ko) h4 {
-  letter-spacing: -0.005em;
-  line-height: 1.26;
+:lang(ko) h4,
+:lang(ko) p,
+:lang(ko) li,
+:lang(ko) dd {
   word-break: keep-all;
 }
 
@@ -87,25 +94,17 @@ p {
   text-wrap: pretty;
 }
 
-:lang(ko) p,
-:lang(ko) li,
-:lang(ko) dd {
-  word-break: keep-all;
-}
-
 .skip-link {
   position: fixed;
   z-index: 100;
   left: clamp(1.25rem, 4vw, 4rem);
   top: 1rem;
-  padding: 0.85rem 1.1rem;
-  background: #c9321f;
-  color: #fdf6f1;
-  font-family: var(--font-mono), monospace;
-  font-size: 0.75rem;
+  padding: 0.7rem 1.1rem;
+  border-radius: 980px;
+  background: #0071e3;
+  color: #fff;
+  font-size: 0.8125rem;
   font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
   transform: translateY(-220%);
 }
 

@@ -1,6 +1,6 @@
 import type { Viewport } from "next";
 
-import { homeDisplay, homeMono } from "@/lib/home-fonts";
+import { homeSans } from "@/lib/home-fonts";
 import { isLocale, locales } from "@/lib/content";
 import { localeRootMetadata } from "@/lib/root-metadata";
 
@@ -27,7 +27,7 @@ export function generateMetadata({ params }: Pick<HomeLayoutProps, "params">) {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#fafbf9",
+  themeColor: "#f5f5f7",
   colorScheme: "light"
 };
 
@@ -39,7 +39,7 @@ export default async function HomeLayout({ children, params }: HomeLayoutProps) 
     <html
       lang={locale}
       data-scroll-behavior="smooth"
-      className={`${homeDisplay.variable} ${homeMono.variable}`}
+      className={homeSans.variable}
     >
       <body>
         <a className="skip-link" href="#main-content">

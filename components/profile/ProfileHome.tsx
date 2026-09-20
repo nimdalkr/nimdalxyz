@@ -6,6 +6,7 @@ import {
   Compass,
   Sparkle,
   ArrowUpRight,
+  CaretRight,
   ChatCircleDots,
   Check,
   Copy,
@@ -69,7 +70,6 @@ type Detail = {
   title: string;
   eyebrow: string;
   summary: string;
-  tone: string;
   status?: { label: string; live: boolean };
   media?: { src: string; alt: string; portrait?: boolean };
   mark?: string;
@@ -160,15 +160,26 @@ function Dialog({
           close();
       }}
     >
-      <button
-        ref={closeButton}
-        className={styles.sheetClose}
-        onClick={close}
-        aria-label={closeLabel}
-        title={closeLabel}
-      >
-        <X size={20} />
-      </button>
+      {/* A window title bar on desktop; a grabber and round close on phones.
+          Only close is a real control, so the other two lights stay dimmed. */}
+      <div className={styles.windowBar}>
+        <button
+          ref={closeButton}
+          className={styles.sheetClose}
+          onClick={close}
+          aria-label={closeLabel}
+          title={closeLabel}
+        >
+          <span>
+            <X weight="bold" aria-hidden />
+          </span>
+        </button>
+        <span className={styles.windowIdle} aria-hidden="true" />
+        <span className={styles.windowIdle} aria-hidden="true" />
+        <span className={styles.windowTitle} aria-hidden="true">
+          {title}
+        </span>
+      </div>
       <div className={styles.sheetScroll}>{children}</div>
     </dialog>
   );
@@ -189,7 +200,6 @@ function CaseSheet({
     <Dialog title={detail.title} open={open} close={close} closeLabel={closeLabel}>
       <header
         className={styles.sheetHead}
-        data-tone={detail.tone}
         data-media={detail.media ? "" : undefined}
       >
         {detail.mark && (
@@ -303,7 +313,7 @@ export function ProfileHome({ locale, featured, projects, career, careerArc, yea
       "in-progress": korean ? "개발 중" : "In progress",
       archived: korean ? "아카이브" : "Archived",
     })[value] ?? value;
-  function projectDetail(project: Project, tone: string): Detail {
+  function projectDetail(project: Project): Detail {
     const labels = korean
       ? ["문제", "접근", "구현", "확인 가능한 것", "현재 한계", "다음 계획"]
       : ["Problem", "Approach", "Build", "Evidence", "Limits", "What's next"];
@@ -312,7 +322,6 @@ export function ProfileHome({ locale, featured, projects, career, careerArc, yea
       title: project.title,
       eyebrow: project.category,
       summary: project.summary,
-      tone,
       status: { label: status(project.status), live: project.status === "live" },
       media: { src: project.image, alt: project.imageAlt },
       facts: [
@@ -350,7 +359,6 @@ export function ProfileHome({ locale, featured, projects, career, careerArc, yea
       title: item.title,
       eyebrow: item.period,
       summary: item.context,
-      tone: "neutral",
       mark: item.logo,
       // A case whose media is a product screen, not its logo, shows it too.
       media:
@@ -373,7 +381,6 @@ export function ProfileHome({ locale, featured, projects, career, careerArc, yea
     summary: korean
       ? "반가워요, 님달이에요. 2012년부터 사람을 모으고, 사업을 운영하고, 제품을 만들어 왔어요. 지금은 FIVE OVER TWO에서 한국 시장 진출과 그로스 운영, 제품 구축을 연결하고 있어요."
       : "Hi, I'm Nimdal. I've been bringing people together, running businesses, and building products since 2012. Today, I connect Korea market entry, growth operations, and product building at FIVE OVER TWO.",
-    tone: "neutral",
     media: {
       src: "/media/operator-portrait.png",
       alt: "Tak Chanwoo",
@@ -383,11 +390,8 @@ export function ProfileHome({ locale, featured, projects, career, careerArc, yea
   };
   const details = [
     profileDetail,
-    projectDetail(featured, "featured"),
-    // Each sheet keeps the tint of the card it opens from.
-    ...orderedProjects.map((project, index) =>
-      projectDetail(project, String(index % 4)),
-    ),
+    projectDetail(featured),
+    ...orderedProjects.map(projectDetail),
     ...career.map(careerDetail),
   ];
   async function copyKakao() {
@@ -507,10 +511,9 @@ export function ProfileHome({ locale, featured, projects, career, careerArc, yea
           </div>
           <div className={styles.projectGrid}>
             {(allProjects ? orderedProjects : orderedProjects.slice(0, 4)).map(
-              (project, index) => (
+              (project) => (
                 <button
                   className={styles.projectCard}
-                  data-tone={index % 4}
                   key={project.slug}
                   onClick={() => setDetailId(`project-${project.slug}`)}
                   aria-label={`${korean ? "프로젝트 열기" : "Explore"} ${project.title}`}
@@ -585,7 +588,7 @@ export function ProfileHome({ locale, featured, projects, career, careerArc, yea
                   <h3>{item.title}</h3>
                   <p>{item.period}</p>
                 </div>
-                <ArrowUpRight size={20} />
+                <CaretRight size={15} weight="bold" />
               </button>
             ))}
           </div>

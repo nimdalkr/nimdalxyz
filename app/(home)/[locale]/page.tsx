@@ -20,7 +20,7 @@ interface HomePageProps {
 }
 
 export const viewport: Viewport = {
-  themeColor: "#fafbf9",
+  themeColor: "#f5f5f7",
   colorScheme: "light"
 };
 

@@ -9,15 +9,15 @@ import { Bricolage_Grotesque, IBM_Plex_Mono, Nanum_Myeongjo, Noto_Serif_KR } fro
  * Nanum Myeongjo carries the headlines, Noto Serif KR the reading text, and
  * the mono stays for stamped labels and figures.
  *
- * Only Bricolage is preloaded. The production build preloads every
- * `preload: true` face on every route, including the profile home, which
- * never sets these; the serif and mono faces load from their @font-face
- * rules instead.
+ * Nothing is preloaded. The production build preloads every `preload: true`
+ * face on every route, including the profile home, which sets none of these
+ * and downloads no fonts on Apple devices; every face here loads from its
+ * @font-face rule instead.
  */
 export const bricolage = Bricolage_Grotesque({
   variable: "--font-display",
   display: "swap",
-  preload: true,
+  preload: false,
   subsets: ["latin"]
 });
 

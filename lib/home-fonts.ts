@@ -1,20 +1,12 @@
-import { Bricolage_Grotesque, IBM_Plex_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 
 /**
- * The profile home's faces, kept apart from the BLOG's ink type system so the
- * home never loads its Korean serif @font-face sets. Bricolage carries the
- * page; the mono face only sets the skip link, so it is not preloaded.
+ * The profile home sets type in the system face: San Francisco and Apple SD
+ * Gothic Neo on Apple devices, which download nothing. Inter stands in for
+ * San Francisco elsewhere; it is not preloaded, so Apple devices never fetch it.
  */
-export const homeDisplay = Bricolage_Grotesque({
-  variable: "--font-display",
-  display: "swap",
-  preload: true,
-  subsets: ["latin"]
-});
-
-export const homeMono = IBM_Plex_Mono({
-  variable: "--font-mono",
-  weight: "600",
+export const homeSans = Inter({
+  variable: "--font-inter",
   display: "swap",
   preload: false,
   subsets: ["latin"]
