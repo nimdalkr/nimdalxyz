@@ -1,6 +1,4 @@
 import AxeBuilder from "@axe-core/playwright";
-import { mkdir, rm, writeFile } from "node:fs/promises";
-import path from "node:path";
 import {
   expect,
   test,
@@ -24,6 +22,7 @@ const BLOG_HEADERS = {
   "x-forwarded-host": BLOG_HOST
 };
 const POST_SLUG = "nimdal-logbook";
+const MAIN_HOST = "nimdal.xyz";
 
 function localUrl(baseURL: string | undefined, pathname: string) {
   if (!baseURL) {
@@ -113,34 +112,6 @@ test.describe("localized navigation and metadata", () => {
     });
   });
 
-  test("blog post metadata and locale link stay on the blog canonical surface", async ({
-    page,
-    request,
-    baseURL
-  }) => {
-    const response = await blogHostGet(
-      request,
-      baseURL,
-      `/ko/posts/${POST_SLUG}`
-    );
-    expect(response.status()).toBe(200);
-
-    await page.setContent(await response.text(), { waitUntil: "domcontentloaded" });
-    await expect(page).toHaveTitle("Nimdal이 블로그를 만든 이유 / Nimdal");
-    await expect(page.locator("article article")).toHaveCount(0);
-    await expect(page.getByRole("link", { name: "Nimdal 홈" })).toBeVisible();
-    await expect(page.getByRole("navigation", { name: "주요 메뉴" })).toBeVisible();
-    await expectAlternates(page, {
-      canonical: `https://${BLOG_HOST}/ko/posts/${POST_SLUG}`,
-      ko: `https://${BLOG_HOST}/ko/posts/${POST_SLUG}`,
-      en: `https://${BLOG_HOST}/en/posts/${POST_SLUG}`,
-      default: `https://${BLOG_HOST}/ko/posts/${POST_SLUG}`
-    });
-    await expect(page.locator('a[lang="en"]')).toHaveAttribute(
-      "href",
-      `https://${BLOG_HOST}/en/posts/${POST_SLUG}`
-    );
-  });
 });
 
 test.describe("legacy routing and host surfaces", () => {
@@ -158,193 +129,54 @@ test.describe("legacy routing and host surfaces", () => {
     await expect(page).toHaveURL(/\/ko#project-arcdu-nft-room-proof$/);
   });
 
-  test("blog host rewrites localized hubs and publishes blog canonicals", async ({
-    page,
-    request,
-    baseURL
-  }) => {
-    const response = await blogHostGet(request, baseURL, "/ko");
-    expect(response.status()).toBe(200);
-
-    await page.setContent(await response.text(), { waitUntil: "domcontentloaded" });
-    await expect(page.locator("main h1")).toHaveText("만들고 운영하며 남긴 기록");
-    await expect(page).toHaveTitle("만들고 운영하며 남긴 기록 / Nimdal");
-    await expectAlternates(page, {
-      canonical: `https://${BLOG_HOST}/ko`,
-      ko: `https://${BLOG_HOST}/ko`,
-      en: `https://${BLOG_HOST}/en`,
-      default: `https://${BLOG_HOST}/ko`
-    });
-  });
-
-  test("old blog-host paths permanently redirect to the Korean localized surface", async ({
+  test("the retired BLOG host sends every old link to the profile home", async ({
     request,
     baseURL
   }) => {
     const cases = [
       { from: "/", pathname: "/ko" },
-      {
-        from: `/posts/${POST_SLUG}?utm_source=legacy`,
-        pathname: `/ko/posts/${POST_SLUG}`,
-        search: "?utm_source=legacy"
-      },
-      {
-        from: `/blog/posts/${POST_SLUG}`,
-        pathname: `/ko/posts/${POST_SLUG}`
-      },
-      { from: "/ko/blog", pathname: "/ko" },
-      { from: "/rss.xml", pathname: "/ko/rss.xml" }
+      { from: "/ko", pathname: "/ko" },
+      { from: "/en", pathname: "/en" },
+      { from: `/ko/posts/${POST_SLUG}?utm_source=legacy`, pathname: "/ko" },
+      { from: `/en/posts/${POST_SLUG}`, pathname: "/en" },
+      { from: `/posts/${POST_SLUG}`, pathname: "/ko" },
+      { from: "/ko/tags/research", pathname: "/ko" },
+      { from: "/en/rss.xml", pathname: "/en" },
+      { from: "/sitemap.xml", pathname: "/ko" },
+      { from: "/write", pathname: "/ko" },
+      { from: "/api/auth/signin", pathname: "/ko" }
     ] as const;
 
     for (const route of cases) {
       const response = await blogHostGet(request, baseURL, route.from, 0);
       await expectPermanentRedirect(response, baseURL, {
         pathname: route.pathname,
-        search: "search" in route ? route.search : "",
-        hostname: BLOG_HOST
+        hostname: MAIN_HOST
       });
     }
   });
 
-  test("main-host blog post and feed URLs permanently redirect to the blog host", async ({
+  test("retired BLOG, writer, and editor paths are gone from the main host", async ({
     request,
     baseURL
   }) => {
     for (const route of [
-      `/posts/${POST_SLUG}`,
       `/ko/posts/${POST_SLUG}`,
+      "/ko/blog",
       "/ko/rss.xml",
-      "/ko/blog"
+      "/rss.xml",
+      "/write",
+      "/keystatic",
+      "/api/auth/session",
+      "/api/keystatic/github/login"
     ]) {
       const response = await request.get(localUrl(baseURL, route), { maxRedirects: 0 });
-      const expectedPath = route === "/ko/blog"
-        ? "/ko"
-        : route.startsWith("/posts/")
-          ? `/ko${route}`
-          : route;
-
-      await expectPermanentRedirect(response, baseURL, {
-        pathname: expectedPath,
-        hostname: BLOG_HOST
-      });
+      expect(response.status(), route).toBe(404);
     }
-  });
-
-  test("draft posts return 404 and stay out of RSS and sitemap", async ({
-    request,
-    baseURL
-  }) => {
-    const draftSlug = `e2e-draft-${process.pid}`;
-    const draftDirectory = path.join(process.cwd(), "content/blog/posts", draftSlug);
-
-    await mkdir(draftDirectory);
-
-    try {
-      await Promise.all([
-        writeFile(
-          path.join(draftDirectory, "index.yaml"),
-          `slug: ${draftSlug}\nstatus: draft\npublishedAt: 2026-07-20\nupdatedAt: 2026-07-20\ncover: /media/identity-octopus.jpg\ncoverWidth: 400\ncoverHeight: 400\nko:\n  title: E2E 비공개 초안\n  description: 공개 경로 제외 검사용 초안입니다.\n  category: 테스트\n  tags:\n    - 테스트\n  readingTime: 1분\nen:\n  title: E2E private draft\n  description: A draft fixture for public-route exclusion checks.\n  category: Test\n  tags:\n    - Test\n  readingTime: 1 min read\n`,
-          "utf8"
-        ),
-        writeFile(path.join(draftDirectory, "bodyKo.md"), "공개되면 안 되는 초안입니다.\n", "utf8"),
-        writeFile(path.join(draftDirectory, "bodyEn.md"), "This draft must stay private.\n", "utf8")
-      ]);
-
-      const draftResponse = await blogHostGet(request, baseURL, `/ko/posts/${draftSlug}`);
-      const koreanFeedResponse = await blogHostGet(request, baseURL, "/ko/rss.xml");
-      const englishFeedResponse = await blogHostGet(request, baseURL, "/en/rss.xml");
-      const sitemapResponse = await blogHostGet(request, baseURL, "/sitemap.xml");
-
-      expect(draftResponse.status()).toBe(404);
-      expect(koreanFeedResponse.status()).toBe(200);
-      expect(englishFeedResponse.status()).toBe(200);
-      expect(sitemapResponse.status()).toBe(200);
-      expect(await koreanFeedResponse.text()).not.toContain(draftSlug);
-      expect(await englishFeedResponse.text()).not.toContain(draftSlug);
-      expect(await sitemapResponse.text()).not.toContain(draftSlug);
-    } finally {
-      await rm(draftDirectory, { force: true, recursive: true });
-    }
-  });
-
-  test("localized RSS feeds return the matching language and canonical item URLs", async ({
-    request,
-    baseURL
-  }) => {
-    for (const locale of ["ko", "en"] as const) {
-      const response = await blogHostGet(request, baseURL, `/${locale}/rss.xml`);
-      expect(response.status()).toBe(200);
-      expect(response.headers()["content-type"]).toContain("application/rss+xml");
-
-      const xml = await response.text();
-      expect(xml).toContain(
-        `<atom:link href="https://${BLOG_HOST}/${locale}/rss.xml" rel="self" type="application/rss+xml" />`
-      );
-      expect(xml).toContain(`<language>${locale === "ko" ? "ko-KR" : "en"}</language>`);
-      expect(xml).toContain(`https://${BLOG_HOST}/${locale}/posts/${POST_SLUG}`);
-      expect(xml.match(/<item>/g)?.length ?? 0).toBeGreaterThanOrEqual(3);
-    }
-  });
-
-  test("blog robots protects the writer and sitemap contains only public routes", async ({
-    request,
-    baseURL
-  }) => {
-    const robotsResponse = await blogHostGet(request, baseURL, "/robots.txt");
-    expect(robotsResponse.status()).toBe(200);
-    const robots = await robotsResponse.text();
-    expect(robots).toContain("Disallow: /write");
-    expect(robots).toContain("Disallow: /api/auth");
-    expect(robots).toContain(`Sitemap: https://${BLOG_HOST}/sitemap.xml`);
-
-    const sitemapResponse = await blogHostGet(request, baseURL, "/sitemap.xml");
-    expect(sitemapResponse.status()).toBe(200);
-    const sitemap = await sitemapResponse.text();
-    expect(sitemap).toContain(`https://${BLOG_HOST}/ko/posts/${POST_SLUG}`);
-    expect(sitemap).toContain(`https://${BLOG_HOST}/en/posts/${POST_SLUG}`);
-    expect(sitemap).not.toContain("/write");
-    expect(sitemap).not.toContain("/api/auth");
   });
 });
 
 test.describe("public links and not-found behavior", () => {
-  test("the custom BLOG writer fails closed when Google OAuth is not configured", async ({
-    page
-  }) => {
-    const response = await page.goto("/write");
-
-    expect(response?.status()).toBe(200);
-    await expect(page).toHaveURL(/\/write\/login$/, { timeout: 15_000 });
-    await expect(page.getByRole("heading", { name: "글쓰기" })).toBeVisible();
-    await expect(page.getByRole("status")).toContainText("인증 환경 설정이 완료되지 않았습니다");
-    await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
-      "content",
-      /noindex/
-    );
-  });
-
-  test("the BLOG editor is mounted in local development", async ({ page }) => {
-    const response = await page.goto("/keystatic");
-
-    expect(response?.status()).toBe(200);
-    await expect(page).toHaveTitle(/Nimdal BLOG Editor/);
-    await expect(page.getByRole("heading", { name: "대시보드" })).toBeVisible();
-
-    await page.goto("/keystatic/collection/posts");
-    for (const slug of [
-      "nimdal-logbook",
-      "research-tools-should-make-markets-readable",
-      "campaign-operations-to-product-systems"
-    ]) {
-      await expect(page.getByText(slug, { exact: true }).first()).toBeVisible();
-    }
-
-    await page.goto("/keystatic/collection/posts/item/nimdal-logbook");
-    await expect(page.locator('input[value="Nimdal이 블로그를 만든 이유"]')).toBeVisible();
-    await expect(page.getByText("한국어 본문", { exact: true })).toBeVisible();
-    await expect(page.getByText("English body", { exact: true })).toBeVisible();
-  });
-
   test("home retains the intended external contact links without a phone number", async ({ page }) => {
     await page.goto("/ko");
     await expect(page.locator('a[href^="/ko/projects/"]')).toHaveCount(0);
@@ -371,17 +203,15 @@ test.describe("public links and not-found behavior", () => {
 
   // Profile interaction, assistant, and detail paging coverage lives in profile-home.spec.ts.
 
-  test("invalid project and post slugs return 404", async ({ page, request, baseURL }) => {
+  test("retired project pages and unknown paths return 404", async ({ page }) => {
     const projectResponse = await page.goto("/ko/projects/not-a-real-project");
     expect(projectResponse?.status()).toBe(404);
     await expect(page.locator("body")).toHaveText("Not found");
 
-    const postResponse = await blogHostGet(
-      request,
-      baseURL,
-      "/en/posts/not-a-real-post"
-    );
-    expect(postResponse.status()).toBe(404);
+    const unknownResponse = await page.goto("/en/not-a-real-page");
+    expect(unknownResponse?.status()).toBe(404);
+    await expect(page.getByRole("heading", { name: "Page not found" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Back to Nimdal" })).toHaveAttribute("href", "/en");
   });
 });
 
@@ -399,24 +229,6 @@ test.describe("responsive and accessible interaction", () => {
     expect(box?.height ?? 0).toBeGreaterThanOrEqual(44);
     await page.getByRole("link", { name: "한국어로 전환" }).click();
     await expect(page).toHaveURL(new RegExp("/ko$"));
-  });
-
-  test("390px BLOG links keep 44px touch targets", async ({ page }) => {
-    await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto(`http://blog.localhost:${process.env.PLAYWRIGHT_PORT ?? "3000"}/ko`);
-
-    const targets = page.locator("a");
-    const count = await targets.count();
-
-    for (let index = 0; index < count; index += 1) {
-      const target = targets.nth(index);
-      if (!(await target.isVisible())) continue;
-
-      const box = await target.boundingBox();
-      expect(box, `BLOG touch target ${index} should have a bounding box`).not.toBeNull();
-      expect(box?.width ?? 0, `BLOG touch target ${index} should be at least 44px wide`).toBeGreaterThanOrEqual(44);
-      expect(box?.height ?? 0, `BLOG touch target ${index} should be at least 44px high`).toBeGreaterThanOrEqual(44);
-    }
   });
 
   test("keyboard focus starts with the skip link and remains visibly outlined", async ({
@@ -503,9 +315,9 @@ test.describe("responsive and accessible interaction", () => {
     });
   }
 
-  test("axe finds no serious or critical issues on the blog host", async ({ page }) => {
-    const response = await page.goto(`http://blog.localhost:${process.env.PLAYWRIGHT_PORT ?? "3000"}/ko`);
-    expect(response?.status()).toBe(200);
+  test("axe finds no serious or critical issues on the 404 page", async ({ page }) => {
+    const response = await page.goto("/en/not-a-real-page");
+    expect(response?.status()).toBe(404);
 
     const results = await new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])

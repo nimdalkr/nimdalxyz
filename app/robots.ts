@@ -6,8 +6,7 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: "*",
-      allow: "/",
-      disallow: ["/keystatic", "/api/keystatic"]
+      allow: "/"
     },
     sitemap: new URL("/sitemap.xml", siteConfig.mainUrl).toString(),
     host: siteConfig.mainUrl

@@ -11,8 +11,6 @@ interface HomeLayoutProps {
   params: Promise<{ locale: string }>;
 }
 
-// The profile home is its own root layout, so it ships only its own faces and
-// base styles; the BLOG's ink type system and effects stay in (site).
 // Unknown locales fall through to the global 404 instead of an empty page.
 export const dynamicParams = false;
 

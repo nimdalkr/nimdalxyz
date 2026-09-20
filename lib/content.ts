@@ -55,7 +55,6 @@ export type Project = {
   status: LabStatus;
   liveUrl?: string;
   repositoryUrl?: string;
-  articleUrl?: string;
   referenceUrl?: string;
   media: readonly ProjectMedia[];
   copy: Localized<ProjectCopy>;
@@ -174,12 +173,6 @@ export type SiteLocaleContent = {
     metricNotice: string;
     proofNotice: string;
     signals: readonly SiteMetricCopy[];
-  };
-  blog: {
-    eyebrow: string;
-    title: string;
-    description: string;
-    readMore: string;
   };
   footer: {
     tagline: string;
@@ -434,7 +427,6 @@ const projectArchive = [
   {
     slug: "maple-union",
     status: "prototype",
-    articleUrl: "https://blog.nimdal.xyz/posts/maple-union-dev-log-2026-07-02/#case-room-proof",
     media: [
       {
         role: "concept",
@@ -1488,14 +1480,6 @@ export const siteContent = {
           provenance: "repository-count"
         },
         {
-          value: "3",
-          label: "공개 글",
-          context: "현재 블로그에 공개한 글의 수입니다.",
-          source: "현재 저장소의 블로그 글",
-          limitation: "세 글 모두 2026-07-02에 처음 공개했습니다.",
-          provenance: "repository-count"
-        },
-        {
           value: "6+ yrs",
           label: "에이전시 경력",
           context: "기존 커리어 포트폴리오에 적힌 MKR 업무 기간은 2018.06.29-2024.09입니다.",
@@ -1630,12 +1614,6 @@ export const siteContent = {
         }
       ]
     },
-    blog: {
-      eyebrow: "BLOG",
-      title: "만들고 운영하며 남긴 기록",
-      description: "포트폴리오에는 결과를, 블로그에는 그 결과를 만들며 고민하고 시도한 과정을 적습니다.",
-      readMore: "글 읽기"
-    },
     footer: {
       tagline: "Nimdal: 리서치하고, 운영하고, 만듭니다."
     }
@@ -1686,14 +1664,6 @@ export const siteContent = {
           context: "Representative cases structured from the current career portfolio.",
           source: "The careerCases array in the current repository",
           limitation: "Case count is not verified-outcome count; each case has its own evidence boundary.",
-          provenance: "repository-count"
-        },
-        {
-          value: "3",
-          label: "Published notes",
-          context: "BLOG posts currently present in the repository.",
-          source: "Keystatic content in content/blog/posts",
-          limitation: "All three are initial notes published on 2026-07-02.",
           provenance: "repository-count"
         },
         {
@@ -1830,12 +1800,6 @@ export const siteContent = {
           provenance: "portfolio-claim"
         }
       ]
-    },
-    blog: {
-      eyebrow: "BLOG",
-      title: "Notes left behind by research, builds, and operations",
-      description: "If the portfolio shows outcomes, the BLOG preserves the judgment and production process behind them.",
-      readMore: "Read note"
     },
     footer: {
       tagline: "Nimdal: research, operations, and product systems."

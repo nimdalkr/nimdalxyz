@@ -1,6 +1,5 @@
-/* Base for the profile home's own root layout. The home is set in a macOS
-   idiom: system type, system grays, and one accent blue. The BLOG's ink type
-   system and its Korean serif @font-face sets stay off this page. */
+/* Base for the root layout. The site is set in a macOS idiom: system type,
+   system grays, and one accent blue. */
 @layer theme, base, components, utilities;
 @import "tailwindcss/preflight.css" layer(base);
 

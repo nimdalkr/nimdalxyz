@@ -56,19 +56,11 @@ test("profile is server-rendered with identity, career since 2012, and real medi
   expect(errors).toEqual([]);
 });
 
-test("the profile home does not load the BLOG's serif type system", async ({
+test("the profile home preloads no fonts, so Apple devices download none", async ({
   request,
 }) => {
   const html = await (await request.get("/en")).text();
-  const sheets = [...html.matchAll(/href="(\/_next\/static\/[^"]+?\.css(?:\?[^"]*)?)"/g)].map(
-    (match) => match[1],
-  );
-  expect(sheets.length).toBeGreaterThan(0);
-  for (const sheet of sheets) {
-    const css = await (await request.get(sheet)).text();
-    expect(css).not.toContain("Noto Serif KR");
-    expect(css).not.toContain("Nanum Myeongjo");
-  }
+  expect(html).not.toMatch(/<link[^>]+as="font"/);
 });
 
 test("featured, personal projects and career cases open as single-view, keyboard-accessible case sheets", async ({

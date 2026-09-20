@@ -1,8 +1,8 @@
 import Link from "next/link";
 
-import { bricolage, notoSerifKr, plexMono } from "@/lib/fonts";
+import { homeSans } from "@/lib/home-fonts";
 
-import "./globals.css";
+import "./not-found.css";
 
 export const metadata = {
   title: "404 / Page not found",
@@ -11,13 +11,17 @@ export const metadata = {
 
 export default function GlobalNotFound() {
   return (
-    <html lang="en" className={`${bricolage.variable} ${notoSerifKr.variable} ${plexMono.variable}`}>
+    <html lang="en" className={homeSans.variable}>
       <body>
-        <main className="not-found-page" id="main-content">
-          <p className="press-mark">404</p>
-          <h1>This page is not in the run.</h1>
+        <main className="not-found" id="main-content">
+          <p className="not-found-code">404</p>
+          <h1>Page not found</h1>
           <p>The address may have changed, or the page moved somewhere else.</p>
-          <Link className="rule-link" href="/en">Back to Nimdal</Link>
+          <p lang="ko">주소가 바뀌었거나 페이지가 다른 곳으로 옮겨졌을 수 있어요.</p>
+          <div className="not-found-actions">
+            <Link href="/en">Back to Nimdal</Link>
+            <Link href="/ko" lang="ko">홈으로 돌아가기</Link>
+          </div>
         </main>
       </body>
     </html>

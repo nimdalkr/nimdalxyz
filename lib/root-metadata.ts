@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { isLocale, siteContent } from "@/lib/content";
 
-/** Shared defaults for the two locale root layouts: the profile home and the BLOG. */
+/** Site-wide metadata defaults for the locale root layout. */
 export async function localeRootMetadata(params: Promise<{ locale: string }>): Promise<Metadata> {
   const { locale: localeParam } = await params;
   const locale = isLocale(localeParam) ? localeParam : "en";
